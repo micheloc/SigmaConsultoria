@@ -29,6 +29,5 @@
       "@utils/*": ["utils/*"]
     }
   },
-  "include": ["src", ".expo/types/**/*.ts", "expo-env.d.ts", "app.config.js"],
-  "files": ["config.d.ts"]
+  "include": ["src", ".expo/types/**/*.ts", "expo-env.d.ts", "config.d.ts"]
 }
