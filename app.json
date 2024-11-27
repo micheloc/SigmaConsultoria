@@ -1,4 +1,30 @@
 {
   "name": "SigmaConsultoria",
-  "displayName": "SigmaConsultoria"
+  "displayName": "SigmaConsultoria",
+  "version": "1.0.0",
+  "web": {
+    "favicon": "./assets/icon-sigma.png"
+  },
+  "experiments": {
+    "tsconfigPaths": true
+  },
+  "orientation": "portrait",
+  "icon": "./assets/logo.png",
+  "userInterfaceStyle": "light",
+  "splash": {
+    "image": "./assets/splash.png",
+    "resizeMode": "contain",
+    "backgroundColor": "#ffffff"
+  },
+  "assetBundlePatterns": ["**/*"],
+  "ios": {
+    "supportsTablet": true
+  },
+  "android": {
+    "adaptiveIcon": {
+      "foregroundImage": "./assets/icon-sigma.png",
+      "backgroundColor": "#ffffff"
+    },
+    "permissions": ["CAMERA", "LOCATION"]
+  }
 }

@@ -1,4 +1,4 @@
-// import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 // import { createStackNavigator } from '@react-navigation/stack';
 
 // import Login from 'screens/Navegacao/navLogin';
