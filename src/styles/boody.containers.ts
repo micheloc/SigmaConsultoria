@@ -13,12 +13,24 @@ export const Container = styled.View`
 /**
  *
  */
+export const ContainerIconLogin = styled.View`
+  flex: 1;
+  width: 100%;
+  height: 49%;
+  position: absolute; /* Faz o ViewFormLogin se sobrepor ao Container */
+  justify-content: center; /* Alinha os itens no centro verticalmente */
+  align-items: center; /* Alinha os itens no centro horizontalmente */
+`;
+
+/**
+ *
+ */
 export const ViewFormLogin = styled.View`
   position: absolute; /* Faz o ViewFormLogin se sobrepor ao Container */
   justify-content: center; /* Alinha os itens no centro verticalmente */
   align-items: center; /* Alinha os itens no centro horizontalmente */
   bottom: 0; /* Faz o ViewFormLogin ocupar toda a área do Container */
-  top: -5%;
+  top: -11.5%;
   left: 0;
   right: 0;
   z-index: 10; /* Garante que o ViewFormLogin fique acima de outros componentes */
@@ -31,7 +43,7 @@ export const BoxFormLogin = styled.View`
   position: absolute; /* Faz o ViewFormLogin se sobrepor ao Container */
   background-color: rgba(44, 46, 17, 0.5);
   width: 85%;
-  height: 25%;
+  height: 18%;
   border-radius: 8px;
   z-index: 20; /* Garante que o ViewFormLogin fique acima de outros componentes */
 `;
@@ -47,7 +59,7 @@ export const BackgroundImg = styled.Image`
 export const Input = styled.TextInput`
   background-color: whitesmoke;
   border-radius: 5px;
-  font-size: 13;
+  font-size: 16px;
   margin: 5px;
 `;
 

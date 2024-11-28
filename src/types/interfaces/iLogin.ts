@@ -1,5 +1,5 @@
 interface iLogin {
-  id: number | null;
+  id: number | null | undefined;
   token: string;
   usuario: string;
   expire: Date;

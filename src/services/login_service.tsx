@@ -2,8 +2,8 @@ import context_realm from 'context_realm';
 import iLogin from 'types/interfaces/iLogin';
 
 /**
- *
- * @param param0
+ * Este método será utilizado para carregar os dados do usuário ao realm db.
+ * @param objeto refere-se ao objeto que contém os dados do usuário logado, como : token, nome do usuário, ata de expiração.
  */
 export const _access = async ({ token, usuario, expire }: iLogin) => {
   const realm = await context_realm();
