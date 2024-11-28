@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "baseUrl": "./src",
+    "baseUrl": "./",
     "target": "es2015",
     "useDefineForClassFields": true,
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -24,10 +24,18 @@
       }
     ],
     "paths": {
-      "@components/*": ["components/*"],
-      "@assets/*": ["assets/*"],
-      "@utils/*": ["utils/*"]
+      "assets/*": ["src/assets/*"],
+      "component/*": ["src/component/*"],
+      "config/*": ["src/config/*"],
+      "context_realm/*": ["src/context_realm/*"],
+      "navigations/*": ["src/navigations/*"],
+      "operations/*": ["src/operations/*"],
+      "routes/*": ["src/routes/*"],
+      "services/*": ["src/services/*"],
+      "styles/*": ["src/styles/*"],
+      "types/*": ["src/types/*"],
+      "util/*": ["src/util/*"]
     }
   },
-  "include": ["src", ".expo/types/**/*.ts", "expo-env.d.ts", "config.d.ts"]
+  "include": ["src", "assets", ".expo/types/**/*.ts", "expo-env.d.ts", "config.d.ts"]
 }
