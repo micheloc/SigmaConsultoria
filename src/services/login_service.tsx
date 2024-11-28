@@ -1,4 +1,4 @@
-import context_realm from 'context_realm';
+import context_realm from 'context_realm/index';
 import iLogin from 'types/interfaces/iLogin';
 
 /**

@@ -12,6 +12,7 @@ module.exports = {
           assets: './src/assets',
           component: './src/component',
           config: './src/config',
+          context_provider: './src/context_provider',
           context_realm: './src/context_realm',
           navigations: './src/navigations',
           operations: './src/operations',
