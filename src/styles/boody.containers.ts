@@ -61,6 +61,17 @@ export const BoxFormLogin = styled.View`
 /**
  *
  */
+export const BoxView = styled.View`
+  background-color: white;
+  position: absolute;
+  padding: 10px;
+  width: 97%;
+  z-index: 20;
+`;
+
+/**
+ *
+ */
 export const BackgroundImg = styled.Image`
   width: 100%;
   height: 100%;
@@ -72,6 +83,7 @@ export const Input = styled.TextInput`
   font-size: 16px;
   margin: 5px;
   padding: 12px;
+  width: 100%;
 `;
 
 export const Label = styled.Text`
@@ -88,7 +100,7 @@ export const LabelForm = styled.Text`
 `;
 
 export const ButtonConf = styled.TouchableOpacity`
-  background-color: #3aa637;
+  background-color: #1b437e;
   padding: 10px;
   border-radius: 5px;
   margin-top: 5px;
@@ -114,4 +126,13 @@ export const ButtonEnd = styled.TouchableOpacity`
   margin: 5px;
   width: 100%;
   align-items: center;
+`;
+
+/**
+ *
+ */
+export const Footer = styled.View`
+  bottom: 5px;
+  position: absolute;
+  width: 105%;
 `;
