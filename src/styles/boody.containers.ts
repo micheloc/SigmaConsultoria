@@ -25,6 +25,16 @@ export const ContainerIconLogin = styled.View`
 /**
  *
  */
+export const GroupButtons = styled.View`
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`;
+
+/**
+ *
+ */
 export const ViewFormLogin = styled.View`
   position: absolute; /* Faz o ViewFormLogin se sobrepor ao Container */
   justify-content: center; /* Alinha os itens no centro verticalmente */
@@ -61,6 +71,12 @@ export const Input = styled.TextInput`
   border-radius: 5px;
   font-size: 16px;
   margin: 5px;
+`;
+
+export const Label = styled.Text`
+  font-size: 19;
+  font-family: popins400;
+  color: #ffffff;
 `;
 
 export const ButtonConf = styled.TouchableOpacity`

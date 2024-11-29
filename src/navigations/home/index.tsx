@@ -1,18 +1,19 @@
-import { Container } from 'styles/boody.containers';
-import { Image, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Container, Label } from 'styles/boody.containers';
+import { Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import sTableNavigation from 'component/style_component/containe_table_navigation';
 
 const Home = () => {
   const navigation: any = useNavigation();
 
   return (
-    <Container style={{ backgroundColor: '#12994a', justifyContent: 'center', alignItems: 'center' }}>
+    <Container style={sTableNavigation.body}>
       <TouchableOpacity onPress={() => console.log('olá')} style={styles.btnAvaliacao}>
         <Image
           source={require('assets/img/Icons/relatorio.png')}
           style={{ margin: 8, width: 45, height: 45 }}
         />
-        <Text style={styles.txtAvaliacao}>Iniciar Avaliação</Text>
+        <Label>Iniciar Avaliação</Label>
       </TouchableOpacity>
     </Container>
   );

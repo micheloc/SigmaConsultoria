@@ -4,10 +4,26 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, TouchableOpacity } from 'react-native';
 import { View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { _user } from 'services/login_service';
+import Cliente from 'navigations/cliente';
 
 const Tab = createBottomTabNavigator();
 
 const TabRoutes = () => {
+  const [user, setUser] = useState<any>();
+
+  useEffect(() => {
+    /** * Este método será responsável por carregar os dados do cliente ao entrar nessa tela. */
+    const setUsuario = async () => {
+      const obj = await _user();
+      console.log(obj);
+      setUser(obj);
+    };
+
+    setUsuario();
+  }, []);
+
   return (
     <>
       <Tab.Navigator
@@ -23,7 +39,8 @@ const TabRoutes = () => {
           component={Home}
           options={{
             headerShown: true,
-            title: 'Principal',
+            headerTitle: user ? user.usuario : '',
+            tabBarLabel: 'Principal',
             headerTitleAlign: 'center',
             headerLeft: () => (
               <View>
@@ -79,7 +96,7 @@ const TabRoutes = () => {
 
         <Tab.Screen
           name="cliente"
-          component={Home}
+          component={Cliente}
           options={{
             headerShown: false,
             title: 'Clientes',
