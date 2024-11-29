@@ -15,19 +15,24 @@ import {
   ContainerIconLogin,
 } from 'styles/boody.containers';
 
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import iLogin from 'types/interfaces/iLogin';
-import { _access, _user } from 'services/login_service';
+import { _access, _user, _userLoggout } from 'services/login_service';
+import AuthContext from 'context_provider/index';
 
 const ax = axios.create({ baseURL: API_URL });
 
 const Login = () => {
+  const { check } = useContext(AuthContext);
+
   const [user, setUser] = useState<iUserPass>({
     userName: '',
     password: '',
   });
 
   const _login = async () => {
+    await _userLoggout();
+
     try {
       const response = await ax.post(
         '/Account/login',
@@ -44,6 +49,8 @@ const Login = () => {
         expire: access.expiration,
       };
       await _access(obj);
+
+      await check();
     } catch (error) {
       console.error(error);
     }
