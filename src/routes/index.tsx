@@ -3,6 +3,7 @@ import StackLogin from './components/stack.login';
 
 import { ActivityIndicator, KeyboardAvoidingView, View, Platform, StatusBar } from 'react-native';
 import { useState, useEffect, useContext } from 'react';
+import StackNavigation from './components/stack.navigation';
 
 const Routes = () => {
   const [loading, setLoading] = useState(true);
@@ -48,7 +49,7 @@ const Routes = () => {
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" translucent={false} />
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        {<StackLogin />}
+        {isLogged ? <StackNavigation /> : <StackLogin />}
       </KeyboardAvoidingView>
     </>
   );
