@@ -66,13 +66,16 @@ const CadCliente = () => {
 
   const onSubmitArea = (obj: iArea) => {
     const oArea: iArea = {
-      objID: obj.objID,
+      objID: uuid.v4().toString(),
       idFazenda: idFazenda,
       nome: obj.nome,
       hectares: parseFloat(obj.hectares.toString()),
       created: obj.created,
       updated: obj.updated,
     };
+
+    console.log(oArea);
+
     const up_lst: iArea[] = [...lstAllAreas];
     up_lst.push(oArea);
     setLstAllAreas(up_lst);
@@ -134,65 +137,38 @@ const CadCliente = () => {
     await _removeAllFazendas();
     await _removeAllArea();
 
-    // await _createCliente(cliente);
-    // await _createFazendas(lstFazenda);
-    // await _createAreas(lstAllAreas);
+    await _createCliente(cliente);
+    await _createFazendas(lstFazenda);
+    await _createAreas(lstAllAreas);
 
-    // const net = await NetInfo.fetch();
+    const net = await NetInfo.fetch();
 
-    // /// Caso o celular esteja conectado na internet, os dados serão salvos no banco de dados.
-    // if (net.isConnected) {
-    //   try {
-    //     console.log(cliente);
+    /// Caso o celular esteja conectado na internet, os dados serão salvos no banco de dados.
+    if (net.isConnected) {
+      const oCliente: any = {
+        objID: cliente.objID,
+        idUser: cliente.idUser,
+        nome: cliente.nome,
+        email: cliente.email,
+        status: cliente.status,
+        registro: cliente.registro,
+        created: cliente.created,
+        updated: cliente.updated,
+        fazendas: lstFazenda,
+        areas: lstAllAreas,
+      };
 
-    //     const clienteResp = await api.post('/Cliente', cliente, {
-    //       headers: { 'Content-Type': 'application/json' },
-    //     });
+      console.log(oCliente);
 
-    //     console.log(clienteResp.data);
-
-    //     /// Aqui será verificado sé os dados informados não está corrompidos ou danificados.
-    //     if (clienteResp.data.isValid) {
-    //       Toast.show({
-    //         type: 'success',
-    //         text1: 'Cadastro do cliente foi realizado com sucesso no banco de dados!',
-    //         text1Style: { fontSize: 14 },
-    //       });
-
-    //       const fazendaResp = await api.post('/Fazenda/AddRange', lstFazenda, {
-    //         headers: { 'Content-Type': 'application/json' },
-    //       });
-
-    //       console.log(fazendaResp.data);
-
-    //       if (fazendaResp.data.isValid) {
-    //         Toast.show({
-    //           type: 'success',
-    //           text1: 'Cadastro das fazendas foi realizado com sucesso no banco de dados!',
-    //           text1Style: { fontSize: 14 },
-    //         });
-
-    //         const areaResp = await api.post('/Area/AddRange', lstAllAreas, {
-    //           headers: { 'Content-Type': 'application/json' },
-    //         });
-
-    //         if (areaResp.data.isValid) {
-    //           Toast.show({
-    //             type: 'success',
-    //             text1: 'Cadastro das areas foi realizado com sucesso no banco de dados!',
-    //             text1Style: { fontSize: 14 },
-    //           });
-
-    //           setTimeout(() => {
-    //             nav.navigate('navHome');
-    //           }, 1000);
-    //         }
-    //       }
-    //     }
-    //   } catch (error: any) {
-    //     console.log(error);
-    //   }
-    // }
+      try {
+        const clienteResp = await api.post('/Cliente/SaveAllCliente', oCliente, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+        console.log(clienteResp.data);
+      } catch (error: any) {
+        console.log(error);
+      }
+    }
   };
 
   const styles = StyleSheet.create({
