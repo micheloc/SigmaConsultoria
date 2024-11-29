@@ -71,6 +71,7 @@ export const Input = styled.TextInput`
   border-radius: 5px;
   font-size: 16px;
   margin: 5px;
+  padding: 12px;
 `;
 
 export const Label = styled.Text`
@@ -80,7 +81,8 @@ export const Label = styled.Text`
 `;
 
 export const LabelForm = styled.Text`
-  font-size: 15;
+  font-size: 15px;
+  padding: 10px;
   color: black;
   font-weght: bold;
 `;

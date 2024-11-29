@@ -1,17 +1,18 @@
+import sForm from 'component/style_component/containe_form';
 import { View } from 'react-native';
 import { Container, Input, LabelForm } from 'styles/boody.containers';
 
 const CadCliente = () => {
   return (
-    <Container>
+    <Container style={sForm.body}>
       <View>
         <LabelForm>CPF/CNPJ :</LabelForm>
-        <Input />
+        <Input placeholder="CPF/CNPJd" keyboardType="number-pad" />
       </View>
 
       <View>
         <LabelForm>Nome :</LabelForm>
-        <Input />
+        <Input placeholder="Nome completo" />
       </View>
 
       <View>

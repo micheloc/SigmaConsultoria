@@ -17,7 +17,6 @@ const TabRoutes = () => {
     /** * Este método será responsável por carregar os dados do cliente ao entrar nessa tela. */
     const setUsuario = async () => {
       const obj = await _user();
-      console.log(obj);
       setUser(obj);
     };
 
