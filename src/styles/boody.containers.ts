@@ -79,6 +79,12 @@ export const Label = styled.Text`
   color: #ffffff;
 `;
 
+export const LabelForm = styled.Text`
+  font-size: 15;
+  color: black;
+  font-weght: bold;
+`;
+
 export const ButtonConf = styled.TouchableOpacity`
   background-color: #3aa637;
   padding: 10px;

@@ -3,7 +3,7 @@ import styled from 'styled-components/native';
 /**
  *
  */
-export const Button = styled.View`
+export const Button = styled.TouchableOpacity`
   background-color: #16b95a;
   width: 46%;
   height: 15%;

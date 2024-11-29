@@ -98,8 +98,9 @@ const TabRoutes = () => {
           name="cliente"
           component={Cliente}
           options={{
-            headerShown: false,
+            headerShown: true,
             title: 'Clientes',
+            headerTitleAlign: 'center',
             tabBarLabelStyle: {
               padding: 8,
               fontSize: 18,

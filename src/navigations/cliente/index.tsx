@@ -1,13 +1,15 @@
 import sTableNavigation from 'component/style_component/containe_table_navigation';
-import { Text, TouchableOpacity, View, StyleSheet } from 'react-native';
-import { Container, GroupButtons, Label } from 'styles/boody.containers';
 import { Button } from './styles';
+import { Container, GroupButtons, Label } from 'styles/boody.containers';
+import { useNavigation } from '@react-navigation/native';
 
 const Cliente = () => {
+  const navigation: any = useNavigation();
+
   return (
     <Container style={sTableNavigation.body}>
       <GroupButtons>
-        <Button>
+        <Button onPress={() => navigation('cadCliente')}>
           <Label>Cadastrar Clientes</Label>
         </Button>
 
