@@ -127,16 +127,11 @@ const CadCliente = () => {
   };
 
   const onRemoveSelectedArea = (objID: string, nome: string) => {
-    console.log(nome);
     const up_areas: iArea[] = lstAllAreas.filter((obj: iArea) => obj.objID !== objID);
     setLstAllAreas(up_areas);
   };
 
   const onSaveCliente = async () => {
-    await _removeAllClientes();
-    await _removeAllFazendas();
-    await _removeAllArea();
-
     await _createCliente(cliente);
     await _createFazendas(lstFazenda);
     await _createAreas(lstAllAreas);
@@ -145,7 +140,7 @@ const CadCliente = () => {
 
     /// Caso o celular esteja conectado na internet, os dados serão salvos no banco de dados.
     if (net.isConnected) {
-      const oCliente: any = {
+      const obj: any = {
         objID: cliente.objID,
         idUser: cliente.idUser,
         nome: cliente.nome,
@@ -158,10 +153,8 @@ const CadCliente = () => {
         areas: lstAllAreas,
       };
 
-      console.log(oCliente);
-
       try {
-        const clienteResp = await api.post('/Cliente/SaveAllCliente', oCliente, {
+        const clienteResp = await api.post('/Cliente/SaveAllCliente', JSON.stringify(obj), {
           headers: { 'Content-Type': 'application/json' },
         });
         console.log(clienteResp.data);
