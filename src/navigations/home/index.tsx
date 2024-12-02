@@ -5,11 +5,11 @@ import sTableNavigation from 'component/style_component/containe_table_navigatio
 import { _userLoggout } from 'services/login_service';
 
 const Home = () => {
-  const navigation: any = useNavigation();
+  const nav: any = useNavigation();
 
   return (
     <Container style={sTableNavigation.body}>
-      <TouchableOpacity onPress={async () => await _userLoggout()} style={styles.btnAvaliacao}>
+      <TouchableOpacity onPress={async () => nav.navigate('navAvaliacao')} style={styles.btnAvaliacao}>
         <Image
           source={require('assets/img/Icons/relatorio.png')}
           style={{ margin: 8, width: 45, height: 45 }}

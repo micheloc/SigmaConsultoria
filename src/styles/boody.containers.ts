@@ -137,3 +137,11 @@ export const Footer = styled.View`
   position: absolute;
   width: 105%;
 `;
+
+export const Divider = styled.View`
+  margin-top: 5px;
+  margin-bottom: 5px;
+  width: 100vw;
+  height: 15px;
+  background-color: #cacaca;
+`;

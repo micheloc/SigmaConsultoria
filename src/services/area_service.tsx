@@ -62,9 +62,7 @@ export const _findArea = async (objID: string) => {
 export const _findAreaByFazenda = async (id: string) => {
   try {
     const realm = await context_realm();
-    const areas = realm.objects('Area').filtered('idFazenda == $0', id);
-
-    return areas;
+    return realm.objects('Area').filtered(`idFazenda == '${id}'`);
   } catch (error) {
     console.debug('Não foi possivel carregar a lista de área:', error);
     return [];

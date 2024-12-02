@@ -75,8 +75,6 @@ const CadCliente = () => {
       updated: obj.updated,
     };
 
-    console.log(oArea);
-
     const up_lst: iArea[] = [...lstAllAreas];
     up_lst.push(oArea);
     setLstAllAreas(up_lst);

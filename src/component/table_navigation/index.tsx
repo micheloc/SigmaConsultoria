@@ -4,14 +4,18 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, TouchableOpacity } from 'react-native';
 import { View } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { _user } from 'services/login_service';
 import Cliente from 'navigations/cliente';
+import context_realm from 'context_realm/index';
+import AuthContext from 'context_provider/index';
 
 const Tab = createBottomTabNavigator();
 
 const TabRoutes = () => {
   const [user, setUser] = useState<any>();
+
+  const { check } = useContext(AuthContext);
 
   useEffect(() => {
     /** * Este método será responsável por carregar os dados do cliente ao entrar nessa tela. */
@@ -22,6 +26,18 @@ const TabRoutes = () => {
 
     setUsuario();
   }, []);
+
+  const logout = async () => {
+    let realm = await context_realm();
+
+    realm.write(() => {
+      realm.deleteAll(); // Remove todos os objetos do banco de dados
+    });
+
+    realm.close();
+
+    await check();
+  };
 
   return (
     <>
@@ -50,7 +66,7 @@ const TabRoutes = () => {
               </View>
             ),
             headerRight: () => (
-              <TouchableOpacity>
+              <TouchableOpacity onPress={() => logout()}>
                 <Image
                   source={require('assets/img/Icons/sair.png')}
                   style={{ margin: 8, width: 40, height: 40 }}

@@ -33,6 +33,7 @@ import {
 
 import { _findCliente, _removeAllClientes, _removeCliente } from 'services/cliente_service';
 import { useEffect, useState } from 'react';
+import Input from 'component/Input';
 
 const LstUsingClientes = () => {
   const [clientes, setClientes] = useState<iCliente[]>([]);
@@ -115,15 +116,15 @@ const LstUsingClientes = () => {
           const cliente: any = await _findCliente(objID);
           setTimeout(() => {
             remove_all_areas(objID);
-          }, 1000);
+          }, 650);
 
           setTimeout(() => {
             remove_all_fazenda(objID);
-          }, 1000);
+          }, 650);
 
           setTimeout(async () => {
             await _removeCliente(objID);
-          }, 1000);
+          }, 650);
 
           Toast.show({
             type: 'success',
@@ -163,7 +164,7 @@ const LstUsingClientes = () => {
   return (
     <Container style={{ backgroundColor: '#12994a' }}>
       <View style={styles.inputGroup}>
-        <TextInput
+        <Input
           style={styles.input}
           placeholder="Informe o nome do cliente."
           onChangeText={(txt: string) => setNameCliente(txt)}

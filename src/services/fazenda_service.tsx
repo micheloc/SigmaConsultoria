@@ -60,9 +60,7 @@ export const _findFazenda = async (objID: string) => {
 export const _findFazendaByCliente = async (id: string) => {
   try {
     const realm = await context_realm();
-    const fazendas = realm.objects('Fazenda').filtered('idCliente == $0', id);
-
-    return fazendas;
+    return realm.objects('Fazenda').filtered(`idCliente =='${id}'`);
   } catch (error) {
     console.debug('Error while finding fazendas by idCliente:', error);
     return [];

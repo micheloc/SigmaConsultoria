@@ -7,6 +7,8 @@ import TabRoutes from 'component/table_navigation';
 import { TouchableOpacity } from 'react-native';
 import LstDownloadClientes from 'navigations/cliente/list_download';
 import LstUsingClientes from 'navigations/cliente/download';
+import Avaliacao from 'navigations/avaliacao';
+import CadAvaliacao from 'operations/avaliacao';
 
 type RootStackParamList = {
   TabNavigator: any;
@@ -18,7 +20,64 @@ const StackNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="navHome">
+        <Stack.Screen
+          name="cadAvaliacao"
+          component={CadAvaliacao}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            title: 'Cadastro da avaliação',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
+
+        <Stack.Screen
+          name="cadCliente"
+          component={CadCliente}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            title: 'Cadastro de Cliente',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
+
         <Stack.Screen name="navHome" component={TabRoutes} options={{ headerShown: false }} />
+
+        <Stack.Screen
+          name="navAvaliacao"
+          component={Avaliacao}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            title: 'Avaliação',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
 
         <Stack.Screen
           name="navDownloadCliente"
@@ -45,25 +104,6 @@ const StackNavigation = () => {
           options={({ navigation }: any) => ({
             headerShown: true,
             title: 'Clientes à serem utilizado',
-            headerTitleAlign: 'center',
-            headerLeft: () => (
-              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
-              </TouchableOpacity>
-            ),
-            headerStyle: {
-              backgroundColor: '#12994a', // Cor de fundo do header
-            },
-            headerTintColor: 'whitesmoke', // Cor do texto do título
-          })}
-        />
-
-        <Stack.Screen
-          name="cadCliente"
-          component={CadCliente}
-          options={({ navigation }: any) => ({
-            headerShown: true,
-            title: 'Cadastro de Cliente',
             headerTitleAlign: 'center',
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>

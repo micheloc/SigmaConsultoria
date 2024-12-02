@@ -1,6 +1,5 @@
 import api from 'config/api';
 import iCliente from 'types/interfaces/iCliente';
-import iFazenda from 'types/interfaces/iFazenda';
 import moment from 'moment';
 import Toast from 'react-native-toast-message';
 
@@ -11,7 +10,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   View,
   Keyboard,
   FlatList,
@@ -24,6 +22,7 @@ import { _createCliente } from 'services/cliente_service';
 import { _createFazendas } from 'services/fazenda_service';
 import { _createAreas } from 'services/area_service';
 import context_realm from 'context_realm/index';
+import Input from 'component/Input';
 
 const LstDownloadClientes = () => {
   const navigation: any = useNavigation();
@@ -108,39 +107,36 @@ const LstDownloadClientes = () => {
       const fazendas: any = await api.get(`/Fazenda/FindAllByClientes?objID=${obj.objID}`);
       if (fazendas.data.length > 0) {
         await _createFazendas(fazendas.data);
-        for (const item of fazendas.data) {
-          const areas = await api.get(`/Area/FindAllByfazenda?objID=${item.objID}`);
 
-          console.log(areas);
+        try {
+          for (const item of fazendas.data) {
+            const areas = await api.get(`/Area/FindAllByfazenda?objID=${item.objID}`);
+            await _createAreas(areas.data);
+          }
+        } catch (error) {
+          setTimeout(() => {
+            Toast.show({
+              type: 'error',
+              text2: `Não foi possivel baixar os dados da área!`,
+              text2Style: { fontSize: 12 },
+            });
+          }, 500);
         }
       }
 
-      // if (fazendas.data.length > 0) {
-      //
-      //   const areaResponses = await Promise.all(
-      //     fazendas.data.map((fazenda: iFazenda) =>
-      //   );
-
-      //   // Mapeia para extrair os dados de cada resposta
-      //   const areasData = areaResponses.map((response) => response.data);
-
-      //   // Achatauuuu a matriz para que todos os elementos fiquem em um único array
-      //   const flattenedAreasData = areasData.flat();
-
-      //   await _createAreas(flattenedAreasData);
-      // }
       // Atualiza a lista de clientes
       setClienteSelect(cli);
-
       setLoading(false);
 
-      // Exibe o toast de sucesso
-      Toast.show({
-        type: 'success',
-        text2: `Cliente ${obj.nome}, foi baixado com sucesso!`,
-        text2Style: { fontSize: 12 },
-        text1Style: { fontSize: 14 },
-      });
+      setTimeout(() => {
+        // Exibe o toast de sucesso
+        Toast.show({
+          type: 'success',
+          text2: `Cliente ${obj.nome}, foi baixado com sucesso!`,
+          text2Style: { fontSize: 12 },
+          text1Style: { fontSize: 14 },
+        });
+      }, 600);
     } catch (error) {
       // Caso algo falhe, exibe o erro
       Toast.show({
@@ -228,7 +224,7 @@ const LstDownloadClientes = () => {
     <Container style={{ backgroundColor: '#12994a' }}>
       <View style={styles.container}>
         <View style={styles.inputGroup}>
-          <TextInput
+          <Input
             style={styles.input}
             placeholder="Informe o nome do cliente."
             onChangeText={(e: string) => setNameCliente(e)}
