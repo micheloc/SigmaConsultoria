@@ -51,7 +51,7 @@ export const _removeCliente = async (objID: string) => {
       }
     });
   } catch (error) {
-    console.error(error);
+    console.log('Não foi possivel apagar o cliente!', error);
   }
 };
 
@@ -63,6 +63,6 @@ export const _removeAllClientes = async () => {
       realm.delete(allClientes); // Remove todos os registros do tipo 'Cliente'
     });
   } catch (error) {
-    console.error(error);
+    console.log('Não foi possivel apagar todos os clientes!', error);
   }
 };

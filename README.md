@@ -8,6 +8,8 @@ Execute os seguintes comandos para instalação do projeto.
 
 # Comandos para uso do gradlew.
 
+Utilize a versão do gradlew : distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-all.zip
+
 - execute : gradlew clean ("Limpa o build do gradlew").
 - execute : gradlew build ("Gerar o build do projeto").
 - execute : gradlew assembleRelease ("Gerar o APK de produção").

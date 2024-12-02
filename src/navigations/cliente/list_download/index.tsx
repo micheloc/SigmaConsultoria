@@ -16,18 +16,21 @@ import {
   Keyboard,
   FlatList,
   Text,
+  ActivityIndicator,
 } from 'react-native';
 
 import { Container } from 'styles/boody.containers';
 import { _createCliente } from 'services/cliente_service';
 import { _createFazendas } from 'services/fazenda_service';
 import { _createAreas } from 'services/area_service';
+import context_realm from 'context_realm/index';
 
 const LstDownloadClientes = () => {
   const navigation: any = useNavigation();
 
   const timestamp: number = moment.now();
 
+  const [loading, setLoading] = useState<boolean>(false);
   const [clientes, setClientes] = useState<iCliente[]>([]);
   const [clienteSelect, setClienteSelect] = useState<iCliente[]>([]);
   const [nameCliente, setNameCliente] = useState<string>('');
@@ -55,8 +58,8 @@ const LstDownloadClientes = () => {
       backgroundColor: '#1b437e',
     },
     image: {
-      width: 20,
-      height: 20,
+      width: 15,
+      height: 15,
     },
   });
 
@@ -93,36 +96,54 @@ const LstDownloadClientes = () => {
 
   /// Cria a lista de clientes
   const createdCliente = async (obj: iCliente) => {
-    await _createCliente(obj);
-    const cli: iCliente[] = [...clienteSelect];
-    cli.push(obj);
+    try {
+      setLoading(true);
 
-    const loadFazendaByCliente = await api.get(`/Fazenda/FindAllByClientes?objID=${obj.objID}`);
-    if (loadFazendaByCliente.data.length > 0) {
-      await _createFazendas(loadFazendaByCliente.data);
-      const areaResponses = await Promise.all(
-        loadFazendaByCliente.data.map((fazenda: iFazenda) =>
-          api.get(`/Area/FindAllByfazenda?objID=${fazenda.objID}`)
-        )
-      );
+      // Criar cliente
+      await _createCliente(obj);
+      const cli: iCliente[] = [...clienteSelect];
+      cli.push(obj);
 
-      // Mapeia para extrair os dados de cada resposta
-      const areasData = areaResponses.map((response) => response.data);
+      // Carregar fazendas do cliente sequencialmente
+      const loadFazendaByCliente = await api.get(`/Fazenda/FindAllByClientes?objID=${obj.objID}`);
+      if (loadFazendaByCliente.data.length > 0) {
+        await _createFazendas(loadFazendaByCliente.data);
+        const areaResponses = await Promise.all(
+          loadFazendaByCliente.data.map((fazenda: iFazenda) =>
+            api.get(`/Area/FindAllByfazenda?objID=${fazenda.objID}`)
+          )
+        );
 
-      // Achatauuuu a matriz para que todos os elementos fiquem em um único array
-      const flattenedAreasData = areasData.flat();
+        // Mapeia para extrair os dados de cada resposta
+        const areasData = areaResponses.map((response) => response.data);
 
-      await _createAreas(flattenedAreasData);
+        // Achatauuuu a matriz para que todos os elementos fiquem em um único array
+        const flattenedAreasData = areasData.flat();
+
+        await _createAreas(flattenedAreasData);
+      }
+      // Atualiza a lista de clientes
+      setClienteSelect(cli);
+
+      setLoading(false);
+
+      // Exibe o toast de sucesso
+      Toast.show({
+        type: 'success',
+        text2: `Cliente ${obj.nome}, foi baixado com sucesso!`,
+        text2Style: { fontSize: 12 },
+        text1Style: { fontSize: 14 },
+      });
+    } catch (error) {
+      // Caso algo falhe, exibe o erro
+      Toast.show({
+        type: 'error',
+        text2: 'Ocorreu um erro ao processar os dados. Tente novamente.',
+        text2Style: { fontSize: 12 },
+        text1Style: { fontSize: 14 },
+      });
+      console.log(error);
     }
-
-    setClienteSelect(cli);
-
-    Toast.show({
-      type: 'success',
-      text2: `Cliente ${obj.nome}, foi baixado com sucesso!`,
-      text2Style: { fontSize: 12 },
-      text1Style: { fontSize: 14 },
-    });
   };
 
   const filteredData: any = clientes.filter((item: any) =>
@@ -130,6 +151,52 @@ const LstDownloadClientes = () => {
   );
 
   useEffect(() => {
+    /**
+     * Esse método tem como objetivo recarregar a lista todo momento em que a lista de cliente do banco interno for alterada.
+     * Com o objetivo de ajustar de acordo com os que existe na lista de dados à serem utilizado com os dados do banco de dados.
+     */
+    const loading = () => {
+      let realm: any = undefined;
+      const initializeRealm = async () => {
+        realm = await context_realm();
+        const clienteCollection = realm.objects('Cliente');
+
+        // Atualiza o estado com os dados iniciais
+        setClienteSelect([...clienteCollection]);
+
+        // Adiciona um listener para escutar inserções e mudanças
+        const listener = () => {
+          setClienteSelect([...realm.objects('Cliente')]);
+        };
+
+        clienteCollection.addListener(listener);
+
+        // Limpa o listener quando o componente for desmontado
+        return () => {
+          if (clienteCollection) {
+            clienteCollection.removeListener(listener);
+          }
+          if (realm) {
+            realm.close();
+          }
+        };
+      };
+
+      initializeRealm();
+
+      // Retorno opcional de limpeza
+      return () => {
+        if (realm) {
+          realm.close();
+        }
+      };
+    };
+
+    loading();
+  }, []);
+
+  useEffect(() => {
+    //
     const load = async () => {
       try {
         const response = await api.get(`/Cliente`);
@@ -141,6 +208,14 @@ const LstDownloadClientes = () => {
 
     load();
   }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" animating={true} />
+      </View>
+    );
+  }
 
   return (
     <Container style={{ backgroundColor: '#12994a' }}>

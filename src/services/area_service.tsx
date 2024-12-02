@@ -98,16 +98,18 @@ export const _removeAllArea = async () => {
 };
 
 export const _removeAllAreaByFazenda = async (idFazenda: string) => {
+  if (!idFazenda) {
+    console.log('O idFazenda não pode ser vazio.');
+    return;
+  }
+
   try {
     const realm = await context_realm();
     realm.write(() => {
-      // Filtra todas as áreas com o idFazenda especificado
-      const areasToDelete = realm.objects('Area').filtered('idFazenda == $0', idFazenda);
-
-      // Remove todas as áreas encontradas
-      realm.delete(areasToDelete);
+      // Remove diretamente as áreas com o idFazenda especificado
+      realm.delete(realm.objects('Area').filtered('idFazenda == $0', idFazenda));
     });
   } catch (error) {
-    console.error(error);
+    console.log('Erro ao remover áreas: ', error);
   }
 };

@@ -14,9 +14,9 @@ import sForm from 'component/style_component/containe_form';
 import sContainerTable from 'component/style_component/container_table';
 import Toast from 'react-native-toast-message';
 
-import { ButtonConf, Container, Footer, Input, Label, LabelForm } from 'styles/boody.containers';
+import { ButtonConf, Container, Footer, Label, LabelForm } from 'styles/boody.containers';
 import { Dropdown } from 'react-native-element-dropdown';
-import { FlatList, View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
+import { FlatList, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { ContainerHeaderLst, Divider, InputGroup } from './styles';
 import { TableArea } from './component/area_table';
 import { useEffect, useState } from 'react';
@@ -25,6 +25,7 @@ import { _createCliente, _getAllCliente, _removeAllClientes } from 'services/cli
 import { _createFazendas, _getAllFazenda, _removeAllFazendas } from 'services/fazenda_service';
 import { _createAreas, _getAllArea, _removeAllArea } from 'services/area_service';
 import { useNavigation } from '@react-navigation/native';
+import Input from 'component/Input';
 
 const CadCliente = () => {
   const timestamp: number = moment.now();
@@ -143,7 +144,7 @@ const CadCliente = () => {
       const obj: any = {
         objID: cliente.objID,
         idUser: cliente.idUser,
-        nome: cliente.nome,
+        nome: cliente.nome.toUpperCase(),
         email: cliente.email,
         status: cliente.status,
         registro: cliente.registro,
@@ -196,6 +197,16 @@ const CadCliente = () => {
       elevation: 4,
     },
   });
+
+  /** * Este método será utilizado para validar o campo de registro  */
+  const disabled_register = (): boolean => {
+    /// Essa condição séra utilizada para validar o cadastro do cliente.
+    if (lstAllAreas.length === 0 || cliente.nome === '') {
+      return false;
+    }
+
+    return true;
+  };
 
   return (
     <Container style={sForm.body}>
@@ -316,8 +327,8 @@ const CadCliente = () => {
 
       <Footer>
         <ButtonConf
-          disabled={lstAllAreas.length === 0}
-          style={{ backgroundColor: lstAllAreas.length === 0 ? '#ccc' : '#1b437e', marginBottom: 5 }}
+          disabled={!disabled_register()}
+          style={{ backgroundColor: !disabled_register() ? '#ccc' : '#1b437e', marginBottom: 5 }}
           onPress={() => onSaveCliente()}>
           <Label>Registrar Cliente</Label>
         </ButtonConf>

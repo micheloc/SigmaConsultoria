@@ -79,11 +79,12 @@ export const BackgroundImg = styled.Image`
 
 export const Input = styled.TextInput`
   background-color: whitesmoke;
+  color: black;
   border-radius: 5px;
   font-size: 16px;
   margin: 5px;
   padding: 12px;
-  width: 100%;
+  width: 97%;
 `;
 
 export const Label = styled.Text`

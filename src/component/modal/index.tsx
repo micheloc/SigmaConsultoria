@@ -45,7 +45,14 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
               <WrappedComponent {...props} setFormData={setFormData} />
             </View>
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: 20,
+                marginLeft: 10,
+                marginRight: 10,
+              }}>
               <TouchableOpacity
                 onPress={handleSubmit}
                 style={{
