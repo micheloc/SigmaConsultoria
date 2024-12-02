@@ -315,7 +315,10 @@ const CadCliente = () => {
       </View>
 
       <Footer>
-        <ButtonConf onPress={() => onSaveCliente()}>
+        <ButtonConf
+          disabled={lstAllAreas.length === 0}
+          style={{ backgroundColor: lstAllAreas.length === 0 ? '#ccc' : '#1b437e', marginBottom: 5 }}
+          onPress={() => onSaveCliente()}>
           <Label>Registrar Cliente</Label>
         </ButtonConf>
       </Footer>
