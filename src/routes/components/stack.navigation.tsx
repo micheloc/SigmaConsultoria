@@ -5,6 +5,8 @@ import CadCliente from 'operations/clientes';
 import Icon from 'react-native-vector-icons/Ionicons'; // Exemplo com Ionicons
 import TabRoutes from 'component/table_navigation';
 import { TouchableOpacity } from 'react-native';
+import LstDownloadClientes from 'navigations/cliente/list_download';
+import LstUsingClientes from 'navigations/cliente/download';
 
 type RootStackParamList = {
   TabNavigator: any;
@@ -17,6 +19,44 @@ const StackNavigation = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="navHome">
         <Stack.Screen name="navHome" component={TabRoutes} options={{ headerShown: false }} />
+
+        <Stack.Screen
+          name="navDownloadCliente"
+          component={LstDownloadClientes}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            title: 'Download de Clientes',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
+
+        <Stack.Screen
+          name="navListCliente"
+          component={LstUsingClientes}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            title: 'Clientes à serem utilizado',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
 
         <Stack.Screen
           name="cadCliente"

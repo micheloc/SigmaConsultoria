@@ -1,0 +1,179 @@
+import api from 'config/api';
+import iCliente from 'types/interfaces/iCliente';
+import iFazenda from 'types/interfaces/iFazenda';
+import moment from 'moment';
+import Toast from 'react-native-toast-message';
+
+import { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import {
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  View,
+  Keyboard,
+  FlatList,
+  Text,
+} from 'react-native';
+
+import { Container } from 'styles/boody.containers';
+import { _createCliente } from 'services/cliente_service';
+import { _createFazendas } from 'services/fazenda_service';
+import { _createAreas } from 'services/area_service';
+
+const LstDownloadClientes = () => {
+  const navigation: any = useNavigation();
+
+  const timestamp: number = moment.now();
+
+  const [clientes, setClientes] = useState<iCliente[]>([]);
+  const [clienteSelect, setClienteSelect] = useState<iCliente[]>([]);
+  const [nameCliente, setNameCliente] = useState<string>('');
+
+  const styles = StyleSheet.create({
+    container: {
+      alignItems: 'center',
+      padding: 10,
+    },
+    inputGroup: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    input: {
+      flex: 1,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 4,
+      backgroundColor: 'whitesmoke',
+    },
+    button: {
+      padding: 14,
+      marginLeft: 10,
+      borderRadius: 5,
+      backgroundColor: '#1b437e',
+    },
+    image: {
+      width: 20,
+      height: 20,
+    },
+  });
+
+  /// Apresentação da lista e seleção de dados.
+  const Item = ({ objID, idUser, nome }: any) => {
+    const objeto: iCliente = {
+      objID: objID,
+      idUser: idUser,
+      nome: nome,
+      email: null,
+      registro: null,
+      status: null,
+      created: new Date(timestamp),
+      updated: new Date(timestamp),
+    };
+
+    const existed = clienteSelect.filter((obj: iCliente) => obj.objID === objID)[0];
+    if (!existed) {
+      return (
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'whitesmoke',
+            width: '96%',
+            padding: '2%',
+            marginLeft: '2%',
+          }}
+          activeOpacity={0.9}
+          onPress={() => createdCliente(objeto)}>
+          <Text style={{ fontSize: 20, color: '#1B437E' }}>{nome.toUpperCase()}</Text>
+        </TouchableOpacity>
+      );
+    }
+  };
+
+  /// Cria a lista de clientes
+  const createdCliente = async (obj: iCliente) => {
+    await _createCliente(obj);
+    const cli: iCliente[] = [...clienteSelect];
+    cli.push(obj);
+
+    const loadFazendaByCliente = await api.get(`/Fazenda/FindAllByClientes?objID=${obj.objID}`);
+    if (loadFazendaByCliente.data.length > 0) {
+      await _createFazendas(loadFazendaByCliente.data);
+      const areaResponses = await Promise.all(
+        loadFazendaByCliente.data.map((fazenda: iFazenda) =>
+          api.get(`/Area/FindAllByfazenda?objID=${fazenda.objID}`)
+        )
+      );
+
+      // Mapeia para extrair os dados de cada resposta
+      const areasData = areaResponses.map((response) => response.data);
+
+      // Achatauuuu a matriz para que todos os elementos fiquem em um único array
+      const flattenedAreasData = areasData.flat();
+
+      await _createAreas(flattenedAreasData);
+    }
+
+    setClienteSelect(cli);
+
+    Toast.show({
+      type: 'success',
+      text2: `Cliente ${obj.nome}, foi baixado com sucesso!`,
+      text2Style: { fontSize: 12 },
+      text1Style: { fontSize: 14 },
+    });
+  };
+
+  const filteredData: any = clientes.filter((item: any) =>
+    item.nome.toLowerCase().includes(nameCliente.toLowerCase())
+  );
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await api.get(`/Cliente`);
+        setClientes(response.data);
+      } catch (error) {
+        console.debug(error);
+      }
+    };
+
+    load();
+  }, []);
+
+  return (
+    <Container style={{ backgroundColor: '#12994a' }}>
+      <View style={styles.container}>
+        <View style={styles.inputGroup}>
+          <TextInput
+            style={styles.input}
+            placeholder="Informe o nome do cliente."
+            onChangeText={(e: string) => setNameCliente(e)}
+            onBlur={() => Keyboard.dismiss()}
+          />
+
+          {clienteSelect.length > 0 && (
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('navListCliente')}>
+              <Image source={require('assets/img/Icons/cliente.png')} style={styles.image} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+      <ScrollView>
+        <FlatList
+          data={filteredData}
+          renderItem={({ item }: any) => (
+            <View style={{ marginBottom: '2%' }}>
+              <Item objID={item.objID} idUser={item.idUser} nome={item.nome} />
+            </View>
+          )}
+          keyExtractor={(item: any, index: number) => item.id || index.toString()}
+        />
+      </ScrollView>
+      <Toast />
+    </Container>
+  );
+};
+
+export default LstDownloadClientes;

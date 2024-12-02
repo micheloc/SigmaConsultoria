@@ -178,7 +178,7 @@ const CadCliente = () => {
     });
 
     setTimeout(() => {
-      nav.navigation('navHome');
+      nav.navigate('navHome');
     }, 1500);
   };
 
@@ -199,7 +199,7 @@ const CadCliente = () => {
 
   return (
     <Container style={sForm.body}>
-      <View style={{ zIndex: 35, width: '100%' }}>
+      <View style={{ zIndex: 100, width: '100%', position: 'absolute' }}>
         <Toast />
       </View>
 
@@ -221,9 +221,7 @@ const CadCliente = () => {
         <Input
           placeholder="Informe seu nome completo..."
           value={cliente.nome}
-          onChangeText={(txt: string) =>
-            setCliente((prev: iCliente) => ({ ...prev, nome: txt.toUpperCase() }))
-          }
+          onChangeText={(txt: string) => setCliente((prev: iCliente) => ({ ...prev, nome: txt }))}
         />
       </View>
 
