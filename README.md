@@ -13,7 +13,9 @@ Execute os seguintes comandos para instalação do projeto.
 - execute : gradlew assembleRelease ("Gerar o APK de produção").
 - execute : gradlew assembleDebug ("Gerar o APK de desenvolvimento").
 
-O Caminho do projeto deve ser curto, não ultrapassando 260 caracteres.
+Lembrando que para executar todos os esses comandos listado acima, você deve está no prompt, bash ou powershell, acessando a pasta 'android'.
+Obs: O caminho do projeto não pode ultrapassar 260 caracteres, para que não dê erro nas dependencias como react-native-reanimated.
+
 -- Caminho mais provavel pode ser na unidade C:, ex: c:/projeto/meu_projeto.
 
 # Plugins adicionais para execução do projeto :
