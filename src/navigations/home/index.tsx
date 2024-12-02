@@ -2,13 +2,14 @@ import { Container, Label } from 'styles/boody.containers';
 import { Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import sTableNavigation from 'component/style_component/containe_table_navigation';
+import { _userLoggout } from 'services/login_service';
 
 const Home = () => {
   const navigation: any = useNavigation();
 
   return (
     <Container style={sTableNavigation.body}>
-      <TouchableOpacity onPress={() => console.log('olá')} style={styles.btnAvaliacao}>
+      <TouchableOpacity onPress={async () => await _userLoggout()} style={styles.btnAvaliacao}>
         <Image
           source={require('assets/img/Icons/relatorio.png')}
           style={{ margin: 8, width: 45, height: 45 }}

@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Modal as IsModal, View, Text, TouchableOpacity } from 'react-native';
-import { BoxView, Container } from 'styles/boody.containers';
 import dimensions from 'util/adjust_size';
+import React, { useState, useEffect } from 'react';
+
+import { BoxView } from 'styles/boody.containers';
+import { Modal as IsModal, View, Text, TouchableOpacity } from 'react-native';
+import { ButtonCancel, ButtonConfirm, Container, ContainerFooter } from './style';
 
 interface ModalProps {
   visible: boolean;
@@ -45,39 +47,15 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
               <WrappedComponent {...props} setFormData={setFormData} />
             </View>
 
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                marginTop: 20,
-                marginLeft: 10,
-                marginRight: 10,
-              }}>
-              <TouchableOpacity
-                onPress={handleSubmit}
-                style={{
-                  backgroundColor: '#0c6325',
-                  padding: 10,
-                  width: 175,
-                  borderRadius: 5,
-                  alignItems: 'center',
-                  marginRight: 10,
-                }}>
+            <ContainerFooter>
+              <ButtonConfirm onPress={handleSubmit}>
                 <Text style={{ color: 'white', fontWeight: 'bold' }}>Adicionar</Text>
-              </TouchableOpacity>
+              </ButtonConfirm>
 
-              <TouchableOpacity
-                onPress={onClose}
-                style={{
-                  backgroundColor: '#97020e',
-                  padding: 10,
-                  width: 175,
-                  borderRadius: 5,
-                  alignItems: 'center',
-                }}>
+              <ButtonCancel onPress={onClose}>
                 <Text style={{ color: 'white', fontWeight: 'bold' }}>Fechar</Text>
-              </TouchableOpacity>
-            </View>
+              </ButtonCancel>
+            </ContainerFooter>
           </BoxView>
         </Container>
       </IsModal>

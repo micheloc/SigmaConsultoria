@@ -105,23 +105,30 @@ const LstDownloadClientes = () => {
       cli.push(obj);
 
       // Carregar fazendas do cliente sequencialmente
-      const loadFazendaByCliente = await api.get(`/Fazenda/FindAllByClientes?objID=${obj.objID}`);
-      if (loadFazendaByCliente.data.length > 0) {
-        await _createFazendas(loadFazendaByCliente.data);
-        const areaResponses = await Promise.all(
-          loadFazendaByCliente.data.map((fazenda: iFazenda) =>
-            api.get(`/Area/FindAllByfazenda?objID=${fazenda.objID}`)
-          )
-        );
+      const fazendas: any = await api.get(`/Fazenda/FindAllByClientes?objID=${obj.objID}`);
+      if (fazendas.data.length > 0) {
+        await _createFazendas(fazendas.data);
+        for (const item of fazendas.data) {
+          const areas = await api.get(`/Area/FindAllByfazenda?objID=${item.objID}`);
 
-        // Mapeia para extrair os dados de cada resposta
-        const areasData = areaResponses.map((response) => response.data);
-
-        // Achatauuuu a matriz para que todos os elementos fiquem em um único array
-        const flattenedAreasData = areasData.flat();
-
-        await _createAreas(flattenedAreasData);
+          console.log(areas);
+        }
       }
+
+      // if (fazendas.data.length > 0) {
+      //
+      //   const areaResponses = await Promise.all(
+      //     fazendas.data.map((fazenda: iFazenda) =>
+      //   );
+
+      //   // Mapeia para extrair os dados de cada resposta
+      //   const areasData = areaResponses.map((response) => response.data);
+
+      //   // Achatauuuu a matriz para que todos os elementos fiquem em um único array
+      //   const flattenedAreasData = areasData.flat();
+
+      //   await _createAreas(flattenedAreasData);
+      // }
       // Atualiza a lista de clientes
       setClienteSelect(cli);
 
