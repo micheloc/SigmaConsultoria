@@ -34,7 +34,7 @@ const AreaModal: any = WithModal(({ setFormData }: iProps) => {
         <LabelForm>Área : </LabelForm>
         <Input
           value={area.nome}
-          onChangeText={(txt: string) => setArea((prev: iArea) => ({ ...prev, nome: txt.toUpperCase() }))}
+          onChangeText={(txt: string) => setArea((prev: iArea) => ({ ...prev, nome: txt }))}
         />
       </View>
 

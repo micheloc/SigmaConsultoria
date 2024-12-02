@@ -157,11 +157,29 @@ const CadCliente = () => {
         const clienteResp = await api.post('/Cliente/SaveAllCliente', JSON.stringify(obj), {
           headers: { 'Content-Type': 'application/json' },
         });
-        console.log(clienteResp.data);
+
+        Toast.show({
+          type: 'success',
+          text1: `Dados salvo no banco de dados!`,
+          text1Style: { fontSize: 14 },
+        });
+
+        if (clienteResp.data.isValid) {
+        }
       } catch (error: any) {
         console.log(error);
       }
     }
+
+    Toast.show({
+      type: 'success',
+      text1: `Os dados dos cliente foram registrados, com sucesso!`,
+      text1Style: { fontSize: 14 },
+    });
+
+    setTimeout(() => {
+      nav.navigation('navHome');
+    }, 1500);
   };
 
   const styles = StyleSheet.create({
