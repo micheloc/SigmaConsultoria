@@ -58,6 +58,16 @@ export const _findAvaliacao = async (objID: string) => {
   }
 };
 
+export const _findAvaliacaoByArea = async (idArea: string) => {
+  try {
+    const realm = await context_realm();
+    return realm.objects('Avaliacao').filtered(`idArea == '${idArea}'`);
+  } catch (error) {
+    console.log('Não foi possivel carregar os dados da avaliação :', error);
+    return [];
+  }
+};
+
 /**
  * Este método será utilizado para remover uma avaliação especifica a partir do id selecionado.
  * @param objID refere-se ao Id da avaliação selecionada.

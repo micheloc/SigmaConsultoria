@@ -13,6 +13,7 @@ import { _findCliente, _getAllCliente } from 'services/cliente_service';
 import { _findFazenda, _findFazendaByCliente, _getAllFazenda } from 'services/fazenda_service';
 import { _findAreaByFazenda, _getAllArea } from 'services/area_service';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { _findAvaliacaoByArea } from 'services/avaliacao_service';
 
 const Avaliacao = () => {
   const route = useRoute();
