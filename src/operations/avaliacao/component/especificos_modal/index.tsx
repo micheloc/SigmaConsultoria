@@ -28,7 +28,7 @@ const CadEspecificos: any = WithModal(({ setFormData }: iProps) => {
   return (
     <View>
       <Box width="100%" marginBottom="1">
-        <LabelForm>Especificos : </LabelForm>
+        <LabelForm>Tipo : </LabelForm>
         <Select
           fontSize={16}
           backgroundColor="white"
@@ -58,7 +58,7 @@ const CadEspecificos: any = WithModal(({ setFormData }: iProps) => {
       </Box>
 
       <View>
-        <LabelForm>Dados : </LabelForm>
+        <LabelForm>Especificação : </LabelForm>
         <Input
           maxLength={30}
           placeholder="insira os dados"

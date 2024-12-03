@@ -14,7 +14,11 @@ import { _findFazendaByCliente, _getAllFazenda } from 'services/fazenda_service'
 import { _findAreaByFazenda, _getAllArea } from 'services/area_service';
 import { useNavigation } from '@react-navigation/native';
 
-const Avaliacao = () => {
+const Avaliacao = ({ router }: any) => {
+  const params = router;
+
+  console.log(params);
+
   const [areas, setAreas] = useState<iArea[]>([]);
   const [clientes, setClientes] = useState<iCliente[]>([]);
   const [fazendas, setFazendas] = useState<iFazenda[]>([]);

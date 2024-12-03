@@ -9,6 +9,7 @@ import LstDownloadClientes from 'navigations/cliente/list_download';
 import LstUsingClientes from 'navigations/cliente/download';
 import Avaliacao from 'navigations/avaliacao';
 import CadAvaliacao from 'operations/avaliacao';
+import CadRecomendacao from 'operations/avaliacao/component/recomendacao';
 
 type RootStackParamList = {
   TabNavigator: any;
@@ -26,6 +27,25 @@ const StackNavigation = () => {
           options={({ navigation }: any) => ({
             headerShown: true,
             title: 'Cadastro da avaliação',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
+
+        <Stack.Screen
+          name="cadRecomendacao"
+          component={CadRecomendacao}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            title: 'Recomendação',
             headerTitleAlign: 'center',
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>

@@ -1,13 +1,20 @@
 import CadAdversidades from './component/adversidades_modal';
+import CadEspecificos from './component/especificos_modal';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Input from 'component/Input';
 import moment from 'moment';
 import uuid from 'react-native-uuid';
 import Toast from 'react-native-toast-message';
 
-import { ButtonConf, Container, Divider, Label, LabelForm } from 'styles/boody.containers';
-import { DrawerScreenProps } from '@react-navigation/drawer';
-import { ParamListBase } from '@react-navigation/routers';
+import iAvaliacao from 'types/interfaces/iAvaliacao';
+import iAdversidades from 'types/interfaces/iAdversidades';
+import iCultura from 'types/interfaces/iCultura';
+import iEspecificacoes from 'types/interfaces/iEspecificacoes';
+import iFase from 'types/interfaces/iFase';
+import iVariedade from 'types/interfaces/iVariedade';
+
+import * as RNLocalize from 'react-native-localize';
+import { ContainerFooter } from 'component/modal/style';
 import {
   ContainerDate,
   ContainerTitleArea,
@@ -16,22 +23,17 @@ import {
   TextTitleArea,
   TextTitles,
 } from './style';
-import { ScrollView, Text, View, Platform, StyleSheet, TouchableOpacity } from 'react-native';
-import { useEffect, useState } from 'react';
-import iAvaliacao from 'types/interfaces/iAvaliacao';
-import iEspecificacoes from 'types/interfaces/iEspecificacoes';
-import iAdversidades from 'types/interfaces/iAdversidades';
-
-import * as RNLocalize from 'react-native-localize';
+import { ButtonConf, Container, Divider, Label, LabelForm } from 'styles/boody.containers';
 import { Dropdown } from 'react-native-element-dropdown';
-import iCultura from 'types/interfaces/iCultura';
-import { _getAllCultura } from 'services/cultura_service';
-import iVariedade from 'types/interfaces/iVariedade';
-import iFase from 'types/interfaces/iFase';
-import { _findAllFaseByCultura } from 'services/fase_service';
+import { DrawerScreenProps } from '@react-navigation/drawer';
+import { ScrollView, Text, View, Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import { ParamListBase } from '@react-navigation/routers';
+import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
+
 import { _findAllVariedadesByCultura, _getAllVariedades } from 'services/variedade_service';
-import { ContainerFooter } from 'component/modal/style';
-import CadEspecificos from './component/especificos_modal';
+import { _findAllFaseByCultura } from 'services/fase_service';
+import { _getAllCultura } from 'services/cultura_service';
 
 type CadAvaliacaoProps = DrawerScreenProps<ParamListBase, 'cadAvaliacao'>;
 
@@ -46,6 +48,9 @@ interface iParams {
 
 const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) => {
   const params: iParams = route.params;
+
+  const nav: any = useNavigation();
+
   // Obter a localidade do dispositivo (pt-BR ou outro)
   const locale = RNLocalize.getLocales()[0].languageTag;
 
@@ -115,7 +120,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
   const title_especificacoes = avaliacao.especificacoes.map((item) => item.especificacao);
   const data_especificacoes = avaliacao.especificacoes.map((item) => [item.descricao]);
 
-  const title_adversidades = avaliacao.adversidades.map((item) => item.descricao);
+  const title_adversidades = avaliacao.adversidades.map((item) => item.tipo);
   const data_adversidades = avaliacao.adversidades.map((item) => [
     item.descricao,
     item.nivel,
@@ -218,6 +223,20 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     },
   });
 
+  const checkedRelease = () => {
+    if (
+      avaliacao.avaliadores === '' ||
+      avaliacao.idCultura === '' ||
+      avaliacao.idFase === '' ||
+      avaliacao.idVariedade === '' ||
+      (avaliacao.adversidades.length === 0 && avaliacao.especificacoes.length === 0)
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
   return (
     <Container style={{ backgroundColor: '#ccc' }}>
       <ScrollView>
@@ -242,8 +261,12 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         <Divider style={{ backgroundColor: '#848484' }} />
 
         <View>
-          <LabelForm>Avaliadroes : </LabelForm>
-          <Input placeholder="Informe o nome dos avaliadores..." />
+          <LabelForm>Avaliadores : </LabelForm>
+          <Input
+            placeholder="Informe o nome dos avaliadores..."
+            value={avaliacao.avaliadores}
+            onChangeText={(txt: string) => setAvaliacao((prev) => ({ ...prev, avaliadores: txt }))}
+          />
         </View>
         <View>
           <LabelForm>Data da avaliação : </LabelForm>
@@ -330,10 +353,10 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                   </View>
                   <View style={styles.row}>
                     <>
+                      <Text style={[styles.cell, styles.headerCell, styles.cellSeparator]}>Tipo</Text>
                       <Text style={[styles.cell, styles.headerCell, styles.cellSeparator]}>
                         Especificação
                       </Text>
-                      <Text style={[styles.cell, styles.headerCell, styles.cellSeparator]} />
                     </>
                   </View>
                   <ScrollView>
@@ -415,8 +438,26 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
       />
 
       <ContainerFooter style={{ padding: 5 }}>
-        <ButtonConf onPress={() => console.log(avaliacao)}>
-          <Label>Confirmar cadastro</Label>
+        <ButtonConf
+          disabled={!checkedRelease()}
+          style={{
+            backgroundColor: !checkedRelease() ? '#ccc' : '#1b437e',
+            borderColor: !checkedRelease() ? 'whitesmoke' : '#1b437e',
+            borderWidth: 1,
+          }}
+          onPress={() => {
+            const sanitizedAvaliacao = {
+              ...avaliacao,
+              image: avaliacao.image || null, // Garantir que `image` não seja undefined
+              pdf: avaliacao.pdf || null,
+              data: avaliacao.data ? avaliacao.data.toISOString() : null, // Converter `Date` para string
+            };
+
+            nav.navigate('cadRecomendacao', {
+              ...sanitizedAvaliacao,
+            });
+          }}>
+          <Label>Avançar</Label>
         </ButtonConf>
       </ContainerFooter>
     </Container>

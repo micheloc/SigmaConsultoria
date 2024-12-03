@@ -17,3 +17,16 @@ interface iAvaliacao {
 }
 
 export default iAvaliacao;
+
+export interface iAvaliacaoRealm {
+  objID: string;
+  idArea: string;
+  idCultura: string;
+  idFase: string;
+  idVariedade: string;
+  avaliadores: string;
+  data: Date;
+  image: any[];
+  pdf: any[];
+  recomendacao: string;
+}
