@@ -12,10 +12,10 @@ import { useEffect, useState } from 'react';
 import { _getAllCliente } from 'services/cliente_service';
 import { _findFazendaByCliente, _getAllFazenda } from 'services/fazenda_service';
 import { _findAreaByFazenda, _getAllArea } from 'services/area_service';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-const Avaliacao = ({ router }: any) => {
-  const params = router;
+const Avaliacao = () => {
+  const params = useRoute();
 
   console.log(params);
 

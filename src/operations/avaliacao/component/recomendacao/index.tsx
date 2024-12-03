@@ -38,6 +38,7 @@ interface iProps {
 
 const CadRecomendacao = ({ route }: any) => {
   const avaliacao: iProps = route.params;
+
   const nav: any = useNavigation();
 
   const [confReg, setConfReg] = useState<boolean>(false);
@@ -96,8 +97,6 @@ const CadRecomendacao = ({ route }: any) => {
 
     try {
       setTimeout(async () => {
-        console.log({ ...registro });
-
         nav.navigate('navAvaliacao', {
           ...registro,
         });
