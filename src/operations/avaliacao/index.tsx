@@ -448,6 +448,8 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           onPress={() => {
             const sanitizedAvaliacao = {
               ...avaliacao,
+              idCliente: params.idCliente,
+              idFazenda: params.idFazenda,
               image: avaliacao.image || null, // Garantir que `image` não seja undefined
               pdf: avaliacao.pdf || null,
               data: avaliacao.data ? avaliacao.data.toISOString() : null, // Converter `Date` para string

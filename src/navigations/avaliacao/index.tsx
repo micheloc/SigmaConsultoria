@@ -9,19 +9,19 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { View, StyleSheet, Text, Image, TouchableOpacity, ScrollView, FlatList } from 'react-native';
 import { useEffect, useState } from 'react';
 
-import { _getAllCliente } from 'services/cliente_service';
-import { _findFazendaByCliente, _getAllFazenda } from 'services/fazenda_service';
+import { _findCliente, _getAllCliente } from 'services/cliente_service';
+import { _findFazenda, _findFazendaByCliente, _getAllFazenda } from 'services/fazenda_service';
 import { _findAreaByFazenda, _getAllArea } from 'services/area_service';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 const Avaliacao = () => {
-  const params = useRoute();
-
-  console.log(params);
+  const route = useRoute();
 
   const [areas, setAreas] = useState<iArea[]>([]);
   const [clientes, setClientes] = useState<iCliente[]>([]);
   const [fazendas, setFazendas] = useState<iFazenda[]>([]);
+
+  const [fArea, setFArea] = useState<string>('');
 
   const [oCliente, setCliente] = useState<iCliente>({
     objID: '',
@@ -102,6 +102,29 @@ const Avaliacao = () => {
     loading();
   }, [oFazenda]);
 
+  useEffect(() => {
+    const loadingParams = async () => {
+      if (route.params !== undefined) {
+        const itens: any = { ...route.params };
+        if (itens.idCliente) {
+          setTimeout(async () => {
+            const cli: any = await _findCliente(itens.idCliente);
+            setCliente(cli);
+          }, 500);
+        }
+
+        if (itens.idFazenda) {
+          setTimeout(async () => {
+            const faz: any = await _findFazenda(itens.idFazenda);
+            setFazenda(faz);
+          }, 500);
+        }
+      }
+    };
+
+    loadingParams();
+  }, [route]);
+
   /// Apresentação da lista e seleção de dados.
   const Item = (obj: iArea) => {
     return (
@@ -134,6 +157,10 @@ const Avaliacao = () => {
     );
   };
 
+  const filteredData: any = areas.filter((item: iArea) =>
+    item.nome.toUpperCase().includes(fArea.toUpperCase())
+  );
+
   return (
     <Container style={{ backgroundColor: '#ccc' }}>
       <View style={{ padding: 5 }}>
@@ -147,6 +174,7 @@ const Avaliacao = () => {
             valueField="objID"
             placeholder="Selecione o Cliente"
             searchPlaceholder="Pesquisar por cliente"
+            value={oCliente}
             onChange={(item: iCliente) => {
               setCliente(item);
             }}
@@ -163,6 +191,7 @@ const Avaliacao = () => {
             valueField="objID"
             placeholder="Selecione a fazenda"
             searchPlaceholder="Pesquisar por fazenda"
+            value={oFazenda}
             onChange={(item: iFazenda) => {
               setFazenda(item);
             }}
@@ -176,9 +205,13 @@ const Avaliacao = () => {
             <ContainerTitleArea>
               <TextTitleArea>Área</TextTitleArea>
             </ContainerTitleArea>
-            <Input placeholder="Pesquisar área" />
+            <Input
+              placeholder="Pesquisar área"
+              value={fArea}
+              onChangeText={(txt: string) => setFArea(txt)}
+            />
             <FlatList
-              data={areas}
+              data={filteredData}
               renderItem={({ item }: any) => <Item {...item} />}
               keyExtractor={(item: any, index: number) => item.id || index.toString()}
             />

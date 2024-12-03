@@ -3,11 +3,11 @@ import iAdversidades from 'types/interfaces/iAdversidades';
 import iEspecificacoes from 'types/interfaces/iEspecificacoes';
 import NetInfo from '@react-native-community/netinfo';
 
-import { ButtonConf, Container, Label } from 'styles/boody.containers';
+import { ButtonConf, Container, Label, LabelForm } from 'styles/boody.containers';
 import { ContainerFooter } from 'component/modal/style';
+import { View, StyleSheet } from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { TextInput, View, StyleSheet } from 'react-native';
 
 import {
   _createAdversidades,
@@ -20,9 +20,13 @@ import {
   _getAllEspecificacoes,
   _removeAllEspecificacoes,
 } from 'services/especificacoes_service';
+import Input from 'component/Input';
+import api from 'config/api';
 
 interface iProps {
   objID: string;
+  idCliente: string;
+  idFazenda: string;
   idArea: string;
   idCultura: string;
   idFase: string;
@@ -38,10 +42,7 @@ interface iProps {
 
 const CadRecomendacao = ({ route }: any) => {
   const avaliacao: iProps = route.params;
-
   const nav: any = useNavigation();
-
-  const [confReg, setConfReg] = useState<boolean>(false);
 
   const [registro, setRegistro] = useState<iAvaliacao>({
     objID: avaliacao.objID,
@@ -59,9 +60,9 @@ const CadRecomendacao = ({ route }: any) => {
   });
 
   const handlePress = async () => {
-    // await _removeAllAvaliacao();
-    // await _removeAllAdversidades();
-    // await _removeAllEspecificacoes();
+    await _removeAllAvaliacao();
+    await _removeAllAdversidades();
+    await _removeAllEspecificacoes();
 
     const realm_avaliacao: iAvaliacaoRealm = {
       objID: registro.objID,
@@ -77,18 +78,13 @@ const CadRecomendacao = ({ route }: any) => {
     };
 
     const resp_avaliacao = await _createAvaliacao(realm_avaliacao);
-    console.log('avaliação', resp_avaliacao);
-
     if (resp_avaliacao) {
       setTimeout(async () => {
         const resp_adversidade = await _createAdversidades(registro.adversidades);
-        console.log('adversidade', resp_adversidade);
         if (resp_adversidade) {
           setTimeout(async () => {
             const resp_especificacoes = await _createEspecificacoes(registro.especificacoes);
-            console.log('especificacoes', resp_especificacoes);
             if (resp_especificacoes) {
-              setConfReg(true);
             }
           }, 500);
         }
@@ -97,8 +93,40 @@ const CadRecomendacao = ({ route }: any) => {
 
     try {
       setTimeout(async () => {
-        nav.navigate('navAvaliacao', {
+        const net = await NetInfo.fetch();
+        if (net.isConnected) {
+          try {
+            const sanitizedRegistro = {
+              objID: registro.objID,
+              idArea: registro.idArea,
+              idCultura: registro.idCultura,
+              idFase: registro.idFase,
+              idVariedade: registro.idVariedade,
+              avaliadores: registro.avaliadores,
+              data: registro.data,
+              recomendacao: registro.recomendacao,
+              Especificacoes: registro.especificacoes,
+              Adversidades: registro.adversidades,
+            };
+
+            await api.post('/Avaliacao/AddAvaliacaoRealmDb', sanitizedRegistro, {
+              headers: { 'Content-Type': 'application/json' },
+            });
+          } catch (error) {
+            console.log(error);
+            return;
+          }
+        }
+
+        const sanitizedAvaliacao = {
           ...registro,
+          idCliente: avaliacao.idCliente,
+          idFazenda: avaliacao.idFazenda,
+          pdf: registro.pdf || null,
+        };
+
+        nav.navigate('navAvaliacao', {
+          ...sanitizedAvaliacao,
         });
       }, 1500);
     } catch (error) {
@@ -109,18 +137,19 @@ const CadRecomendacao = ({ route }: any) => {
   return (
     <Container>
       <View style={styles.textAreaContainer}>
-        <TextInput
+        <LabelForm>Descrição da recomendação : </LabelForm>
+        <Input
           style={styles.textArea}
           value={registro.recomendacao}
-          onChangeText={(txt) => setRegistro((prevState) => ({ ...prevState, recomendacao: txt }))}
-          placeholder="Inserir recomendação..."
+          onChangeText={(txt: string) => setRegistro((prevState) => ({ ...prevState, recomendacao: txt }))}
+          placeholder="Informe os dados da recomendação... "
           multiline={true}
           numberOfLines={4}
         />
       </View>
 
       <ContainerFooter>
-        <ButtonConf onPress={() => handlePress()}>
+        <ButtonConf style={{ marginBottom: 10 }} onPress={() => handlePress()}>
           <Label>Registrar avaliação</Label>
         </ButtonConf>
       </ContainerFooter>
