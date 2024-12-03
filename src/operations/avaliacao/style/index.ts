@@ -43,8 +43,8 @@ export const TextTitleArea = styled.Text`
 `;
 
 export const ContainerDate = styled.View`
-  width: 100%;
-  margin: 3px;
+  width: 97%;
+  margin: 5px;
   margin-bottom: -2px;
 `;
 

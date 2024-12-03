@@ -64,7 +64,7 @@ export const _findVariedades = async (id: string) => {
 export const _findAllVariedadesByCultura = async (id: string) => {
   try {
     const realm = await context_realm();
-    return realm.objects('Variedade').filtered('idCultura == $0', id);
+    return realm.objects('Variedade').filtered(`idCultura == '${id}'`);
   } catch (error) {
     console.debug('Erro ao carregar a lista de variedades a partir da cultura:', error);
     return [];
