@@ -22,3 +22,18 @@ export const ButtonCancel = styled.TouchableOpacity`
   border-radius: 5px;
   align-items: center;
 `;
+
+export const Imagem = styled.Image`
+  width: 100%;
+  height: 100%;
+  max-width: 300;
+  max-height: 300;
+  align-self: center;
+`;
+
+export const ContainerImagem = styled.TouchableOpacity`
+  max-height: 300px;
+  border: 1px dashed rgba(184, 184, 184, 1);
+  align-items: center;
+  justify-content: center;
+`;

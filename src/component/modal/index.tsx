@@ -1,8 +1,7 @@
-import dimensions from 'util/adjust_size';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 import { BoxView } from 'styles/boody.containers';
-import { Modal as IsModal, View, Text, TouchableOpacity } from 'react-native';
+import { Modal as IsModal, View, Text } from 'react-native';
 import { ButtonCancel, ButtonConfirm, Container, ContainerFooter } from './style';
 
 interface ModalProps {
@@ -15,16 +14,6 @@ interface ModalProps {
 const WithModal = (WrappedComponent: React.ComponentType<any>) => {
   const ModalHOC = ({ visible, onClose, height, ...props }: ModalProps) => {
     const [formData, setFormData] = useState<any>({});
-    const [sizeHeight, setSizeHeight] = useState<any>('32%');
-
-    useEffect(() => {
-      let altura = dimensions.isTablet ? '26%' : '32%';
-      if (height) {
-        altura = height;
-      }
-
-      setSizeHeight(altura);
-    }, []);
 
     const handleSubmit = () => {
       props.onSubmitForm(formData);
@@ -32,11 +21,7 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
 
     return (
       <IsModal visible={visible} animationType="slide" transparent>
-        <Container
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
+        <Container>
           <BoxView
             style={{
               borderColor: 'black', // Define a cor da borda
@@ -46,7 +31,6 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
             <View>
               <WrappedComponent {...props} setFormData={setFormData} />
             </View>
-
             <ContainerFooter>
               <ButtonConfirm onPress={handleSubmit}>
                 <Text style={{ color: 'white', fontWeight: 'bold' }}>Adicionar</Text>
