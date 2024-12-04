@@ -5,12 +5,13 @@ import WithModal from 'component/modal';
 import uuid from 'react-native-uuid';
 
 import { Box, Select, CheckIcon } from 'native-base';
-import { ButtonUpdate, Container, LabelForm } from 'styles/boody.containers';
-import { ContainerPhoto } from './styles';
+import { BoxView, ButtonUpdate, Container, Label, LabelForm } from 'styles/boody.containers';
+import { ButtonCancel, ContainerModalGalery, ContainerPhoto } from './styles';
 import { Modal, TouchableOpacity, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import dimensions from 'util/adjust_size';
-import { ButtonCancel } from 'component/modal/style';
+import { InputGroup } from 'operations/clientes/styles';
+import { ContainerFooter } from 'component/modal/style';
 
 interface iProps {
   setFormData: (state: any) => void;
@@ -91,36 +92,42 @@ const CadAdversidades: any = WithModal(({ setFormData }: iProps) => {
         </ContainerPhoto>
       </View>
 
-      <Modal visible={showGaleria} animationType="slide" transparent>
-        <Container
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <View>
-            <View>
+      <Modal visible={showGaleria} transparent>
+        <ContainerModalGalery>
+          <BoxView
+            style={{
+              flex: 1,
+              borderColor: 'black',
+              borderWidth: 2,
+              borderRadius: 5,
+            }}>
+            <View style={{ paddingRight: 10 }}>
               <ButtonUpdate onPress={() => setShowGaleria(false)}>
-                <MaterialIcon name="photo-camera-back" size={24} color="white" />
-                <LabelForm style={{ color: 'white', fontWeight: 'bold', fontSize: 18, marginRight: '42%' }}>
-                  Galeria
-                </LabelForm>
+                <InputGroup>
+                  <MaterialIcon name="photo-camera-back" size={24} color="white" />
+                  <View style={{ padding: 10 }} />
+                  <Label>Galeria</Label>
+                </InputGroup>
               </ButtonUpdate>
             </View>
 
-            <View>
+            <View style={{ paddingRight: 10 }}>
               <ButtonUpdate onPress={() => setShowGaleria(false)}>
-                <MaterialIcon name="add-a-photo" size={24} color="white" />
-                <LabelForm>Câmera</LabelForm>
+                <InputGroup>
+                  <MaterialIcon name="add-a-photo" size={24} color="white" />
+                  <View style={{ padding: 10 }} />
+                  <Label>Câmera</Label>
+                </InputGroup>
               </ButtonUpdate>
             </View>
-          </View>
 
-          <View>
-            <ButtonCancel onPress={() => setShowGaleria(false)}>
-              <LabelForm>Fechar</LabelForm>
-            </ButtonCancel>
-          </View>
-        </Container>
+            <ContainerFooter style={{ paddingRight: 9 }}>
+              <ButtonCancel onPress={() => setShowGaleria(false)}>
+                <Label>Fechar</Label>
+              </ButtonCancel>
+            </ContainerFooter>
+          </BoxView>
+        </ContainerModalGalery>
       </Modal>
     </Container>
   );
