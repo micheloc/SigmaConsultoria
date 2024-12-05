@@ -9,7 +9,6 @@ interface iAvaliacao {
   idVariedade: string;
   avaliadores: string;
   data: Date;
-  image: any[];
   pdf: any[];
   especificacoes: iEspecificacoes[];
   adversidades: iAdversidades[];
@@ -17,3 +16,15 @@ interface iAvaliacao {
 }
 
 export default iAvaliacao;
+
+export interface iAvaliacaoRealm {
+  objID: string;
+  idArea: string;
+  idCultura: string;
+  idFase: string;
+  idVariedade: string;
+  avaliadores: string;
+  data: Date;
+  pdf: any[];
+  recomendacao: string;
+}

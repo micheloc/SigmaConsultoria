@@ -25,6 +25,12 @@
       "foregroundImage": "./src/assets/icon-sigma.png",
       "backgroundColor": "#ffffff"
     },
-    "permissions": ["CAMERA", "LOCATION"]
+    "permissions": [
+      "CAMERA",
+      "LOCATION",
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE",
+      "READ_MEDIA_IMAGES"
+    ]
   }
 }

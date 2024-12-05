@@ -25,3 +25,5 @@ Obs: O caminho do projeto n찾o pode ultrapassar 260 caracteres, para que n찾o d�
 - Java na vers찾o 17 em diante.
 - Node na vers찾o 18 em diante.
 - Android Studio na ver찾o Flamingo | 2022.2.1 em diante.
+
+Key: 8TtteP.e

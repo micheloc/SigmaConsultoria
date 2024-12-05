@@ -9,11 +9,11 @@ import { View } from 'react-native';
 import { useEffect, useState } from 'react';
 
 interface iProps {
+  esp: iEspecificacoes;
   setFormData: (state: any) => void;
-  onSubmitForm: (data: any) => void;
 }
 
-const CadEspecificos: any = WithModal(({ setFormData }: iProps) => {
+const CadEspecificos: any = WithModal(({ setFormData, esp }: iProps) => {
   const [especificacao, setEspecificacao] = useState<iEspecificacoes>({
     objID: uuid.v4().toString(),
     idAvaliacao: '',
@@ -25,10 +25,32 @@ const CadEspecificos: any = WithModal(({ setFormData }: iProps) => {
     setFormData(especificacao);
   }, [especificacao]);
 
+  useEffect(() => {
+    if (esp) {
+      setEspecificacao((prev) => ({
+        ...prev,
+        objID: esp.objID,
+        idAvaliacao: esp.idAvaliacao,
+        descricao: esp.descricao,
+        especificacao: esp.especificacao,
+      }));
+    }
+
+    return () => {
+      setEspecificacao((prev) => ({
+        ...prev,
+        objID: uuid.v4().toString(),
+        idAvaliacao: '',
+        especificacao: '',
+        descricao: '',
+      }));
+    };
+  }, []);
+
   return (
     <View>
       <Box width="100%" marginBottom="1">
-        <LabelForm>Especificos : </LabelForm>
+        <LabelForm>Tipo : </LabelForm>
         <Select
           fontSize={16}
           backgroundColor="white"
@@ -58,7 +80,7 @@ const CadEspecificos: any = WithModal(({ setFormData }: iProps) => {
       </Box>
 
       <View>
-        <LabelForm>Dados : </LabelForm>
+        <LabelForm>Especificação : </LabelForm>
         <Input
           maxLength={30}
           placeholder="insira os dados"
