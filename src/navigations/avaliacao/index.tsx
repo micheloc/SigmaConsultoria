@@ -79,9 +79,11 @@ const Avaliacao = () => {
 
   useEffect(() => {
     const loading = async () => {
-      const resp: any = await _findFazendaByCliente(oCliente.objID);
-      if (resp.length > 0) {
-        setFazendas(resp);
+      if (oCliente.objID) {
+        const resp: any = await _findFazendaByCliente(oCliente.objID);
+        if (resp.length > 0) {
+          setFazendas(resp);
+        }
       }
     };
 
@@ -91,12 +93,13 @@ const Avaliacao = () => {
   useEffect(() => {
     const loading = async () => {
       try {
-        const areas: any = await _findAreaByFazenda(oFazenda.objID);
-        if (areas.length === 0) {
-          console.warn('Nenhuma area encontrada para o idFazenda:', oFazenda.objID);
+        if (oFazenda.objID) {
+          const areas: any = await _findAreaByFazenda(oFazenda.objID);
+          if (areas.length === 0) {
+            console.warn('Nenhuma area encontrada para o idFazenda:', oFazenda.objID);
+          }
+          setAreas(areas);
         }
-
-        setAreas(areas);
       } catch (error) {
         console.error('Erro ao carregar areas:', error);
       }
@@ -208,6 +211,7 @@ const Avaliacao = () => {
           </ContainerTitleArea>
           <Input placeholder="Pesquisar área" value={fArea} onChangeText={(txt: string) => setFArea(txt)} />
           <FlatList
+            scrollEnabled
             data={filteredData}
             renderItem={({ item }: any) => <Item {...item} />}
             keyExtractor={(item: any, index: number) => item.id || index.toString()}
