@@ -1,5 +1,8 @@
 import Input from 'component/Input';
 import Icon from 'react-native-vector-icons/Entypo';
+
+import iAdversidades from 'types/interfaces/iAdversidades';
+
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import WithModal from 'component/modal';
 import RNFS from 'react-native-fs';
@@ -15,17 +18,15 @@ import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { InputGroup } from 'operations/clientes/styles';
 import { Modal, StyleSheet, View, PermissionsAndroid, Platform, Image } from 'react-native';
 import { useEffect, useState } from 'react';
-import iAdversidades from 'types/interfaces/iAdversidades';
+import Avaliacao from 'navigations/avaliacao';
 
 interface iProps {
   adv: iAdversidades;
   setFormData: (state: any) => void;
+  checkRelease: (isValid: boolean) => void;
 }
 
-/**
- *
- */
-const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
+const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iProps) => {
   const devices: any = useCameraDevices();
   const device = devices;
 
@@ -41,13 +42,12 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
   });
 
   useEffect(() => {
+    checkedForm();
     setFormData(adversidade);
   }, [adversidade]);
 
   useEffect(() => {
     if (adv) {
-      console.log(adv);
-
       setAdversidade((prev) => ({
         ...prev,
         objID: adv.objID,
@@ -72,7 +72,7 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
     };
   }, []);
 
-  /** * Este método será utilizado para habilitar a camera.  */
+  /** * Este método será utilizado para autorizar que o usuário possa carregar as imagens retirada diretamente da câmera.. */
   const requestPermissionCamera = async (): Promise<void> => {
     if (Platform.OS === 'android') {
       try {
@@ -102,6 +102,7 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
     }
   };
 
+  /** * Este método será utilizado para carregar os dados referente a foto retirada pela camera. */
   const handleCameraLaunch = () => {
     const options: any = {
       mediaType: 'photo',
@@ -127,9 +128,7 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
     });
   };
 
-  /**
-   * Este método será utilizado para habilitar o acesso à galeria.
-   */
+  /** * Este método será utilizado para autorizar que o usuário possa carregar as imagens da galeria.. */
   const requestPermissionGaleria = async (): Promise<void> => {
     if (Platform.OS === 'android') {
       try {
@@ -164,6 +163,7 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
     }
   };
 
+  /** * Este método será utilizado para carregar os dados referente a galeria. */
   const handleGaleriaLaunch = () => {
     const options: any = {
       mediaType: 'photo', // Isso limita a seleção à tipos de mídia 'foto'
@@ -193,6 +193,46 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
         console.log('Nenhuma imagem selecionada');
       }
     });
+  };
+
+  /**
+   * Este método será utilizado para carregar os dados de campo númerico com as seguintes condições, duas casas decimais e limitação do campo.
+   * @param text refere-se ao campo digitado.
+   */
+  const handleNumberChange = (text: string): void => {
+    // Essa condição será utilizada para limitar o campo em somente números e pontos.
+    let value = text.replace(/[^0-9.]/g, '');
+
+    // Essa condição limita o campo em até duas casas decimais.
+    if (value.includes('.')) {
+      const parts = value.split('.');
+      if (parts[1].length > 2) {
+        value = `${parts[0]}.${parts[1].slice(0, 2)}`;
+      }
+    }
+
+    /// Essa condição será utilizada para validar o limite do campo até no máximo 5.
+    if (parseFloat(value) > 5) {
+      return;
+    }
+
+    setAdversidade((prevState: any) => ({ ...prevState, nivel: value }));
+  };
+
+  /**
+   * Este método vai verificar sé todos os campos foram preenchidos.
+   * @returns valor referente a validação dos campos.
+   */
+  const checkedForm = (): void => {
+    const nivel: any = adversidade.nivel;
+
+    /// Essa condição será utilizada para carregar os dados referente a adversidade, sendo eles os valores que não foram preenchidos.
+    /// Como: tipo, descricao e nivel/ quando esses valores estiverem vazio o retorno será true, indicando que um desses campos não foi preenchido.
+    if (adversidade.tipo === '' || adversidade.descricao === '' || nivel === '' || nivel === 0) {
+      checkRelease(false);
+    } else {
+      checkRelease(true);
+    }
   };
 
   return (
@@ -240,11 +280,9 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
         <View style={{ width: '33%' }}>
           <LabelForm>Nível: </LabelForm>
           <Input
-            value={adversidade.nivel.toString()}
             keyboardType="numeric"
-            onChangeText={(txt: string) =>
-              setAdversidade((prevState: any) => ({ ...prevState, nivel: txt }))
-            }
+            value={adversidade.nivel.toString()}
+            onChangeText={(txt: string) => handleNumberChange(txt)}
           />
         </View>
       </View>
@@ -259,7 +297,6 @@ const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
           <ContainerImagem onPress={() => setShowGaleria(true)}>
             <Imagem
               source={{ uri: `data:image/png;base64,${adversidade.image}` }}
-              resizeMode="contain"
               style={{ width: '100%', height: '100%' }}
             />
           </ContainerImagem>

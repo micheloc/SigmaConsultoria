@@ -93,7 +93,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
   useEffect(() => {
     const loadingCultura = async () => {
       const resp: any = await _getAllCultura();
-
       setCultura(resp);
     };
 
@@ -121,9 +120,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     loading_fase();
     loading_avaliacao();
   }, [avaliacao.idCultura]);
-
-  const title_especificacoes = avaliacao.especificacoes.map((item) => item.especificacao);
-  const data_especificacoes = avaliacao.especificacoes.map((item) => [item.descricao]);
 
   /**
    * Este método será utilizado para capturar os valores informados na modal de cadastro de adversidades.
