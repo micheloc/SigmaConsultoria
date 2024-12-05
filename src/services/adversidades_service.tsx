@@ -37,7 +37,7 @@ export const _createAdversidades = async (items: iAdversidades[]): Promise<boole
 
     return true;
   } catch (error) {
-    console.error('lst area cadastro : ', error);
+    console.error('Não foi possivel registar a adversidades : ', error);
 
     return false;
   }

@@ -84,7 +84,6 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
           buttonPositive: 'OK',
         });
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log(device);
           handleCameraLaunch();
         } else {
           console.log('Permissão de câmera negada');
@@ -172,23 +171,15 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
       maxWidth: 2000, // Tamanho máximo da largura da imagem
     };
 
-    launchImageLibrary(options, (response: any) => {
+    launchImageLibrary(options, async (response: any) => {
       if (response.assets && response.assets.length > 0) {
         // Acessa a URI do arquivo da primeira imagem selecionada
         const file = response.assets[0].uri;
 
-        // Lê o arquivo da imagem e converte para base64
-        RNFS.readFile(file, 'base64')
-          .then((base64) => {
-            // Atualiza o estado com a imagem em base64
-            setAdversidade((prev) => ({ ...prev, image: base64 }));
+        const base64 = await RNFS.readFile(file, 'base64');
+        setAdversidade((prev) => ({ ...prev, image: base64 }));
 
-            // Fecha a galeria ou a modal de seleção de imagens
-            setShowGaleria(false);
-          })
-          .catch((error) => {
-            console.error('Erro ao ler o arquivo:', error);
-          });
+        setShowGaleria(false);
       } else {
         console.log('Nenhuma imagem selecionada');
       }

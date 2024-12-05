@@ -25,7 +25,6 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
      * @param isValid refere-se ao valor de validação do formulário.
      */
     const validate = (isValid: boolean): void => {
-      console.log(isValid);
       setIsValid(isValid);
     };
 

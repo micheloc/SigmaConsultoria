@@ -20,16 +20,7 @@ import {
   _removeArea,
 } from 'services/area_service';
 
-import {
-  StyleSheet,
-  FlatList,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  View,
-  Keyboard,
-  Text,
-} from 'react-native';
+import { StyleSheet, FlatList, TouchableOpacity, View, Keyboard, Text } from 'react-native';
 
 import { _findCliente, _removeAllClientes, _removeCliente } from 'services/cliente_service';
 import { useEffect, useState } from 'react';
@@ -172,17 +163,15 @@ const LstUsingClientes = () => {
         />
       </View>
 
-      <ScrollView>
-        <FlatList
-          data={filteredData}
-          renderItem={({ item }: any) => (
-            <View style={{ marginBottom: '2%' }}>
-              <Item objID={item.objID} idUser={item.idUser} nome={item.nome} />
-            </View>
-          )}
-          keyExtractor={(item: any, index: number) => item.id || index.toString()}
-        />
-      </ScrollView>
+      <FlatList
+        data={filteredData}
+        renderItem={({ item }: any) => (
+          <View style={{ marginBottom: '2%' }}>
+            <Item objID={item.objID} idUser={item.idUser} nome={item.nome} />
+          </View>
+        )}
+        keyExtractor={(item: any, index: number) => item.id || index.toString()}
+      />
 
       <Toast />
     </Container>

@@ -6,7 +6,7 @@ import Input from 'component/Input';
 import { ContainerLstArea, ContainerTitleArea, TextTitleArea } from './style';
 import { Container, Divider, LabelForm } from 'styles/boody.containers';
 import { Dropdown } from 'react-native-element-dropdown';
-import { View, StyleSheet, Text, Image, TouchableOpacity, ScrollView, FlatList } from 'react-native';
+import { View, StyleSheet, Text, Image, TouchableOpacity, FlatList } from 'react-native';
 import { useEffect, useState } from 'react';
 
 import { _findCliente, _getAllCliente } from 'services/cliente_service';
@@ -14,6 +14,7 @@ import { _findFazenda, _findFazendaByCliente, _getAllFazenda } from 'services/fa
 import { _findAreaByFazenda, _getAllArea } from 'services/area_service';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { _findAvaliacaoByArea } from 'services/avaliacao_service';
+import { ScrollView } from 'native-base';
 
 const Avaliacao = () => {
   const route = useRoute();
@@ -202,21 +203,15 @@ const Avaliacao = () => {
         <Divider style={{ backgroundColor: '#848484' }} />
 
         <View>
-          <ScrollView>
-            <ContainerTitleArea>
-              <TextTitleArea>Área</TextTitleArea>
-            </ContainerTitleArea>
-            <Input
-              placeholder="Pesquisar área"
-              value={fArea}
-              onChangeText={(txt: string) => setFArea(txt)}
-            />
-            <FlatList
-              data={filteredData}
-              renderItem={({ item }: any) => <Item {...item} />}
-              keyExtractor={(item: any, index: number) => item.id || index.toString()}
-            />
-          </ScrollView>
+          <ContainerTitleArea>
+            <TextTitleArea>Área</TextTitleArea>
+          </ContainerTitleArea>
+          <Input placeholder="Pesquisar área" value={fArea} onChangeText={(txt: string) => setFArea(txt)} />
+          <FlatList
+            data={filteredData}
+            renderItem={({ item }: any) => <Item {...item} />}
+            keyExtractor={(item: any, index: number) => item.id || index.toString()}
+          />
         </View>
       </View>
     </Container>
