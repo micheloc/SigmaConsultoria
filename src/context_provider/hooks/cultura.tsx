@@ -8,17 +8,23 @@ import { _createVariedades, _getAllVariedades, _removeAllVariedade } from 'servi
 export const useCultura = () => {
   const lAllCultura = async (): Promise<void> => {
     try {
-      /// Essa condição será utilizada para carregar todas as culturas, ao entrar no aplicativo.
-      const cultura = await api.get('/Cultura');
-      await _createCulturas(cultura.data);
+      setTimeout(async () => {
+        /// Essa condição será utilizada para carregar todas as culturas, ao entrar no aplicativo.
+        const cultura = await api.get('/Cultura');
+        await _createCulturas(cultura.data);
+      }, 1500);
 
-      /// Essa condição será utilizada para carregar todas as fases, ao entrar no aplicativo.
-      const fase: any = await api.get('/Fase');
-      await _createFases(fase.data);
+      setTimeout(async () => {
+        /// Essa condição será utilizada para carregar todas as fases, ao entrar no aplicativo.
+        const fase: any = await api.get('/Fase');
+        await _createFases(fase.data);
+      }, 1500);
 
-      /// Essa condição será utilizada para carregar todas as variedades, ao entrar no aplicativo.
-      const variedade: any = await api.get('/Variedade');
-      await _createVariedades(variedade.data);
+      setTimeout(async () => {
+        /// Essa condição será utilizada para carregar todas as variedades, ao entrar no aplicativo.
+        const variedade: any = await api.get('/Variedade');
+        await _createVariedades(variedade.data);
+      }, 1500);
     } catch (error: any) {
       console.log('Error no context_provider hooks/ create cultura', error);
     }

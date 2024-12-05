@@ -48,9 +48,7 @@ const Routes = () => {
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" translucent={false} />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        {isLogged ? <StackNavigation /> : <StackLogin />}
-      </KeyboardAvoidingView>
+      {isLogged ? <StackNavigation /> : <StackLogin />}
     </>
   );
 };

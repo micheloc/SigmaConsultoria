@@ -64,7 +64,7 @@ export const _findFase = async (objID: string) => {
 export const _findAllFaseByCultura = async (id: string) => {
   try {
     const realm = await context_realm();
-    return realm.objects('Fase').filtered('idCultura == $0', id);
+    return realm.objects('Fase').filtered(`idCultura == '${id}'`);
   } catch (error) {
     console.debug('Erro ao carregar a lista de fases a partir do id da cultura:', error);
     return [];

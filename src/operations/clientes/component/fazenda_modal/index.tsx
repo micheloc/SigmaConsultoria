@@ -33,7 +33,7 @@ const FazendaModal: any = WithModal(({ setFormData }: iProps) => {
         <LabelForm>Fazenda : </LabelForm>
         <Input
           value={fazenda.nome}
-          onChangeText={(txt: string) => setFazenda((prev: any) => ({ ...prev, nome: txt.toUpperCase() }))}
+          onChangeText={(txt: string) => setFazenda((prev: any) => ({ ...prev, nome: txt }))}
         />
       </View>
     </View>

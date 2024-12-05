@@ -10,7 +10,6 @@ import {
   BackgroundImg,
   ViewFormLogin,
   BoxFormLogin,
-  Input,
   ButtonConf,
   ContainerIconLogin,
 } from 'styles/boody.containers';
@@ -19,6 +18,7 @@ import { useContext, useState } from 'react';
 import iLogin from 'types/interfaces/iLogin';
 import { _access, _user, _userLoggout } from 'services/login_service';
 import AuthContext from 'context_provider/index';
+import Input from 'component/Input';
 
 const ax = axios.create({ baseURL: API_URL });
 

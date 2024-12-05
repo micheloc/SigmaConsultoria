@@ -1,3 +1,4 @@
+import api from 'config/api';
 import AreaModal from './component/area_modal';
 import dimensions from 'util/adjust_size';
 
@@ -5,27 +6,33 @@ import iArea from 'types/interfaces/iArea';
 import iCliente from 'types/interfaces/iCliente';
 import iFazenda from 'types/interfaces/iFazenda';
 
+import FazendaModal from './component/fazenda_modal';
 import moment from 'moment';
+import NetInfo from '@react-native-community/netinfo';
 import uuid from 'react-native-uuid';
 import sForm from 'component/style_component/containe_form';
 import sContainerTable from 'component/style_component/container_table';
+import Toast from 'react-native-toast-message';
 
-import { ButtonConf, Container, Footer, Input, Label, LabelForm } from 'styles/boody.containers';
+import { ButtonConf, Container, Footer, Label, LabelForm } from 'styles/boody.containers';
 import { Dropdown } from 'react-native-element-dropdown';
-import { FlatList, View, StyleSheet, Text, Image, TouchableOpacity } from 'react-native';
+import { FlatList, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { ContainerHeaderLst, Divider, InputGroup } from './styles';
 import { TableArea } from './component/area_table';
 import { useEffect, useState } from 'react';
-import { Button } from 'navigations/cliente/styles';
-import FazendaModal from './component/fazenda_modal';
-import { formatCPForCNPJ, formatCPForCNPJString } from 'util/adjust_mask';
-import { ScrollView } from 'react-native';
+import { formatCPForCNPJString } from 'util/adjust_mask';
+import { _createCliente, _getAllCliente, _removeAllClientes } from 'services/cliente_service';
+import { _createFazendas, _getAllFazenda, _removeAllFazendas } from 'services/fazenda_service';
+import { _createAreas, _getAllArea, _removeAllArea } from 'services/area_service';
+import { useNavigation } from '@react-navigation/native';
+import Input from 'component/Input';
 
 const CadCliente = () => {
   const timestamp: number = moment.now();
+  const nav: any = useNavigation();
 
   const [cliente, setCliente] = useState<iCliente>({
-    objID: uuid.v4.toString(),
+    objID: uuid.v4().toString(),
     idUser: '52776b3e-850f-426c-b962-c59f16da5b23',
     nome: '',
     email: '',
@@ -60,16 +67,23 @@ const CadCliente = () => {
 
   const onSubmitArea = (obj: iArea) => {
     const oArea: iArea = {
-      objID: obj.objID,
+      objID: uuid.v4().toString(),
       idFazenda: idFazenda,
       nome: obj.nome,
       hectares: parseFloat(obj.hectares.toString()),
       created: obj.created,
       updated: obj.updated,
     };
+
     const up_lst: iArea[] = [...lstAllAreas];
     up_lst.push(oArea);
     setLstAllAreas(up_lst);
+
+    Toast.show({
+      type: 'success',
+      text1: `Área: ${obj.nome} adicionada!`,
+      text1Style: { fontSize: 14 },
+    });
   };
 
   const onSubmitFazenda = (obj: iFazenda) => {
@@ -87,15 +101,117 @@ const CadCliente = () => {
     setLstFazenda(up_lst);
 
     setShowFazendaModal(false);
+
+    Toast.show({
+      type: 'success',
+      text1: `Fazenda: ${obj.nome} adicionada com sucesso!`,
+      text1Style: { fontSize: 14 },
+    });
+  };
+
+  const onRemoveSelectedFazenda = () => {
+    const up_fazenda: iFazenda[] = lstFazenda.filter((obj: iFazenda) => obj.objID !== idFazenda);
+    setLstFazenda(up_fazenda);
+
+    const up_areas: iArea[] = lstAllAreas.filter((obj: iArea) => obj.idFazenda !== idFazenda);
+    setLstAllAreas(up_areas);
+
+    setIdFazenda('');
+
+    Toast.show({
+      type: 'success',
+      text1: `Fazenda removida com sucesso!`,
+      text1Style: { fontSize: 14 },
+    });
   };
 
   const onRemoveSelectedArea = (objID: string, nome: string) => {
-    console.log(objID);
-    console.log(nome);
+    const up_areas: iArea[] = lstAllAreas.filter((obj: iArea) => obj.objID !== objID);
+    setLstAllAreas(up_areas);
+  };
+
+  const onSaveCliente = async () => {
+    await _createCliente(cliente);
+    await _createFazendas(lstFazenda);
+    await _createAreas(lstAllAreas);
+
+    const net = await NetInfo.fetch();
+
+    /// Caso o celular esteja conectado na internet, os dados serão salvos no banco de dados.
+    if (net.isConnected) {
+      const obj: any = {
+        objID: cliente.objID,
+        idUser: cliente.idUser,
+        nome: cliente.nome.toUpperCase(),
+        email: cliente.email,
+        status: cliente.status,
+        registro: cliente.registro,
+        created: cliente.created,
+        updated: cliente.updated,
+        fazendas: lstFazenda,
+        areas: lstAllAreas,
+      };
+
+      try {
+        const clienteResp = await api.post('/Cliente/SaveAllCliente', JSON.stringify(obj), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        Toast.show({
+          type: 'success',
+          text1: `Dados salvo no banco de dados!`,
+          text1Style: { fontSize: 14 },
+        });
+
+        if (clienteResp.data.isValid) {
+        }
+      } catch (error: any) {
+        console.log(error);
+      }
+    }
+
+    Toast.show({
+      type: 'success',
+      text1: `Os dados dos cliente foram registrados, com sucesso!`,
+      text1Style: { fontSize: 14 },
+    });
+
+    setTimeout(() => {
+      nav.navigate('navHome');
+    }, 1500);
+  };
+
+  const styles = StyleSheet.create({
+    dropdownSelect: {
+      marginTop: -2,
+      marginLeft: 5,
+      height: 45,
+      width: idFazenda === '' ? '90%' : '80%',
+      backgroundColor: 'white',
+      borderRadius: 6,
+      padding: 15,
+      textAlign: 'center',
+      alignItems: 'center',
+      elevation: 4,
+    },
+  });
+
+  /** * Este método será utilizado para validar o campo de registro  */
+  const disabled_register = (): boolean => {
+    /// Essa condição séra utilizada para validar o cadastro do cliente.
+    if (lstAllAreas.length === 0 || cliente.nome === '') {
+      return false;
+    }
+
+    return true;
   };
 
   return (
     <Container style={sForm.body}>
+      <View style={{ zIndex: 100, width: '100%', position: 'absolute' }}>
+        <Toast />
+      </View>
+
       <View>
         <LabelForm>CPF/CNPJ :</LabelForm>
         <Input
@@ -114,9 +230,7 @@ const CadCliente = () => {
         <Input
           placeholder="Informe seu nome completo..."
           value={cliente.nome}
-          onChangeText={(txt: string) =>
-            setCliente((prev: iCliente) => ({ ...prev, nome: txt.toUpperCase() }))
-          }
+          onChangeText={(txt: string) => setCliente((prev: iCliente) => ({ ...prev, nome: txt }))}
         />
       </View>
 
@@ -125,9 +239,7 @@ const CadCliente = () => {
         <Input
           placeholder="Informe seu e-mail..."
           value={cliente.email?.toString()}
-          onChangeText={(txt: string) =>
-            setCliente((prev: iCliente) => ({ ...prev, email: txt.toUpperCase() }))
-          }
+          onChangeText={(txt: string) => setCliente((prev: iCliente) => ({ ...prev, email: txt }))}
         />
       </View>
 
@@ -153,6 +265,22 @@ const CadCliente = () => {
             onPress={() => setShowFazendaModal(true)}>
             <Image
               source={require('assets/img/Icons/adicionar.png')}
+              style={{ width: 30, height: 30, padding: 0 }}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            disabled={idFazenda === ''}
+            style={{
+              marginBottom: 5,
+              width: 50,
+              height: 50,
+              paddingTop: 10,
+              paddingBottom: 10,
+            }}
+            onPress={() => onRemoveSelectedFazenda()}>
+            <Image
+              source={require('assets/img/Icons/remover.png')}
               style={{ width: 30, height: 30, padding: 0 }}
             />
           </TouchableOpacity>
@@ -196,7 +324,10 @@ const CadCliente = () => {
       </View>
 
       <Footer>
-        <ButtonConf>
+        <ButtonConf
+          disabled={!disabled_register()}
+          style={{ backgroundColor: !disabled_register() ? '#ccc' : '#1b437e', marginBottom: 5 }}
+          onPress={() => onSaveCliente()}>
           <Label>Registrar Cliente</Label>
         </ButtonConf>
       </Footer>
@@ -217,20 +348,5 @@ const CadCliente = () => {
     </Container>
   );
 };
-
-const styles = StyleSheet.create({
-  dropdownSelect: {
-    marginTop: -2,
-    marginLeft: 5,
-    height: 45,
-    width: '90%',
-    backgroundColor: 'white',
-    borderRadius: 6,
-    padding: 15,
-    textAlign: 'center',
-    alignItems: 'center',
-    elevation: 4,
-  },
-});
 
 export default CadCliente;

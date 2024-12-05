@@ -1,108 +1,29 @@
 # Doc ( SIGMA - Consultoria ).
 
-Caso o projeto esteja com os seguintes arquivos. \
-
-- Yarn.lock
-- /Android
-- /IOS
-- /node_modules
-
-Apague todos esses arquivos, logo em seguida execute os seguintes comandos.
+Execute os seguintes comandos para instalação do projeto.
 
 ¹ yarn install
 
-² yarn add expo
+² yarn global add react-native-cli
 
-³ yarn global add expo-cli
+# Comandos para uso do gradlew.
 
-- Tente primeiramente executar com : npx expo eject. ("Este comando vai gerar a pasta ANDROID e a pasta IOS")
+Utilize a versão do gradlew : distributionUrl=https\://services.gradle.org/distributions/gradle-8.7-all.zip
 
-Caso não dê certo, execute expo eject.
-
-# Comandos para limpar o gradlew
-
-- primeiro você acessa a pasta do android
 - execute : gradlew clean ("Limpa o build do gradlew").
-- execute : gradlew build ("Gera o build do projeto").
+- execute : gradlew build ("Gerar o build do projeto").
+- execute : gradlew assembleRelease ("Gerar o APK de produção").
+- execute : gradlew assembleDebug ("Gerar o APK de desenvolvimento").
 
-Caso você queira gerar o APK via gradlew, você pode executar :
-gradlew assembleRelease
+Lembrando que para executar todos os esses comandos listado acima, você deve está no prompt, bash ou powershell, acessando a pasta 'android'.
+Obs: O caminho do projeto não pode ultrapassar 260 caracteres, para que não dê erro nas dependencias como react-native-reanimated.
 
-O APK vai estar na pasta ANDROID/src
+-- Caminho mais provavel pode ser na unidade C:, ex: c:/projeto/meu_projeto.
 
-# Comandos para build no expo.dev
+# Plugins adicionais para execução do projeto :
 
-- eas build --profile development --platform android // Versão para desenvolimento.
-- eas build --profile preview --platform android // Versão de teste.
+- Java na versão 17 em diante.
+- Node na versão 18 em diante.
+- Android Studio na verão Flamingo | 2022.2.1 em diante.
 
-Lembrando que no arquivo **app.config.js** você deve adicionar seus dados referente ao expo.dev.
-
-Como : package, eas.projectId
-ex:
-
-```bash
-  export default {
-  expo: {
-    android: {
-      adaptiveIcon: {
-        backgroundColor: '#ffffff',
-      },
-      package: 'com.username.nomedoprojeto',
-    },
-  }
-```
-
-```bash
-    extra: {
-        eas: {
-            projectId: 'xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx',
-        },
-    }
-```
-
-# Modelo do app.config.js
-
-### Crie o arquivo app.config.js na pasta principal do projeto e adicione essa configuração.
-
-```bash
-    export default {
-        expo: {
-            name: 'consultoria',
-            slug: 'consultoria',
-            version: '1.0.0',
-            orientation: 'portrait',
-            icon: './src/assets/icon.png',
-            scheme: 'myapp',
-            userInterfaceStyle: 'automatic',
-            splash: {
-                image: './src/assets/logo.png',
-                resizeMode: 'contain',
-                backgroundColor: '#ffffff',
-            },
-            ios: {
-                supportsTablet: true,
-            },
-            android: {
-            adaptiveIcon: {
-                backgroundColor: '#ffffff',
-            },
-                package: 'com.username.nomedoprojeto',
-                permissions: ['CAMERA', 'RECORD_AUDIO'],
-            },
-            web: {
-                bundler: 'metro',
-                output: 'static',
-                favicon: './src/assets/icon-sigma.png',
-            },
-            plugins: ['expo-router', 'expo-font'],
-            experiments: {
-                typedRoutes: true,
-            },
-            extra: {
-                eas: {
-                    projectId: 'xxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxx',
-                },
-            },
-        },
-    };
-```
+Key: 8TtteP.e

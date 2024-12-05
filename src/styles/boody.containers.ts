@@ -79,11 +79,12 @@ export const BackgroundImg = styled.Image`
 
 export const Input = styled.TextInput`
   background-color: whitesmoke;
+  color: black;
   border-radius: 5px;
   font-size: 16px;
   margin: 5px;
   padding: 12px;
-  width: 100%;
+  width: 97%;
 `;
 
 export const Label = styled.Text`
@@ -135,4 +136,12 @@ export const Footer = styled.View`
   bottom: 5px;
   position: absolute;
   width: 105%;
+`;
+
+export const Divider = styled.View`
+  margin-top: 5px;
+  margin-bottom: 5px;
+  width: 100vw;
+  height: 15px;
+  background-color: #cacaca;
 `;

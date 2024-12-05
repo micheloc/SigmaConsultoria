@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Modal as IsModal, View, Text, TouchableOpacity } from 'react-native';
-import { BoxView, Container } from 'styles/boody.containers';
-import dimensions from 'util/adjust_size';
+import React, { useState } from 'react';
+
+import { BoxView } from 'styles/boody.containers';
+import { Modal as IsModal, View, Text } from 'react-native';
+import { ButtonCancel, ButtonConfirm, Container, ContainerFooter } from './style';
 
 interface ModalProps {
   visible: boolean;
@@ -13,16 +14,6 @@ interface ModalProps {
 const WithModal = (WrappedComponent: React.ComponentType<any>) => {
   const ModalHOC = ({ visible, onClose, height, ...props }: ModalProps) => {
     const [formData, setFormData] = useState<any>({});
-    const [sizeHeight, setSizeHeight] = useState<any>('32%');
-
-    useEffect(() => {
-      let altura = dimensions.isTablet ? '26%' : '32%';
-      if (height) {
-        altura = height;
-      }
-
-      setSizeHeight(altura);
-    }, []);
 
     const handleSubmit = () => {
       props.onSubmitForm(formData);
@@ -30,11 +21,7 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
 
     return (
       <IsModal visible={visible} animationType="slide" transparent>
-        <Container
-          style={{
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
+        <Container>
           <BoxView
             style={{
               borderColor: 'black', // Define a cor da borda
@@ -44,33 +31,15 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
             <View>
               <WrappedComponent {...props} setFormData={setFormData} />
             </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20 }}>
-              <TouchableOpacity
-                onPress={handleSubmit}
-                style={{
-                  backgroundColor: '#0c6325',
-                  padding: 10,
-                  width: 175,
-                  borderRadius: 5,
-                  alignItems: 'center',
-                  marginRight: 10,
-                }}>
+            <ContainerFooter>
+              <ButtonConfirm onPress={handleSubmit}>
                 <Text style={{ color: 'white', fontWeight: 'bold' }}>Adicionar</Text>
-              </TouchableOpacity>
+              </ButtonConfirm>
 
-              <TouchableOpacity
-                onPress={onClose}
-                style={{
-                  backgroundColor: '#97020e',
-                  padding: 10,
-                  width: 175,
-                  borderRadius: 5,
-                  alignItems: 'center',
-                }}>
+              <ButtonCancel onPress={onClose}>
                 <Text style={{ color: 'white', fontWeight: 'bold' }}>Fechar</Text>
-              </TouchableOpacity>
-            </View>
+              </ButtonCancel>
+            </ContainerFooter>
           </BoxView>
         </Container>
       </IsModal>
