@@ -60,6 +60,12 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
   const [showAdversidades, setShowAdversidades] = useState<boolean>(false);
   const [showEspecificos, setShowEspecificos] = useState<boolean>(false);
 
+  const [isEditedAdversidade, setIsEditedAdversidade] = useState<boolean>(false);
+  const [isEditedEspecificacoes, setIsEditedEspecificacoes] = useState<boolean>(false);
+
+  const [adversidade, setAdversidade] = useState<iAdversidades | null>();
+  const [especificacao, setEspecificacao] = useState<iEspecificacoes | null>();
+
   const [cultura, setCultura] = useState<iCultura[]>([]);
   const [variedade, setVariedade] = useState<iVariedade[]>([]);
   const [fase, setFase] = useState<iFase[]>([]);
@@ -74,7 +80,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     data: new Date(timestamp),
     especificacoes: [] as iEspecificacoes[],
     adversidades: [] as iAdversidades[],
-    image: [],
     recomendacao: '',
     pdf: [],
   });
@@ -120,36 +125,42 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
   const title_especificacoes = avaliacao.especificacoes.map((item) => item.especificacao);
   const data_especificacoes = avaliacao.especificacoes.map((item) => [item.descricao]);
 
-  const title_adversidades = avaliacao.adversidades.map((item) => item.tipo);
-  const data_adversidades = avaliacao.adversidades.map((item) => [
-    item.descricao,
-    item.nivel,
-    item.image ? '✅' : '❌',
-  ]);
-
   /**
    * Este método será utilizado para capturar os valores informados na modal de cadastro de adversidades.
    * @param props refere-se aos valores infomados na modal.
    */
   const onSubmitAdversidades = (props: iAdversidades) => {
-    const problems: iAdversidades[] = [...avaliacao.adversidades];
-    const obj = {
-      objID: props.objID,
-      idAvaliacao: avaliacao.objID,
-      descricao: props.descricao,
-      nivel: props.nivel,
-      tipo: props.tipo,
-      image: props.image,
-    };
-    problems.push(obj);
+    let problems: iAdversidades[] = [...avaliacao.adversidades];
 
-    Toast.show({
-      type: 'success',
-      text1: `Adversidade registrada com sucesso!`,
-      text1Style: { fontSize: 14 },
-    });
+    if (!isEditedAdversidade) {
+      const obj = {
+        objID: props.objID,
+        idAvaliacao: avaliacao.objID,
+        descricao: props.descricao,
+        nivel: props.nivel,
+        tipo: props.tipo,
+        image: props.image,
+      };
+      problems.push(obj);
+
+      Toast.show({
+        type: 'success',
+        text1: `Adversidade registrada com sucesso!`,
+        text1Style: { fontSize: 14 },
+      });
+    } else {
+      problems = problems.filter((obj: iAdversidades) => obj.objID !== props.objID);
+      problems.push(props);
+
+      Toast.show({
+        type: 'success',
+        text1: `Adversidade atualizada com sucesso!`,
+        text1Style: { fontSize: 14 },
+      });
+    }
 
     setAvaliacao((prevState: any) => ({ ...prevState, adversidades: problems }));
+    setIsEditedAdversidade(false);
     setShowAdversidades(false);
   };
 
@@ -158,23 +169,35 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
    * @param props refere-se aos valores informados na modal.
    */
   const onSubmitEspecificacoes = (props: iEspecificacoes) => {
-    const especificacoes: iEspecificacoes[] = [...avaliacao.especificacoes];
-    const obj: iEspecificacoes = {
-      objID: props.objID,
-      idAvaliacao: avaliacao.objID,
-      especificacao: props.especificacao,
-      descricao: props.descricao,
-    };
+    let especificacoes: iEspecificacoes[] = [...avaliacao.especificacoes];
+    if (!isEditedEspecificacoes) {
+      const obj: iEspecificacoes = {
+        objID: props.objID,
+        idAvaliacao: avaliacao.objID,
+        especificacao: props.especificacao,
+        descricao: props.descricao,
+      };
 
-    especificacoes.push(obj);
+      especificacoes.push(obj);
 
-    Toast.show({
-      type: 'success',
-      text1: `Especificações registrada com sucesso!`,
-      text1Style: { fontSize: 14 },
-    });
+      Toast.show({
+        type: 'success',
+        text1: `Especificações registrada com sucesso!`,
+        text1Style: { fontSize: 14 },
+      });
+    } else {
+      especificacoes = especificacoes.filter((obj: iEspecificacoes) => obj.objID !== props.objID);
+      especificacoes.push(props);
+
+      Toast.show({
+        type: 'success',
+        text1: `Especificação atualizada com sucesso!`,
+        text1Style: { fontSize: 14 },
+      });
+    }
 
     setAvaliacao((prevState: any) => ({ ...prevState, especificacoes: especificacoes }));
+    setIsEditedEspecificacoes(false);
     setShowEspecificos(false);
   };
 
@@ -215,6 +238,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     row: { flexDirection: 'row' },
     cell: {
       padding: 5,
+      fontSize: 18,
       textAlign: 'center',
       borderWidth: 1,
       borderColor: 'rgb(180, 180, 180)',
@@ -235,6 +259,22 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     }
 
     return true;
+  };
+
+  const edited_adversidade = (row: iAdversidades) => {
+    setAdversidade(row);
+    setIsEditedAdversidade(true);
+    setTimeout(() => {
+      setShowAdversidades(true);
+    }, 500);
+  };
+
+  const edited_especificacao = (row: iEspecificacoes) => {
+    setEspecificacao(row);
+    setIsEditedEspecificacoes(true);
+    setTimeout(() => {
+      setShowEspecificos(true);
+    }, 500);
   };
 
   return (
@@ -268,6 +308,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             onChangeText={(txt: string) => setAvaliacao((prev) => ({ ...prev, avaliadores: txt }))}
           />
         </View>
+
         <View>
           <LabelForm>Data da avaliação : </LabelForm>
 
@@ -359,22 +400,32 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                       </Text>
                     </>
                   </View>
-                  <ScrollView>
-                    {data_especificacoes.map((rowData, rowIndex) => (
-                      <TouchableOpacity key={rowIndex}>
-                        <View key={rowIndex} style={styles.row}>
-                          <Text style={[styles.cell, styles.titleCell, styles.cellSeparator]}>
-                            {title_especificacoes[rowIndex]}
+                  {avaliacao.especificacoes.map((row: iEspecificacoes) => {
+                    return (
+                      <TouchableOpacity
+                        key={uuid.v4().toString()}
+                        onPress={() => edited_especificacao(row)}>
+                        <View key={uuid.v4.toString()} style={styles.row}>
+                          <Text
+                            key={uuid.v4().toString()}
+                            style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>
+                            {row.objID}
                           </Text>
-                          {rowData.map((cellData, cellIndex) => (
-                            <Text key={cellIndex} style={[styles.cell, styles.cellSeparator]}>
-                              {cellData}
-                            </Text>
-                          ))}
+                          <Text
+                            key={uuid.v4().toString()}
+                            style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>
+                            {row.idAvaliacao}
+                          </Text>
+                          <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
+                            {row.descricao}
+                          </Text>
+                          <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
+                            {row.especificacao}
+                          </Text>
                         </View>
                       </TouchableOpacity>
-                    ))}
-                  </ScrollView>
+                    );
+                  })}
                 </View>
               )}
             </View>
@@ -402,22 +453,36 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                       <Text style={[styles.cell, styles.headerCell, styles.cellSeparator]}>Foto</Text>
                     </>
                   </View>
-                  <ScrollView>
-                    {data_adversidades.map((rowData, rowIndex) => (
-                      <TouchableOpacity onPress={() => console.log('olá')} key={rowIndex}>
-                        <View key={rowIndex} style={styles.row}>
-                          <Text style={[styles.cell, styles.titleCell, styles.cellSeparator]}>
-                            {title_adversidades[rowIndex].toUpperCase()}
+                  {avaliacao.adversidades.map((row: iAdversidades) => {
+                    return (
+                      <TouchableOpacity onPress={() => edited_adversidade(row)}>
+                        <View key={row.objID} style={styles.row}>
+                          <Text
+                            key={uuid.v4().toString()}
+                            style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>
+                            {row.objID}
                           </Text>
-                          {rowData.map((cellData, cellIndex) => (
-                            <Text key={cellIndex} style={[styles.cell, styles.cellSeparator]}>
-                              {cellData}
-                            </Text>
-                          ))}
+                          <Text
+                            key={uuid.v4().toString()}
+                            style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>
+                            {row.idAvaliacao}
+                          </Text>
+                          <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
+                            {row.tipo.toUpperCase()}
+                          </Text>
+                          <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
+                            {row.descricao.toUpperCase()}
+                          </Text>
+                          <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
+                            {row.nivel}
+                          </Text>
+                          <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
+                            {row.image ? '✅' : '❌'}
+                          </Text>
                         </View>
                       </TouchableOpacity>
-                    ))}
-                  </ScrollView>
+                    );
+                  })}
                 </View>
               )}
             </View>
@@ -425,16 +490,26 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         )}
       </ScrollView>
 
-      <CadEspecificos
-        visible={showEspecificos}
-        onClose={() => setShowEspecificos(false)}
-        onSubmitForm={onSubmitEspecificacoes}
-      />
-
       <CadAdversidades
         visible={showAdversidades}
-        onClose={() => setShowAdversidades(false)}
+        adv={adversidade}
+        onClose={() => {
+          setAdversidade(null);
+          setIsEditedAdversidade(false);
+          setShowAdversidades(false);
+        }}
         onSubmitForm={onSubmitAdversidades}
+      />
+
+      <CadEspecificos
+        visible={showEspecificos}
+        esp={especificacao}
+        onClose={() => {
+          setEspecificacao(null);
+          setShowEspecificos(false);
+          setIsEditedEspecificacoes(false);
+        }}
+        onSubmitForm={onSubmitEspecificacoes}
       />
 
       <ContainerFooter style={{ padding: 5 }}>
@@ -450,7 +525,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
               ...avaliacao,
               idCliente: params.idCliente,
               idFazenda: params.idFazenda,
-              image: avaliacao.image || null, // Garantir que `image` não seja undefined
               pdf: avaliacao.pdf || null,
               data: avaliacao.data ? avaliacao.data.toISOString() : null, // Converter `Date` para string
             };

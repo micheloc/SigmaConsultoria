@@ -9,11 +9,11 @@ import { View } from 'react-native';
 import { useEffect, useState } from 'react';
 
 interface iProps {
+  esp: iEspecificacoes;
   setFormData: (state: any) => void;
-  onSubmitForm: (data: any) => void;
 }
 
-const CadEspecificos: any = WithModal(({ setFormData }: iProps) => {
+const CadEspecificos: any = WithModal(({ setFormData, esp }: iProps) => {
   const [especificacao, setEspecificacao] = useState<iEspecificacoes>({
     objID: uuid.v4().toString(),
     idAvaliacao: '',
@@ -24,6 +24,28 @@ const CadEspecificos: any = WithModal(({ setFormData }: iProps) => {
   useEffect(() => {
     setFormData(especificacao);
   }, [especificacao]);
+
+  useEffect(() => {
+    if (esp) {
+      setEspecificacao((prev) => ({
+        ...prev,
+        objID: esp.objID,
+        idAvaliacao: esp.idAvaliacao,
+        descricao: esp.descricao,
+        especificacao: esp.especificacao,
+      }));
+    }
+
+    return () => {
+      setEspecificacao((prev) => ({
+        ...prev,
+        objID: uuid.v4().toString(),
+        idAvaliacao: '',
+        especificacao: '',
+        descricao: '',
+      }));
+    };
+  }, []);
 
   return (
     <View>

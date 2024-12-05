@@ -10,18 +10,22 @@ import { BoxView, ButtonUpdate, Container, Label, LabelForm } from 'styles/boody
 import { ButtonCancel, ContainerImagem, ContainerModalGalery, ContainerPhoto, Imagem } from './styles';
 import { ContainerFooter } from 'component/modal/style';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
-import { launchCamera } from 'react-native-image-picker';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { InputGroup } from 'operations/clientes/styles';
 import { Modal, StyleSheet, View, PermissionsAndroid, Platform, Image } from 'react-native';
 import { useEffect, useState } from 'react';
+import iAdversidades from 'types/interfaces/iAdversidades';
 
 interface iProps {
+  adv: iAdversidades;
   setFormData: (state: any) => void;
-  onSubmitForm: (data: any) => void;
 }
 
-const CadAdversidades: any = WithModal(({ setFormData }: iProps) => {
+/**
+ *
+ */
+const CadAdversidades: any = WithModal(({ setFormData, adv }: iProps) => {
   const devices: any = useCameraDevices();
   const device = devices;
 
@@ -39,6 +43,34 @@ const CadAdversidades: any = WithModal(({ setFormData }: iProps) => {
   useEffect(() => {
     setFormData(adversidade);
   }, [adversidade]);
+
+  useEffect(() => {
+    if (adv) {
+      console.log(adv);
+
+      setAdversidade((prev) => ({
+        ...prev,
+        objID: adv.objID,
+        idAvaliacao: adv.idAvaliacao,
+        nivel: adv.nivel,
+        descricao: adv.descricao,
+        tipo: adv.tipo,
+        image: adv.image,
+      }));
+    }
+
+    return () => {
+      setAdversidade((prev) => ({
+        ...prev,
+        objID: uuid.v4().toString(),
+        idAvaliacao: '',
+        nivel: 0,
+        descricao: '',
+        tipo: '',
+        image: '',
+      }));
+    };
+  }, []);
 
   /** * Este método será utilizado para habilitar a camera.  */
   const requestPermissionCamera = async (): Promise<void> => {
@@ -84,7 +116,74 @@ const CadAdversidades: any = WithModal(({ setFormData }: iProps) => {
         RNFS.readFile(file, 'base64')
           .then((base64) => {
             setAdversidade((prev) => ({ ...prev, image: base64 }));
+            setShowGaleria(false);
+          })
+          .catch((error) => {
+            console.error('Erro ao ler o arquivo:', error);
+          });
+      } else {
+        console.log('Nenhuma imagem selecionada');
+      }
+    });
+  };
 
+  /**
+   * Este método será utilizado para habilitar o acesso à galeria.
+   */
+  const requestPermissionGaleria = async (): Promise<void> => {
+    if (Platform.OS === 'android') {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES, // Usar essa permissão para Android 13+ (API 33)
+          {
+            title: 'Permissão para acessar a galeria',
+            message: 'Precisamos da sua permissão para acessar a galeria de fotos',
+            buttonNeutral: 'Pergunte-me depois',
+            buttonNegative: 'Cancelar',
+            buttonPositive: 'OK',
+          }
+        );
+
+        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+          console.log('Permissão de galeria concedida');
+          handleGaleriaLaunch(); // Função para abrir a galeria
+        } else {
+          console.log('Permissão de galeria negada');
+        }
+      } catch (err) {
+        console.warn(err);
+      }
+    } else {
+      // Para iOS, solicitamos a permissão para acessar a galeria
+      const result = await request(PERMISSIONS.IOS.PHOTO_LIBRARY); // Permissão para acessar a galeria de fotos
+      if (result === RESULTS.GRANTED) {
+        handleGaleriaLaunch(); // Função para abrir a galeria
+      } else {
+        console.log('Permissão de galeria negada');
+      }
+    }
+  };
+
+  const handleGaleriaLaunch = () => {
+    const options: any = {
+      mediaType: 'photo', // Isso limita a seleção à tipos de mídia 'foto'
+      includeBase64: false, // Definido como 'false' para evitar base64 automático
+      maxHeight: 2000, // Tamanho máximo da altura da imagem
+      maxWidth: 2000, // Tamanho máximo da largura da imagem
+    };
+
+    launchImageLibrary(options, (response: any) => {
+      if (response.assets && response.assets.length > 0) {
+        // Acessa a URI do arquivo da primeira imagem selecionada
+        const file = response.assets[0].uri;
+
+        // Lê o arquivo da imagem e converte para base64
+        RNFS.readFile(file, 'base64')
+          .then((base64) => {
+            // Atualiza o estado com a imagem em base64
+            setAdversidade((prev) => ({ ...prev, image: base64 }));
+
+            // Fecha a galeria ou a modal de seleção de imagens
             setShowGaleria(false);
           })
           .catch((error) => {
@@ -177,7 +276,7 @@ const CadAdversidades: any = WithModal(({ setFormData }: iProps) => {
               borderRadius: 5,
             }}>
             <View style={{ paddingRight: 10 }}>
-              <ButtonUpdate onPress={() => setShowGaleria(false)}>
+              <ButtonUpdate onPress={() => requestPermissionGaleria()}>
                 <InputGroup>
                   <MaterialIcon name="photo-camera-back" size={24} color="white" />
                   <View style={{ padding: 10 }} />
