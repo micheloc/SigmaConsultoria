@@ -24,16 +24,17 @@ import {
   TextTitles,
 } from './style';
 import { ButtonConf, Container, Divider, Label, LabelForm } from 'styles/boody.containers';
-import { Dropdown } from 'react-native-element-dropdown';
 import { DrawerScreenProps } from '@react-navigation/drawer';
-import { ScrollView, Text, View, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 import { ParamListBase } from '@react-navigation/routers';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
+import { Text, View, Platform, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { _findAllVariedadesByCultura, _getAllVariedades } from 'services/variedade_service';
 import { _findAllFaseByCultura } from 'services/fase_service';
 import { _getAllCultura } from 'services/cultura_service';
+import Dropdown from 'component/DropDown';
+import { ScrollView } from 'native-base';
 
 type CadAvaliacaoProps = DrawerScreenProps<ParamListBase, 'cadAvaliacao'>;
 
@@ -275,7 +276,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   return (
     <Container style={{ backgroundColor: '#ccc' }}>
-      <ScrollView>
+      <ScrollView style={{ width: '100%', height: '100%' }}>
         <View>
           <ContainerTitles>
             <TextTitles>{params.cliente}</TextTitles>
@@ -332,12 +333,12 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           <Dropdown
             search
             data={cultura}
-            style={styles.dropdownSelect}
             labelField="nome"
             valueField="objID"
+            dropdownPosition="top"
             placeholder="Selecione a cultura..."
             searchPlaceholder="Pesquisar por cultura"
-            onChange={(item: any) => {
+            onChange={(item: iCultura) => {
               setAvaliacao((prevState) => ({ ...prevState, idCultura: item.objID }));
             }}
           />
@@ -351,6 +352,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             style={styles.dropdownSelect}
             labelField="nome"
             valueField="objID"
+            dropdownPosition="top"
             placeholder="Selecione a fase..."
             searchPlaceholder="Pesquisar por fase"
             onChange={(item: any) => {
@@ -367,6 +369,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             style={styles.dropdownSelect}
             labelField="nome"
             valueField="objID"
+            dropdownPosition="top"
             placeholder="Selecione a variedade..."
             searchPlaceholder="Pesquisar por variedade"
             onChange={(item: any) => {

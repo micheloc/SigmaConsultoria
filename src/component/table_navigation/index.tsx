@@ -3,7 +3,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Image, TouchableOpacity } from 'react-native';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { useContext, useEffect, useState } from 'react';
 import { _user } from 'services/login_service';
 import Cliente from 'navigations/cliente';
@@ -55,7 +55,6 @@ const TabRoutes = () => {
           options={{
             headerShown: true,
             headerTitle: user ? user.usuario : '',
-            tabBarLabel: 'Principal',
             headerTitleAlign: 'center',
             headerLeft: () => (
               <View>
@@ -73,11 +72,18 @@ const TabRoutes = () => {
                 />
               </TouchableOpacity>
             ),
+            tabBarLabel: () => (
+              <View>
+                <Text style={{ padding: 8, fontSize: 18, color: 'whitesmoke' }}>Principal</Text>
+              </View>
+            ),
             tabBarIcon: () => (
-              <Image
-                source={require('assets/img/Icons/home.png')}
-                style={{ margin: 8, width: 35, height: 35 }}
-              />
+              <View>
+                <Image
+                  source={require('assets/img/Icons/home.png')}
+                  style={{ margin: 8, width: 35, height: 35 }}
+                />
+              </View>
             ),
             tabBarLabelStyle: {
               padding: 8,
@@ -93,12 +99,11 @@ const TabRoutes = () => {
           component={Home}
           options={{
             headerShown: false,
-            title: 'Relatório',
-            tabBarLabelStyle: {
-              padding: 8,
-              fontSize: 18,
-              color: 'whitesmoke',
-            },
+            tabBarLabel: () => (
+              <View>
+                <Text style={{ padding: 8, fontSize: 18, color: 'whitesmoke' }}>Relatório</Text>
+              </View>
+            ),
             tabBarIcon: () => (
               <Image
                 source={require('assets/img/Icons/relatorio.png')}
@@ -110,17 +115,16 @@ const TabRoutes = () => {
         />
 
         <Tab.Screen
-          name="cliente"
+          name="Cliente"
           component={Cliente}
           options={{
             headerShown: true,
-            title: 'Clientes',
             headerTitleAlign: 'center',
-            tabBarLabelStyle: {
-              padding: 8,
-              fontSize: 18,
-              color: 'whitesmoke',
-            },
+            tabBarLabel: () => (
+              <View>
+                <Text style={{ padding: 8, fontSize: 18, color: 'whitesmoke' }}>Cliente</Text>
+              </View>
+            ),
             tabBarIcon: () => (
               <Image
                 source={require('assets/img/Icons/clientes.png')}
