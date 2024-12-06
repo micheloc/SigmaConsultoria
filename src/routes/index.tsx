@@ -18,7 +18,7 @@ const Routes = () => {
       setLoading(true); // Atualiza o estado de carregamento após o check
 
       await check();
-      await lAllCultura();
+      // await lAllCultura();
 
       setLoading(false); // Atualiza o estado de carregamento após o check
     };

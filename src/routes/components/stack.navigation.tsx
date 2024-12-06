@@ -1,15 +1,15 @@
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 import Avaliacao from 'navigations/avaliacao';
 import CadCliente from 'operations/clientes';
 import CadAvaliacao from 'operations/avaliacao';
 import CadRecomendacao from 'operations/avaliacao/component/recomendacao';
-import Icon from 'react-native-vector-icons/Ionicons'; // Exemplo com Ionicons
 import TabRoutes from 'component/table_navigation';
-import LstDownloadClientes from 'navigations/cliente/list_download';
-import LstUsingClientes from 'navigations/cliente/download';
+import LstDownloadClientes from 'navigations/cliente/lista_clientes';
+import LstUsingClientes from 'navigations/cliente/clientes_baixados';
+import ListCulturas from 'navigations/Cultura/lista_culturas';
 
 type RootStackParamList = {
   TabNavigator: any;
@@ -34,7 +34,10 @@ const StackNavigation = () => {
             ),
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+                <Image
+                  source={require('assets/img/Icons/back.png')}
+                  style={{ margin: 8, width: 25, height: 25 }}
+                />
               </TouchableOpacity>
             ),
             headerStyle: {
@@ -55,7 +58,10 @@ const StackNavigation = () => {
             ),
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+                <Image
+                  source={require('assets/img/Icons/back.png')}
+                  style={{ margin: 8, width: 25, height: 25 }}
+                />
               </TouchableOpacity>
             ),
             headerStyle: {
@@ -78,7 +84,10 @@ const StackNavigation = () => {
             ),
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+                <Image
+                  source={require('assets/img/Icons/back.png')}
+                  style={{ margin: 8, width: 25, height: 25 }}
+                />
               </TouchableOpacity>
             ),
             headerStyle: {
@@ -116,7 +125,10 @@ const StackNavigation = () => {
                   }}
                   style={{ paddingLeft: 15 }}>
                   <View>
-                    <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+                    <Image
+                      source={require('assets/img/Icons/back.png')}
+                      style={{ margin: 8, width: 25, height: 25 }}
+                    />
                   </View>
                 </TouchableOpacity>
               ),
@@ -141,7 +153,10 @@ const StackNavigation = () => {
             ),
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+                <Image
+                  source={require('assets/img/Icons/back.png')}
+                  style={{ margin: 8, width: 25, height: 25 }}
+                />
               </TouchableOpacity>
             ),
             headerStyle: {
@@ -164,7 +179,36 @@ const StackNavigation = () => {
             ),
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
-                <Icon name="arrow-back" size={24} color="whitesmoke" /> {/* Ícone do botão */}
+                <Image
+                  source={require('assets/img/Icons/back.png')}
+                  style={{ margin: 8, width: 25, height: 25 }}
+                />
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
+
+        <Stack.Screen
+          name="navListCultura"
+          component={ListCulturas}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            headerTitleAlign: 'center',
+            headerTitle: () => (
+              <Text style={{ fontSize: 18, color: 'whitesmoke', textAlign: 'center' }}>
+                Culturas à serem utilizada
+              </Text>
+            ),
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Image
+                  source={require('assets/img/Icons/back.png')}
+                  style={{ margin: 8, width: 25, height: 25 }}
+                />
               </TouchableOpacity>
             ),
             headerStyle: {

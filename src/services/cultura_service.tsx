@@ -1,6 +1,10 @@
 import context_realm from 'context_realm/index';
 import iCultura from 'types/interfaces/iCultura';
 
+/**
+ * Este método, tem como objetivo adicionar a cultura informada ao banco realm.db
+ * @param item refere-se ao objeto de cultura.
+ */
 export const _createCultura = async (item: iCultura) => {
   try {
     const realm = await context_realm();

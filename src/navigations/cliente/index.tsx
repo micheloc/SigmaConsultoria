@@ -12,7 +12,7 @@ const Cliente = () => {
     <Container style={sTableNavigation.body}>
       <GroupButtons>
         <Button onPress={() => navigation.navigate('cadCliente')}>
-          <Label>Cadastrar Clientes</Label>
+          <Label>Cadastrar Cliente</Label>
         </Button>
 
         <Button onPress={() => navigation.navigate('navDownloadCliente')}>
