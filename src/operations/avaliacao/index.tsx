@@ -1,6 +1,7 @@
 import CadAdversidades from './component/adversidades_modal';
 import CadEspecificos from './component/especificos_modal';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Dropdown from 'component/DropDown';
 import Input from 'component/Input';
 import moment from 'moment';
 import uuid from 'react-native-uuid';
@@ -33,7 +34,6 @@ import { Text, View, Platform, StyleSheet, TouchableOpacity } from 'react-native
 import { _findAllVariedadesByCultura, _getAllVariedades } from 'services/variedade_service';
 import { _findAllFaseByCultura } from 'services/fase_service';
 import { _getAllCultura } from 'services/cultura_service';
-import Dropdown from 'component/DropDown';
 import { ScrollView } from 'native-base';
 
 type CadAvaliacaoProps = DrawerScreenProps<ParamListBase, 'cadAvaliacao'>;
@@ -335,7 +335,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             data={cultura}
             labelField="nome"
             valueField="objID"
-            dropdownPosition="top"
             placeholder="Selecione a cultura..."
             searchPlaceholder="Pesquisar por cultura"
             onChange={(item: iCultura) => {
@@ -352,7 +351,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             style={styles.dropdownSelect}
             labelField="nome"
             valueField="objID"
-            dropdownPosition="top"
             placeholder="Selecione a fase..."
             searchPlaceholder="Pesquisar por fase"
             onChange={(item: any) => {
@@ -369,7 +367,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             style={styles.dropdownSelect}
             labelField="nome"
             valueField="objID"
-            dropdownPosition="top"
             placeholder="Selecione a variedade..."
             searchPlaceholder="Pesquisar por variedade"
             onChange={(item: any) => {
