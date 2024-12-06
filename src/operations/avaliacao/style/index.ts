@@ -15,8 +15,8 @@ export const ContainerTitles = styled.View`
  */
 export const TextTitles = styled.Text`
   text-align: center;
-  padding: 10px;
-  font-size: 20px;
+  padding: 8px;
+  font-size: 18px;
   font-wight: bold;
   color: black;
 `;
@@ -36,8 +36,8 @@ export const ContainerTitleArea = styled.View`
  */
 export const TextTitleArea = styled.Text`
   text-align: center;
-  padding: 10px;
-  font-size: 20px;
+  padding: 8px;
+  font-size: 18px;
   font-wight: bold;
   color: white;
 `;

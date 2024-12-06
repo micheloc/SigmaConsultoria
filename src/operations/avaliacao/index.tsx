@@ -199,17 +199,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
   };
 
   const styles = StyleSheet.create({
-    dropdownSelect: {
-      height: 40,
-      width: '97%',
-      backgroundColor: 'whitesmoke',
-      borderRadius: 5,
-      padding: 15,
-      textAlign: 'center',
-      alignItems: 'center',
-      elevation: 4,
-      marginLeft: 5,
-    },
     headerCell: {
       color: 'white',
       fontWeight: 'bold',
@@ -276,7 +265,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   return (
     <Container style={{ backgroundColor: '#ccc' }}>
-      <ScrollView style={{ width: '100%', height: '100%' }}>
+      <ScrollView>
         <View>
           <ContainerTitles>
             <TextTitles>{params.cliente}</TextTitles>
@@ -348,7 +337,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           <Dropdown
             search
             data={fase}
-            style={styles.dropdownSelect}
             labelField="nome"
             valueField="objID"
             placeholder="Selecione a fase..."
@@ -364,7 +352,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           <Dropdown
             search
             data={variedade}
-            style={styles.dropdownSelect}
             labelField="nome"
             valueField="objID"
             placeholder="Selecione a variedade..."
