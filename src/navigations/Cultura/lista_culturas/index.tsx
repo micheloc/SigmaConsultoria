@@ -29,7 +29,7 @@ import { _createVariedades } from 'services/variedade_service';
 
 const ListCulturas = () => {
   const nav: any = useNavigation();
-  const timestamp: number = moment.now();
+
   const [loading, setLoading] = useState<boolean>(false);
 
   const [culturas, setCulturas] = useState<iCultura[]>([]);
@@ -111,7 +111,7 @@ const ListCulturas = () => {
       if (variedades.data.length > 0) {
         await _createVariedades(variedades.data);
       }
-
+      setNameCultura('');
       setLoading(false);
 
       Toast.show({
@@ -211,7 +211,7 @@ const ListCulturas = () => {
           />
 
           {culturaSelected.length > 0 && (
-            <TouchableOpacity style={styles.button} onPress={() => console.log('olá')}>
+            <TouchableOpacity style={styles.button} onPress={() => nav.navigate('lstCulturaBaixada')}>
               <Image source={require('assets/img/Icons/Download.png')} style={styles.image} />
             </TouchableOpacity>
           )}

@@ -10,6 +10,7 @@ import TabRoutes from 'component/table_navigation';
 import LstDownloadClientes from 'navigations/cliente/lista_clientes';
 import LstUsingClientes from 'navigations/cliente/clientes_baixados';
 import ListCulturas from 'navigations/Cultura/lista_culturas';
+import LstUsingCultura from 'navigations/Cultura/cultura_baixadas';
 
 type RootStackParamList = {
   TabNavigator: any;
@@ -201,6 +202,32 @@ const StackNavigation = () => {
             headerTitle: () => (
               <Text style={{ fontSize: 18, color: 'whitesmoke', textAlign: 'center' }}>
                 Culturas à serem utilizada
+              </Text>
+            ),
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ paddingLeft: 15 }}>
+                <Image
+                  source={require('assets/img/Icons/back.png')}
+                  style={{ margin: 8, width: 25, height: 25 }}
+                />
+              </TouchableOpacity>
+            ),
+            headerStyle: {
+              backgroundColor: '#12994a', // Cor de fundo do header
+            },
+            headerTintColor: 'whitesmoke', // Cor do texto do título
+          })}
+        />
+
+        <Stack.Screen
+          name="lstCulturaBaixada"
+          component={LstUsingCultura}
+          options={({ navigation }: any) => ({
+            headerShown: true,
+            headerTitleAlign: 'center',
+            headerTitle: () => (
+              <Text style={{ fontSize: 18, color: 'whitesmoke', textAlign: 'center' }}>
+                Culturas utilizadas
               </Text>
             ),
             headerLeft: () => (

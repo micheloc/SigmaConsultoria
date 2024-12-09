@@ -4,6 +4,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Dropdown from 'component/DropDown';
 import Input from 'component/Input';
 import moment from 'moment';
+import NetInfo from '@react-native-community/netinfo';
 import uuid from 'react-native-uuid';
 import Toast from 'react-native-toast-message';
 
@@ -29,12 +30,14 @@ import { DrawerScreenProps } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/routers';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { Text, View, Platform, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, Platform, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
 import { _findAllVariedadesByCultura, _getAllVariedades } from 'services/variedade_service';
 import { _findAllFaseByCultura } from 'services/fase_service';
 import { _getAllCultura } from 'services/cultura_service';
-import { ScrollView } from 'native-base';
+import { InputGroup, ScrollView } from 'native-base';
+import CadVariedadeCultura from './component/variedade_modal';
+import api from 'config/api';
 
 type CadAvaliacaoProps = DrawerScreenProps<ParamListBase, 'cadAvaliacao'>;
 
@@ -60,9 +63,11 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
   const [showDate, setShowDate] = useState<boolean>(false);
   const [showAdversidades, setShowAdversidades] = useState<boolean>(false);
   const [showEspecificos, setShowEspecificos] = useState<boolean>(false);
+  const [showVarieade, setShowVariedade] = useState<boolean>(false);
 
   const [isEditedAdversidade, setIsEditedAdversidade] = useState<boolean>(false);
   const [isEditedEspecificacoes, setIsEditedEspecificacoes] = useState<boolean>(false);
+  const [isEditedVariedade, setIsEditedVariedade] = useState<boolean>(false);
 
   const [adversidade, setAdversidade] = useState<iAdversidades | null>();
   const [especificacao, setEspecificacao] = useState<iEspecificacoes | null>();
@@ -198,6 +203,57 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     setShowEspecificos(false);
   };
 
+  /**
+   * Este método será utilizado para capturar os valores informados na modal de cadastro de especificações.
+   * @param props refere-se aos valores informados na modal.
+   */
+  const onSubmitVariedade = async (props: iVariedade) => {
+    let vre: iVariedade[] = [...variedade];
+    if (!isEditedVariedade) {
+      const obj: iVariedade = {
+        objID: uuid.v4().toString(),
+        idCultura: avaliacao.idCultura,
+        nome: props.nome,
+      };
+
+      vre.push(obj);
+
+      Toast.show({
+        type: 'success',
+        text1: `Variedade de cultura foi salva com sucesso!`,
+        text1Style: { fontSize: 14 },
+      });
+
+      const net = await NetInfo.fetch();
+      if (net.isConnected) {
+        const resp = await api.post('/Variedade ', JSON.stringify(obj), {
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (resp.data.isValid) {
+          Toast.show({
+            type: 'success',
+            text1: `Variedade de cultura foi salva com sucesso no banco de dados!`,
+            text1Style: { fontSize: 14 },
+          });
+        }
+      }
+    } else {
+      vre = vre.filter((obj: iVariedade) => obj.objID !== props.objID);
+      vre.push(props);
+
+      Toast.show({
+        type: 'success',
+        text1: `Especificação atualizada com sucesso!`,
+        text1Style: { fontSize: 14 },
+      });
+    }
+
+    setVariedade(vre);
+    setIsEditedVariedade(false);
+    setShowVariedade(false);
+  };
+
   const styles = StyleSheet.create({
     headerCell: {
       color: 'white',
@@ -263,8 +319,30 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     }, 500);
   };
 
+  const edited_variedade = (row: iVariedade) => {
+    // setVariedade(row);
+    setIsEditedVariedade(true);
+    setTimeout(() => {
+      setShowAdversidades(true);
+    }, 500);
+  };
+
+  const sizeVariedade = (): any => {
+    if (avaliacao.idCultura && avaliacao.idVariedade === '') {
+      return '89%';
+    } else if (avaliacao.idCultura && avaliacao.idVariedade !== '') {
+      return '73%';
+    }
+
+    return '97%';
+  };
+
   return (
     <Container style={{ backgroundColor: '#ccc' }}>
+      <View style={{ zIndex: 100 }}>
+        <Toast />
+      </View>
+
       <ScrollView>
         <View>
           <ContainerTitles>
@@ -349,17 +427,44 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
         <View>
           <LabelForm>Variedade : </LabelForm>
-          <Dropdown
-            search
-            data={variedade}
-            labelField="nome"
-            valueField="objID"
-            placeholder="Selecione a variedade..."
-            searchPlaceholder="Pesquisar por variedade"
-            onChange={(item: any) => {
-              setAvaliacao((prevState) => ({ ...prevState, idVariedade: item.objID }));
-            }}
-          />
+          <InputGroup>
+            <Dropdown
+              search
+              data={variedade}
+              labelField="nome"
+              valueField="objID"
+              placeholder="Selecione a variedade..."
+              searchPlaceholder="Pesquisar por variedade"
+              style={{ width: sizeVariedade() }}
+              onChange={(item: any) => {
+                setAvaliacao((prevState) => ({ ...prevState, idVariedade: item.objID }));
+              }}
+            />
+            <TouchableOpacity onPress={() => setShowVariedade(true)}>
+              <Image
+                source={require('assets/img/Icons/Add.png')}
+                style={{ width: 40, height: 40, margin: 5, marginLeft: 10 }}
+              />
+            </TouchableOpacity>
+
+            {avaliacao.idVariedade !== '' && (
+              <TouchableOpacity>
+                <Image
+                  source={require('assets/img/Icons/editar.png')}
+                  style={{ width: 40, height: 40, margin: 5 }}
+                />
+              </TouchableOpacity>
+            )}
+
+            {avaliacao.idVariedade !== '' && (
+              <TouchableOpacity>
+                <Image
+                  source={require('assets/img/Icons/remover.png')}
+                  style={{ width: 40, height: 40, margin: 5 }}
+                />
+              </TouchableOpacity>
+            )}
+          </InputGroup>
         </View>
 
         {avaliacao.idCultura && (
@@ -493,6 +598,17 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           setIsEditedEspecificacoes(false);
         }}
         onSubmitForm={onSubmitEspecificacoes}
+      />
+
+      <CadVariedadeCultura
+        visible={showVarieade}
+        vari={variedade}
+        onClose={() => {
+          setEspecificacao(null);
+          setShowVariedade(false);
+          setIsEditedVariedade(false);
+        }}
+        onSubmitForm={onSubmitVariedade}
       />
 
       <ContainerFooter style={{ padding: 5 }}>

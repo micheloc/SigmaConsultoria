@@ -82,3 +82,17 @@ export const _removeAllFase = async () => {
     console.error(error);
   }
 };
+
+export const _removeFaseByCultura = async (objID: string) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const cultura = realm.objectForPrimaryKey('Fase', objID);
+      if (cultura) {
+        realm.delete(cultura);
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};

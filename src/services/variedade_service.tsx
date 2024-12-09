@@ -82,3 +82,17 @@ export const _removeAllVariedade = async () => {
     console.error(error);
   }
 };
+
+export const _removeVariedadeByCultura = async (objID: string) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const variedade = realm.objectForPrimaryKey('Variedade', objID);
+      if (variedade) {
+        realm.delete(variedade);
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};

@@ -11,6 +11,7 @@ const Dropdown = ({ data, onChange, ...props }: any) => {
       data={data}
       onChange={onChange}
       maxHeight={dropSize}
+      disabled={true} // Desabilita o campo
       style={[styles.dropdownSelect, props.style]} // Permite a personalização do estilo
     />
   );
@@ -18,11 +19,11 @@ const Dropdown = ({ data, onChange, ...props }: any) => {
 
 const styles = StyleSheet.create({
   dropdownSelect: {
-    height: 40,
+    height: 50,
     width: '97%',
     backgroundColor: 'whitesmoke',
     borderRadius: 5,
-    padding: 15,
+    padding: '1%',
     textAlign: 'center',
     alignItems: 'center',
     elevation: 4,
