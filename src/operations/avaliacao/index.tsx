@@ -327,6 +327,16 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     }, 500);
   };
 
+  const sizeFase = (): any => {
+    if (avaliacao.idCultura && avaliacao.idFase === '') {
+      return '89%';
+    } else if (avaliacao.idCultura && avaliacao.idFase !== '') {
+      return '73%';
+    }
+
+    return '97%';
+  };
+
   const sizeVariedade = (): any => {
     if (avaliacao.idCultura && avaliacao.idVariedade === '') {
       return '89%';
@@ -410,65 +420,92 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           />
         </View>
 
-        <View>
-          <LabelForm>Fase : </LabelForm>
-          <Dropdown
-            search
-            data={fase}
-            labelField="nome"
-            valueField="objID"
-            placeholder="Selecione a fase..."
-            searchPlaceholder="Pesquisar por fase"
-            onChange={(item: any) => {
-              setAvaliacao((prevState) => ({ ...prevState, idFase: item.objID }));
-            }}
-          />
-        </View>
-
-        <View>
-          <LabelForm>Variedade : </LabelForm>
-          <InputGroup>
-            <Dropdown
-              search
-              data={variedade}
-              labelField="nome"
-              valueField="objID"
-              placeholder="Selecione a variedade..."
-              searchPlaceholder="Pesquisar por variedade"
-              style={{ width: sizeVariedade() }}
-              onChange={(item: any) => {
-                setAvaliacao((prevState) => ({ ...prevState, idVariedade: item.objID }));
-              }}
-            />
-            <TouchableOpacity onPress={() => setShowVariedade(true)}>
-              <Image
-                source={require('assets/img/Icons/Add.png')}
-                style={{ width: 40, height: 40, margin: 5, marginLeft: 10 }}
-              />
-            </TouchableOpacity>
-
-            {avaliacao.idVariedade !== '' && (
-              <TouchableOpacity>
-                <Image
-                  source={require('assets/img/Icons/editar.png')}
-                  style={{ width: 40, height: 40, margin: 5 }}
-                />
-              </TouchableOpacity>
-            )}
-
-            {avaliacao.idVariedade !== '' && (
-              <TouchableOpacity>
-                <Image
-                  source={require('assets/img/Icons/remover.png')}
-                  style={{ width: 40, height: 40, margin: 5 }}
-                />
-              </TouchableOpacity>
-            )}
-          </InputGroup>
-        </View>
-
-        {avaliacao.idCultura && (
+        {avaliacao.idCultura !== '' && (
           <>
+            <View>
+              <LabelForm>Fase : </LabelForm>
+              <InputGroup>
+                <Dropdown
+                  search
+                  data={fase}
+                  labelField="nome"
+                  valueField="objID"
+                  placeholder="Selecione a fase..."
+                  searchPlaceholder="Pesquisar por fase"
+                  style={{ width: sizeFase() }}
+                  onChange={(item: any) => {
+                    setAvaliacao((prevState) => ({ ...prevState, idFase: item.objID }));
+                  }}
+                />
+                <TouchableOpacity onPress={() => setShowVariedade(true)}>
+                  <Image
+                    source={require('assets/img/Icons/Add.png')}
+                    style={{ width: 40, height: 40, margin: 5, marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+
+                {avaliacao.idFase !== '' && (
+                  <TouchableOpacity>
+                    <Image
+                      source={require('assets/img/Icons/editar.png')}
+                      style={{ width: 40, height: 40, margin: 5 }}
+                    />
+                  </TouchableOpacity>
+                )}
+
+                {avaliacao.idFase !== '' && (
+                  <TouchableOpacity>
+                    <Image
+                      source={require('assets/img/Icons/remover.png')}
+                      style={{ width: 40, height: 40, margin: 5 }}
+                    />
+                  </TouchableOpacity>
+                )}
+              </InputGroup>
+            </View>
+
+            <View>
+              <LabelForm>Variedade : </LabelForm>
+              <InputGroup>
+                <Dropdown
+                  search
+                  data={variedade}
+                  labelField="nome"
+                  valueField="objID"
+                  placeholder="Selecione a variedade..."
+                  searchPlaceholder="Pesquisar por variedade"
+                  style={{ width: sizeVariedade() }}
+                  onChange={(item: any) => {
+                    setAvaliacao((prevState) => ({ ...prevState, idVariedade: item.objID }));
+                  }}
+                />
+                <TouchableOpacity onPress={() => setShowVariedade(true)}>
+                  <Image
+                    source={require('assets/img/Icons/Add.png')}
+                    style={{ width: 40, height: 40, margin: 5, marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+
+                {avaliacao.idVariedade !== '' && (
+                  <TouchableOpacity>
+                    <Image
+                      source={require('assets/img/Icons/editar.png')}
+                      style={{ width: 40, height: 40, margin: 5 }}
+                    />
+                  </TouchableOpacity>
+                )}
+
+                {avaliacao.idVariedade !== '' && (
+                  <TouchableOpacity>
+                    <Image
+                      source={require('assets/img/Icons/remover.png')}
+                      style={{ width: 40, height: 40, margin: 5 }}
+                    />
+                  </TouchableOpacity>
+                )}
+              </InputGroup>
+            </View>
+
             <Divider style={{ backgroundColor: '#848484', marginTop: 20 }} />
             <View>
               <ButtonConf onPress={() => setShowEspecificos(true)}>
@@ -517,11 +554,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                 </View>
               )}
             </View>
-          </>
-        )}
 
-        {avaliacao.idCultura && (
-          <>
             <Divider style={{ backgroundColor: '#848484', marginTop: 20 }} />
             <View>
               <ButtonConf onPress={() => setShowAdversidades(true)}>

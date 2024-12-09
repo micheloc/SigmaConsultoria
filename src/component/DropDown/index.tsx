@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { Dropdown as Drop } from 'react-native-element-dropdown';
 
 const Dropdown = ({ data, onChange, ...props }: any) => {
