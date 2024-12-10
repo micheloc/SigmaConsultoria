@@ -52,8 +52,6 @@ const CadVariedadeCultura: any = WithModal(({ setFormData, checkRelease, vari }:
    * @returns valor referente a validação dos campos.
    */
   const checkedForm = (): void => {
-    console.log(variedade);
-
     /// Essa condição será utilizada para carregar os dados referente a adversidade, sendo eles os valores que não foram preenchidos.
     /// Como: tipo, descricao e nivel/ quando esses valores estiverem vazio o retorno será true, indicando que um desses campos não foi preenchido.
     if (!variedade.nome) {

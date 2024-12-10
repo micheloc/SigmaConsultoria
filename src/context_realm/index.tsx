@@ -25,7 +25,7 @@ const context_realm = async (): Promise<Realm> => {
       login_schema,
       variedade_schema,
     ],
-    schemaVersion: 1,
+    schemaVersion: 2,
   };
 
   return await Realm.open(config);

@@ -7,6 +7,7 @@ const fase_schema: ObjectSchema = {
     objID: 'string',
     idCultura: 'string',
     nome: 'string',
+    dapMedio: 'double',
   },
 };
 

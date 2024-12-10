@@ -9,10 +9,11 @@ export const _createFase = async (item: iFase) => {
         objID: item.objID,
         idCultura: item.idCultura,
         nome: item.nome,
+        datpMedio: parseFloat(item.dapMedio.toString()),
       });
     });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao registrar o dapMedio: ', error);
   }
 };
 
@@ -34,12 +35,39 @@ export const _createFases = async (items: iFase[]) => {
             objID: item.objID,
             idCultura: item.idCultura,
             nome: item.nome,
+            datpMedio: parseFloat(item.dapMedio.toString()),
           });
         });
       });
     }
   } catch (error) {
     console.error('Erro ao registrar a lista de fases: ', error);
+  }
+};
+
+export const _updateFase = async (item: iFase) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const existingItem = realm.objectForPrimaryKey('Fase', item.objID);
+      console.log(existingItem);
+      if (existingItem) {
+        // Atualizar propriedades
+        existingItem.idCultura = item.idCultura;
+        existingItem.nome = item.nome;
+        existingItem.dapMedio = parseFloat(item.dapMedio.toString());
+      } else {
+        // Criar novo objeto
+        realm.create('Fase', {
+          objID: item.objID,
+          idCultura: item.idCultura,
+          nome: item.nome,
+          dapMedio: parseFloat(item.dapMedio.toString()),
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar/criar fase:', error);
   }
 };
 
@@ -77,6 +105,20 @@ export const _removeAllFase = async () => {
     realm.write(() => {
       const remove = realm.objects('Fase');
       realm.delete(remove);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const _removeFase = async (objID: string) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const variedade = realm.objectForPrimaryKey('Fase', objID);
+      if (variedade) {
+        realm.delete(variedade);
+      }
     });
   } catch (error) {
     console.error(error);

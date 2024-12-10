@@ -63,6 +63,20 @@ export const _findCultura = async (objID: string) => {
   }
 };
 
+export const _removeCultura = async (objID: string) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const cultura = realm.objectForPrimaryKey('Cultura', objID);
+      if (cultura) {
+        realm.delete(cultura);
+      }
+    });
+  } catch (error) {
+    console.log('Não foi possível remover a cultura!', error);
+  }
+};
+
 export const _removeAllCultura = async () => {
   try {
     const realm = await context_realm();

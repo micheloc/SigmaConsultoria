@@ -8,7 +8,7 @@ import { Container } from 'styles/boody.containers';
 import { StyleSheet, FlatList, TouchableOpacity, View, Keyboard, Text } from 'react-native';
 import { useEffect, useState } from 'react';
 
-import { _findCultura } from 'services/cultura_service';
+import { _findCultura, _removeAllCultura, _removeCultura } from 'services/cultura_service';
 import { _removeAllFase, _removeFaseByCultura } from 'services/fase_service';
 import { _removeAllVariedade, _removeVariedadeByCultura } from 'services/variedade_service';
 
@@ -96,9 +96,13 @@ const LstUsingCultura = () => {
             await _removeVariedadeByCultura(cultura.objID);
           }, 650);
 
+          setTimeout(async () => {
+            await _removeCultura(cultura.objID);
+          }, 650);
+
           Toast.show({
             type: 'success',
-            text1: `Os dados da cultura: ${cultura.nome}, foram removidos com sucesso!`,
+            text1: `Cultura: ${cultura.nome}, removida!`,
             text1Style: { fontSize: 12 },
           });
         }}>

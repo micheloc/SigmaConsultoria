@@ -30,14 +30,29 @@ import { DrawerScreenProps } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/routers';
 import { useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { Text, View, Platform, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { Text, View, Platform, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 
-import { _findAllVariedadesByCultura, _getAllVariedades } from 'services/variedade_service';
-import { _findAllFaseByCultura } from 'services/fase_service';
+import {
+  _createVariedade,
+  _findAllVariedadesByCultura,
+  _findVariedades,
+  _getAllVariedades,
+  _removeAllVariedade,
+  _removeVariedade,
+  _updateVariedade,
+} from 'services/variedade_service';
+import {
+  _createFase,
+  _findAllFaseByCultura,
+  _removeFase,
+  _removeFaseByCultura,
+  _updateFase,
+} from 'services/fase_service';
 import { _getAllCultura } from 'services/cultura_service';
 import { InputGroup, ScrollView } from 'native-base';
 import CadVariedadeCultura from './component/variedade_modal';
 import api from 'config/api';
+import CadFase from './component/fase_modal';
 
 type CadAvaliacaoProps = DrawerScreenProps<ParamListBase, 'cadAvaliacao'>;
 
@@ -64,13 +79,17 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
   const [showAdversidades, setShowAdversidades] = useState<boolean>(false);
   const [showEspecificos, setShowEspecificos] = useState<boolean>(false);
   const [showVarieade, setShowVariedade] = useState<boolean>(false);
+  const [showFase, setShowFase] = useState<boolean>(false);
 
   const [isEditedAdversidade, setIsEditedAdversidade] = useState<boolean>(false);
   const [isEditedEspecificacoes, setIsEditedEspecificacoes] = useState<boolean>(false);
   const [isEditedVariedade, setIsEditedVariedade] = useState<boolean>(false);
+  const [isEditedFase, setIsEditedFase] = useState<boolean>(false);
 
-  const [adversidade, setAdversidade] = useState<iAdversidades | null>();
-  const [especificacao, setEspecificacao] = useState<iEspecificacoes | null>();
+  const [rowAdversidade, setRowAdversidade] = useState<iAdversidades | null>();
+  const [rowEspecificacao, setRowEspecificacao] = useState<iEspecificacoes | null>();
+  const [rowVariedade, setRowVariedade] = useState<iVariedade | null>();
+  const [rowFase, setRowFase] = useState<iFase | null>();
 
   const [cultura, setCultura] = useState<iCultura[]>([]);
   const [variedade, setVariedade] = useState<iVariedade[]>([]);
@@ -216,11 +235,13 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         nome: props.nome,
       };
 
+      await _createVariedade(obj);
+
       vre.push(obj);
 
       Toast.show({
         type: 'success',
-        text1: `Variedade de cultura foi salva com sucesso!`,
+        text1: `Variedade salva!`,
         text1Style: { fontSize: 14 },
       });
 
@@ -233,25 +254,313 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         if (resp.data.isValid) {
           Toast.show({
             type: 'success',
-            text1: `Variedade de cultura foi salva com sucesso no banco de dados!`,
+            text1: `Valor salvo no banco!`,
             text1Style: { fontSize: 14 },
           });
         }
       }
     } else {
-      vre = vre.filter((obj: iVariedade) => obj.objID !== props.objID);
-      vre.push(props);
+      setTimeout(async () => {
+        vre = vre.filter((obj: iVariedade) => obj.objID !== props.objID);
+        vre.push(props);
 
-      Toast.show({
-        type: 'success',
-        text1: `Especificação atualizada com sucesso!`,
-        text1Style: { fontSize: 14 },
-      });
+        try {
+          const net = await NetInfo.fetch();
+          if (net.isConnected) {
+            const resp = await api.put(`/Variedade?objID=${props.objID}`, props);
+            if (resp.data.isValid) {
+              Toast.show({
+                type: 'success',
+                text1: `Valor salvo no banco!`,
+                text1Style: { fontSize: 14 },
+              });
+            }
+          }
+        } catch (error: any) {
+          console.log(error);
+        }
+      }, 500);
+
+      setTimeout(async () => {
+        await _updateVariedade(props);
+      }, 500);
+
+      setTimeout(() => {
+        Toast.show({
+          type: 'success',
+          text1: `Variedade atualizada!`,
+          text1Style: { fontSize: 14 },
+        });
+      }, 1200);
     }
 
     setVariedade(vre);
-    setIsEditedVariedade(false);
+    setRowVariedade(null);
     setShowVariedade(false);
+    setIsEditedVariedade(false);
+    setAvaliacao((prev) => ({ ...prev, idVariedade: '' }));
+  };
+
+  /**
+   * Este método será utilizado para capturar os valores informados na modal de cadastro de especificações.
+   * @param props refere-se aos valores informados na modal.
+   */
+  const onSubmitFase = async (props: iFase) => {
+    let fse: iFase[] = [...fase];
+    if (!isEditedFase) {
+      const obj: iFase = {
+        objID: uuid.v4().toString(),
+        idCultura: avaliacao.idCultura,
+        nome: props.nome,
+        dapMedio: props.dapMedio,
+      };
+
+      await _createFase(obj);
+
+      fse.push(obj);
+
+      Toast.show({
+        type: 'success',
+        text1: `Fase salva!`,
+        text1Style: { fontSize: 14 },
+      });
+
+      const net = await NetInfo.fetch();
+      if (net.isConnected) {
+        const resp = await api.post('/Fase ', obj, {
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (resp.data.isValid) {
+          Toast.show({
+            type: 'success',
+            text1: `Valor salvo no banco!`,
+            text1Style: { fontSize: 14 },
+          });
+        }
+      }
+    } else {
+      setTimeout(async () => {
+        fse = fse.filter((obj: iFase) => obj.objID !== props.objID);
+        fse.push(props);
+
+        try {
+          const net = await NetInfo.fetch();
+          if (net.isConnected) {
+            const resp = await api.put(`/Fase?objID=${props.objID}`, props);
+            if (resp.data.isValid) {
+              Toast.show({
+                type: 'success',
+                text1: `Valor salvo no banco!`,
+                text1Style: { fontSize: 14 },
+              });
+            }
+          }
+        } catch (error: any) {
+          console.log(error);
+        }
+      }, 500);
+
+      await _updateFase(props);
+
+      setTimeout(() => {
+        Toast.show({
+          type: 'success',
+          text1: `Fase atualizada!`,
+          text1Style: { fontSize: 14 },
+        });
+      }, 1200);
+    }
+
+    setFase(fse);
+    setRowFase(null);
+    setShowFase(false);
+    setIsEditedFase(false);
+    setAvaliacao((prev) => ({ ...prev, idFase: '' }));
+  };
+
+  const checkedRelease = () => {
+    if (
+      avaliacao.avaliadores === '' ||
+      avaliacao.idCultura === '' ||
+      avaliacao.idFase === '' ||
+      avaliacao.idVariedade === '' ||
+      (avaliacao.adversidades.length === 0 && avaliacao.especificacoes.length === 0)
+    ) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const edited_adversidade = (row: iAdversidades) => {
+    setRowAdversidade(row);
+    setIsEditedAdversidade(true);
+    setTimeout(() => {
+      setShowAdversidades(true);
+    }, 500);
+  };
+
+  const edited_especificacao = (row: iEspecificacoes) => {
+    setRowEspecificacao(row);
+    setIsEditedEspecificacoes(true);
+    setTimeout(() => {
+      setShowEspecificos(true);
+    }, 500);
+  };
+
+  const edited_fase = () => {
+    setIsEditedFase(true);
+    setTimeout(() => {
+      setShowFase(true);
+    }, 500);
+  };
+
+  const edited_variedade = () => {
+    setIsEditedVariedade(true);
+    setTimeout(() => {
+      setShowVariedade(true);
+    }, 500);
+  };
+
+  const sizeFase = (): any => {
+    if (avaliacao.idCultura && avaliacao.idFase === '') {
+      return '89%';
+    } else if (avaliacao.idCultura && avaliacao.idFase !== '') {
+      return '73%';
+    }
+
+    return '97%';
+  };
+
+  const sizeVariedade = (): any => {
+    if (avaliacao.idCultura && avaliacao.idVariedade === '') {
+      return '89%';
+    } else if (avaliacao.idCultura && avaliacao.idVariedade !== '') {
+      return '73%';
+    }
+
+    return '97%';
+  };
+
+  /** * Este método será utilizado para remover a variedade selecionada do banco de dados e do banco interno. */
+  const onRemoveVariedae = async () => {
+    const objID: any = rowVariedade?.objID;
+
+    try {
+      Alert.alert('Alerta!', `Deseja remover a fase : ${rowVariedade?.nome} `, [
+        {
+          text: 'Não',
+          style: 'cancel',
+        },
+        {
+          text: 'Sim',
+          onPress: async () => {
+            try {
+              const net = await NetInfo.fetch();
+              if (net.isConnected) {
+                const resp = await api.delete(`/Variedade?objID=${objID}`);
+
+                if (resp.data.isValid) {
+                  setTimeout(() => {
+                    Toast.show({
+                      type: 'success',
+                      text1: `Variedade removida do banco!`,
+                      text1Style: { fontSize: 14 },
+                    });
+                  }, 2000);
+                }
+              }
+            } catch (error) {
+              console.log('Não foi possivel remover a fase: ', error);
+            }
+
+            try {
+              await _removeFase(objID);
+              setTimeout(() => {
+                Toast.show({
+                  type: 'success',
+                  text1: `Variedade removida!`,
+                  text1Style: { fontSize: 14 },
+                });
+              }, 600);
+            } catch (error) {
+              console.log('Não foi possivel remover: ', error);
+            }
+
+            setTimeout(() => {
+              const vre: iVariedade[] = [...variedade];
+              const vari: iVariedade[] = vre.filter((obj: iVariedade) => obj.objID !== objID);
+              setVariedade(vari);
+              // setRowVariedade(null);
+              setAvaliacao((prev) => ({ ...prev, idVariedade: '' }));
+            }, 500);
+          },
+        },
+      ]);
+    } catch (error) {
+      console.log('erro ao apresenta mensagem de alerta, ao excluir a fase : ', error);
+    }
+  };
+
+  /** * Este método será utilizado para remover a variedade selecionada do banco de dados e do banco interno. */
+  const onRemoveFase = async () => {
+    const objID: any = rowFase?.objID;
+
+    try {
+      Alert.alert('Alerta!', `Deseja remover a fase : ${rowFase?.nome} `, [
+        {
+          text: 'Não',
+          style: 'cancel',
+        },
+        {
+          text: 'Sim',
+          onPress: async () => {
+            try {
+              const net = await NetInfo.fetch();
+              if (net.isConnected) {
+                const resp = await api.delete(`/Fase?objID=${objID}`);
+
+                if (resp.data.isValid) {
+                  setTimeout(() => {
+                    Toast.show({
+                      type: 'success',
+                      text1: `Fase removida do banco!`,
+                      text1Style: { fontSize: 14 },
+                    });
+                  }, 2000);
+                }
+              }
+            } catch (error) {
+              console.log('Não foi possivel remover a fase: ', error);
+            }
+
+            try {
+              await _removeFase(objID);
+              setTimeout(() => {
+                Toast.show({
+                  type: 'success',
+                  text1: `Fase removida!`,
+                  text1Style: { fontSize: 14 },
+                });
+              }, 600);
+            } catch (error) {
+              console.log('Não foi possivel remover: ', error);
+            }
+
+            setTimeout(() => {
+              const fse: iFase[] = [...fase];
+              const vr: iFase[] = fse.filter((obj: iFase) => obj.objID !== objID);
+              setFase(vr);
+              setRowFase(null);
+              setAvaliacao((prev) => ({ ...prev, idFase: '' }));
+            }, 500);
+          },
+        },
+      ]);
+    } catch (error) {
+      console.log('erro ao apresenta mensagem de alerta, ao excluir a fase : ', error);
+    }
   };
 
   const styles = StyleSheet.create({
@@ -288,64 +597,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
       fontFamily: 'roboto',
     },
   });
-
-  const checkedRelease = () => {
-    if (
-      avaliacao.avaliadores === '' ||
-      avaliacao.idCultura === '' ||
-      avaliacao.idFase === '' ||
-      avaliacao.idVariedade === '' ||
-      (avaliacao.adversidades.length === 0 && avaliacao.especificacoes.length === 0)
-    ) {
-      return false;
-    }
-
-    return true;
-  };
-
-  const edited_adversidade = (row: iAdversidades) => {
-    setAdversidade(row);
-    setIsEditedAdversidade(true);
-    setTimeout(() => {
-      setShowAdversidades(true);
-    }, 500);
-  };
-
-  const edited_especificacao = (row: iEspecificacoes) => {
-    setEspecificacao(row);
-    setIsEditedEspecificacoes(true);
-    setTimeout(() => {
-      setShowEspecificos(true);
-    }, 500);
-  };
-
-  const edited_variedade = (row: iVariedade) => {
-    // setVariedade(row);
-    setIsEditedVariedade(true);
-    setTimeout(() => {
-      setShowAdversidades(true);
-    }, 500);
-  };
-
-  const sizeFase = (): any => {
-    if (avaliacao.idCultura && avaliacao.idFase === '') {
-      return '89%';
-    } else if (avaliacao.idCultura && avaliacao.idFase !== '') {
-      return '73%';
-    }
-
-    return '97%';
-  };
-
-  const sizeVariedade = (): any => {
-    if (avaliacao.idCultura && avaliacao.idVariedade === '') {
-      return '89%';
-    } else if (avaliacao.idCultura && avaliacao.idVariedade !== '') {
-      return '73%';
-    }
-
-    return '97%';
-  };
 
   return (
     <Container style={{ backgroundColor: '#ccc' }}>
@@ -435,9 +686,10 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                   style={{ width: sizeFase() }}
                   onChange={(item: any) => {
                     setAvaliacao((prevState) => ({ ...prevState, idFase: item.objID }));
+                    setRowFase(item);
                   }}
                 />
-                <TouchableOpacity onPress={() => setShowVariedade(true)}>
+                <TouchableOpacity onPress={() => setShowFase(true)}>
                   <Image
                     source={require('assets/img/Icons/Add.png')}
                     style={{ width: 40, height: 40, margin: 5, marginLeft: 10 }}
@@ -445,7 +697,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                 </TouchableOpacity>
 
                 {avaliacao.idFase !== '' && (
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => edited_fase()}>
                     <Image
                       source={require('assets/img/Icons/editar.png')}
                       style={{ width: 40, height: 40, margin: 5 }}
@@ -454,7 +706,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                 )}
 
                 {avaliacao.idFase !== '' && (
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => onRemoveFase()}>
                     <Image
                       source={require('assets/img/Icons/remover.png')}
                       style={{ width: 40, height: 40, margin: 5 }}
@@ -472,11 +724,13 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                   data={variedade}
                   labelField="nome"
                   valueField="objID"
+                  value={rowVariedade?.objID}
                   placeholder="Selecione a variedade..."
                   searchPlaceholder="Pesquisar por variedade"
                   style={{ width: sizeVariedade() }}
                   onChange={(item: any) => {
                     setAvaliacao((prevState) => ({ ...prevState, idVariedade: item.objID }));
+                    setRowVariedade(item);
                   }}
                 />
                 <TouchableOpacity onPress={() => setShowVariedade(true)}>
@@ -487,7 +741,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                 </TouchableOpacity>
 
                 {avaliacao.idVariedade !== '' && (
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => edited_variedade()}>
                     <Image
                       source={require('assets/img/Icons/editar.png')}
                       style={{ width: 40, height: 40, margin: 5 }}
@@ -496,7 +750,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                 )}
 
                 {avaliacao.idVariedade !== '' && (
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => onRemoveVariedae()}>
                     <Image
                       source={require('assets/img/Icons/remover.png')}
                       style={{ width: 40, height: 40, margin: 5 }}
@@ -613,9 +867,9 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
       <CadAdversidades
         visible={showAdversidades}
-        adv={adversidade}
+        adv={rowAdversidade}
         onClose={() => {
-          setAdversidade(null);
+          setRowAdversidade(null);
           setIsEditedAdversidade(false);
           setShowAdversidades(false);
         }}
@@ -624,20 +878,31 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
       <CadEspecificos
         visible={showEspecificos}
-        esp={especificacao}
+        esp={rowEspecificacao}
         onClose={() => {
-          setEspecificacao(null);
+          setRowEspecificacao(null);
           setShowEspecificos(false);
           setIsEditedEspecificacoes(false);
         }}
         onSubmitForm={onSubmitEspecificacoes}
       />
 
+      <CadFase
+        visible={showFase}
+        fs={rowFase}
+        onClose={() => {
+          setRowFase(null);
+          setShowFase(false);
+          setIsEditedFase(false);
+        }}
+        onSubmitForm={onSubmitFase}
+      />
+
       <CadVariedadeCultura
         visible={showVarieade}
-        vari={variedade}
+        vari={rowVariedade}
         onClose={() => {
-          setEspecificacao(null);
+          setRowVariedade(null);
           setShowVariedade(false);
           setIsEditedVariedade(false);
         }}
