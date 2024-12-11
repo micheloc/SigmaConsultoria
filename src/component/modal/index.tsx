@@ -14,9 +14,18 @@ interface ModalProps {
 const WithModal = (WrappedComponent: React.ComponentType<any>) => {
   const ModalHOC = ({ visible, onClose, height, ...props }: ModalProps) => {
     const [formData, setFormData] = useState<any>({});
+    const [isValid, setIsValid] = useState<boolean>(false);
 
     const handleSubmit = () => {
       props.onSubmitForm(formData);
+    };
+
+    /**
+     * Este método tem como objetivo validar o formulário, sé todos os campos foram preenchidos corretamente.
+     * @param isValid refere-se ao valor de validação do formulário.
+     */
+    const validate = (isValid: boolean): void => {
+      setIsValid(isValid);
     };
 
     return (
@@ -29,10 +38,17 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
               borderRadius: 5, // (Opcional) Torna os cantos arredondados
             }}>
             <View>
-              <WrappedComponent {...props} setFormData={setFormData} />
+              <WrappedComponent {...props} setFormData={setFormData} checkRelease={validate} />
             </View>
             <ContainerFooter>
-              <ButtonConfirm onPress={handleSubmit}>
+              <ButtonConfirm
+                disabled={!isValid}
+                style={{
+                  backgroundColor: isValid ? '#1b437e' : '#ccc',
+                  borderColor: isValid ? '#1b437e' : 'whitesmoke',
+                  borderWidth: 1,
+                }}
+                onPress={handleSubmit}>
                 <Text style={{ color: 'white', fontWeight: 'bold' }}>Adicionar</Text>
               </ButtonConfirm>
 

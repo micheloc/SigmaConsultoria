@@ -8,7 +8,6 @@ import { useNavigation } from '@react-navigation/native';
 import {
   Image,
   StyleSheet,
-  ScrollView,
   TouchableOpacity,
   View,
   Keyboard,
@@ -238,17 +237,15 @@ const LstDownloadClientes = () => {
           )}
         </View>
       </View>
-      <ScrollView>
-        <FlatList
-          data={filteredData}
-          renderItem={({ item }: any) => (
-            <View style={{ marginBottom: '2%' }}>
-              <Item objID={item.objID} idUser={item.idUser} nome={item.nome} />
-            </View>
-          )}
-          keyExtractor={(item: any, index: number) => item.id || index.toString()}
-        />
-      </ScrollView>
+      <FlatList
+        data={filteredData}
+        renderItem={({ item }: any) => (
+          <View style={{ marginBottom: '2%' }}>
+            <Item objID={item.objID} idUser={item.idUser} nome={item.nome} />
+          </View>
+        )}
+        keyExtractor={(item: any, index: number) => item.id || index.toString()}
+      />
       <Toast />
     </Container>
   );

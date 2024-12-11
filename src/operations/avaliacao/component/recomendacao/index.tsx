@@ -22,6 +22,7 @@ import {
 } from 'services/especificacoes_service';
 import Input from 'component/Input';
 import api from 'config/api';
+import base64ToBytes from 'util/base64ToBytes';
 
 interface iProps {
   objID: string;
@@ -54,7 +55,6 @@ const CadRecomendacao = ({ route }: any) => {
     data: avaliacao.data,
     especificacoes: [...avaliacao.especificacoes],
     adversidades: [...avaliacao.adversidades],
-    image: [],
     recomendacao: '',
     pdf: [],
   });
@@ -72,7 +72,6 @@ const CadRecomendacao = ({ route }: any) => {
       idVariedade: registro.idVariedade,
       avaliadores: registro.avaliadores,
       data: registro.data,
-      image: registro.image,
       pdf: registro.pdf,
       recomendacao: registro.recomendacao,
     };
@@ -106,12 +105,28 @@ const CadRecomendacao = ({ route }: any) => {
               data: registro.data,
               recomendacao: registro.recomendacao,
               Especificacoes: registro.especificacoes,
-              Adversidades: registro.adversidades,
+              Adversidades: registro.adversidades.map((item) => ({
+                ...item,
+                image: null,
+              })),
             };
 
             await api.post('/Avaliacao/AddAvaliacaoRealmDb', sanitizedRegistro, {
               headers: { 'Content-Type': 'application/json' },
             });
+
+            const adv = registro.adversidades.map((item: iAdversidades) => {
+              return { objID: item.objID, img: item.image };
+            });
+            setTimeout(async () => {
+              try {
+                const x = await api.put('/Adversidade/UpdateImgAdv', adv, {
+                  headers: { 'Content-Type': 'application/json' },
+                });
+              } catch (error) {
+                console.log('olá', error);
+              }
+            }, 1000);
           } catch (error) {
             console.log(error);
             return;

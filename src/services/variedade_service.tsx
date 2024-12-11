@@ -43,6 +43,29 @@ export const _createVariedades = async (items: iVariedade[]) => {
   }
 };
 
+export const _updateVariedade = async (item: iVariedade) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const existingItem = realm.objectForPrimaryKey('Variedade', item.objID);
+      if (existingItem) {
+        // Atualizar propriedades
+        existingItem.idCultura = item.idCultura;
+        existingItem.nome = item.nome;
+      } else {
+        // Criar novo objeto
+        realm.create('Variedade', {
+          objID: item.objID,
+          idCultura: item.idCultura,
+          nome: item.nome,
+        });
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao atualizar/criar Variedade:', error);
+  }
+};
+
 export const _getAllVariedades = async () => {
   try {
     const realm = await context_realm();
@@ -71,12 +94,40 @@ export const _findAllVariedadesByCultura = async (id: string) => {
   }
 };
 
+export const _removeVariedade = async (objID: string) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const variedade = realm.objectForPrimaryKey('Variedade', objID);
+      if (variedade) {
+        realm.delete(variedade);
+      }
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const _removeAllVariedade = async () => {
   try {
     const realm = await context_realm();
     realm.write(() => {
       const remove = realm.objects('Variedade');
       realm.delete(remove);
+    });
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const _removeVariedadeByCultura = async (objID: string) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const variedade = realm.objectForPrimaryKey('Variedade', objID);
+      if (variedade) {
+        realm.delete(variedade);
+      }
     });
   } catch (error) {
     console.error(error);

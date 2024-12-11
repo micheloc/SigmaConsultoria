@@ -1,4 +1,3 @@
-import React from 'react';
 import { Input as TextInput } from 'styles/boody.containers';
 
 const Input = ({ ...props }) => {

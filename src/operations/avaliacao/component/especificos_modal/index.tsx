@@ -10,10 +10,11 @@ import { useEffect, useState } from 'react';
 
 interface iProps {
   esp: iEspecificacoes;
+  checkRelease: (isValid: boolean) => void;
   setFormData: (state: any) => void;
 }
 
-const CadEspecificos: any = WithModal(({ setFormData, esp }: iProps) => {
+const CadEspecificos: any = WithModal(({ setFormData, checkRelease, esp }: iProps) => {
   const [especificacao, setEspecificacao] = useState<iEspecificacoes>({
     objID: uuid.v4().toString(),
     idAvaliacao: '',
@@ -22,6 +23,7 @@ const CadEspecificos: any = WithModal(({ setFormData, esp }: iProps) => {
   });
 
   useEffect(() => {
+    checkedForm();
     setFormData(especificacao);
   }, [especificacao]);
 
@@ -46,6 +48,20 @@ const CadEspecificos: any = WithModal(({ setFormData, esp }: iProps) => {
       }));
     };
   }, []);
+
+  /**
+   * Este método vai verificar sé todos os campos foram preenchidos.
+   * @returns valor referente a validação dos campos.
+   */
+  const checkedForm = (): void => {
+    /// Essa condição será utilizada para carregar os dados referente a adversidade, sendo eles os valores que não foram preenchidos.
+    /// Como: tipo, descricao e nivel/ quando esses valores estiverem vazio o retorno será true, indicando que um desses campos não foi preenchido.
+    if (especificacao.especificacao === '' || especificacao.descricao === '') {
+      checkRelease(false);
+    } else {
+      checkRelease(true);
+    }
+  };
 
   return (
     <View>

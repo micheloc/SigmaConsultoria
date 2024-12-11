@@ -35,7 +35,7 @@ export const _createAreas = async (items: iArea[]) => {
       });
     });
   } catch (error) {
-    console.error('lst area cadastro : ', error);
+    console.error('Não foi possivel salvar as áreas : ', error);
   }
 };
 

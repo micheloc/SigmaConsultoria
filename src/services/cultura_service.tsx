@@ -1,6 +1,10 @@
 import context_realm from 'context_realm/index';
 import iCultura from 'types/interfaces/iCultura';
 
+/**
+ * Este método, tem como objetivo adicionar a cultura informada ao banco realm.db
+ * @param item refere-se ao objeto de cultura.
+ */
 export const _createCultura = async (item: iCultura) => {
   try {
     const realm = await context_realm();
@@ -56,6 +60,20 @@ export const _findCultura = async (objID: string) => {
     return await realm.objectForPrimaryKey('Cultura', objID);
   } catch (error: any) {
     console.error(error);
+  }
+};
+
+export const _removeCultura = async (objID: string) => {
+  try {
+    const realm = await context_realm();
+    realm.write(() => {
+      const cultura = realm.objectForPrimaryKey('Cultura', objID);
+      if (cultura) {
+        realm.delete(cultura);
+      }
+    });
+  } catch (error) {
+    console.log('Não foi possível remover a cultura!', error);
   }
 };
 

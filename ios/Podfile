@@ -23,6 +23,10 @@ target 'SigmaConsultoria' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  # Adicione aqui o VisionCamera
+  pod 'VisionCamera', :path => '../node_modules/react-native-vision-camera'
+
+
   target 'SigmaConsultoriaTests' do
     inherit! :complete
     # Pods for testing

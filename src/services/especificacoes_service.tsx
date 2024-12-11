@@ -33,7 +33,7 @@ export const _createEspecificacoes = async (items: iEspecificacoes[]): Promise<b
 
     return true;
   } catch (error) {
-    console.error('lst area cadastro : ', error);
+    console.error('Não foi possivel salvar os dados de especificações : ', error);
 
     return false;
   }
@@ -62,7 +62,7 @@ export const _findEspecificacoesByFazenda = async (id: string) => {
     const realm = await context_realm();
     return realm.objects('Especificacao').filtered(`idFazenda == '${id}'`);
   } catch (error) {
-    console.debug('Não foi possivel carregar a lista de área:', error);
+    console.debug('Não foi possivel carregar os dados especificos relacionado à fazenda:', error);
     return [];
   }
 };

@@ -7,7 +7,7 @@ export const Container = styled.View`
   flex: 1;
   width: 100%;
   height: 100%;
-  position: relative; /* Isso garante que o ViewFormLogin será posicionado em relação ao Container */
+  position: relative;
 `;
 
 /**

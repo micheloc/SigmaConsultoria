@@ -1,9 +1,11 @@
 import AuthContext from 'context_provider/index';
 import StackLogin from './components/stack.login';
 
-import { ActivityIndicator, KeyboardAvoidingView, View, Platform, StatusBar } from 'react-native';
+import { ActivityIndicator, View, Platform, StatusBar, StyleSheet } from 'react-native';
 import { useState, useEffect, useContext } from 'react';
 import StackNavigation from './components/stack.navigation';
+
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const Routes = () => {
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const Routes = () => {
       setLoading(true); // Atualiza o estado de carregamento após o check
 
       await check();
-      await lAllCultura();
+      // await lAllCultura();
 
       setLoading(false); // Atualiza o estado de carregamento após o check
     };
@@ -52,5 +54,11 @@ const Routes = () => {
     </>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export default Routes;
