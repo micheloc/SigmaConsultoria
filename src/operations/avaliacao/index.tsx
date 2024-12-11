@@ -347,7 +347,35 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         try {
           const net = await NetInfo.fetch();
           if (net.isConnected) {
-            const resp = await api.put(`/Fase?objID=${props.objID}`, props);
+            // Tratamento de parseFloat com validação
+            let dapMedio: number;
+            try {
+              dapMedio = parseFloat(props.dapMedio.toString());
+              if (isNaN(dapMedio)) {
+                throw new Error('Valor inválido para dapMedio');
+              }
+            } catch (error) {
+              console.error('Erro ao converter dapMedio para float:', error);
+              dapMedio = 0; // Valor padrão caso a conversão falhe
+            }
+
+            const fa: iFase = {
+              objID: props.objID,
+              idCultura: props.idCultura,
+              nome: props.nome,
+              dapMedio: dapMedio,
+            };
+
+            const resp = await api.put(
+              `/Fase?objID=${props.objID}`, // objID como parâmetro na URL
+              fa, // Corpo da requisição com os dados a serem atualizados
+              {
+                headers: {
+                  accept: 'text/plain',
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
             if (resp.data.isValid) {
               Toast.show({
                 type: 'success',

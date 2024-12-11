@@ -4,12 +4,25 @@ import iFase from 'types/interfaces/iFase';
 export const _createFase = async (item: iFase) => {
   try {
     const realm = await context_realm();
+
+    // Tratamento de parseFloat com validação
+    let dapMedio: number;
+    try {
+      dapMedio = parseFloat(item.dapMedio.toString());
+      if (isNaN(dapMedio)) {
+        throw new Error('Valor inválido para dapMedio');
+      }
+    } catch (error) {
+      console.error('Erro ao converter dapMedio para float:', error);
+      dapMedio = 0; // Valor padrão caso a conversão falhe
+    }
+
     realm.write(() => {
       realm.create('Fase', {
         objID: item.objID,
         idCultura: item.idCultura,
         nome: item.nome,
-        datpMedio: parseFloat(item.dapMedio.toString()),
+        dapMedio: dapMedio,
       });
     });
   } catch (error) {
@@ -31,11 +44,23 @@ export const _createFases = async (items: iFase[]) => {
     if (newItems.length > 0) {
       realm.write(() => {
         newItems.forEach((item) => {
+          // Tratamento de parseFloat com validação
+          let dapMedio: number;
+          try {
+            dapMedio = parseFloat(item.dapMedio.toString());
+            if (isNaN(dapMedio)) {
+              throw new Error('Valor inválido para dapMedio');
+            }
+          } catch (error) {
+            console.error('Erro ao converter dapMedio para float:', error);
+            dapMedio = 0; // Valor padrão caso a conversão falhe
+          }
+
           realm.create('Fase', {
             objID: item.objID,
             idCultura: item.idCultura,
             nome: item.nome,
-            datpMedio: parseFloat(item.dapMedio.toString()),
+            dapMedio: dapMedio,
           });
         });
       });
@@ -50,19 +75,31 @@ export const _updateFase = async (item: iFase) => {
     const realm = await context_realm();
     realm.write(() => {
       const existingItem = realm.objectForPrimaryKey('Fase', item.objID);
-      console.log(existingItem);
+      let dapMedio: number;
+
+      // Tenta realizar a conversão de dapMedio
+      try {
+        dapMedio = parseFloat(item.dapMedio.toString());
+        if (isNaN(dapMedio)) {
+          throw new Error('Valor inválido para dapMedio');
+        }
+      } catch (error) {
+        console.error('Erro ao converter dapMedio para float:', error);
+        dapMedio = 0; // Valor padrão caso a conversão falhe
+      }
+
       if (existingItem) {
         // Atualizar propriedades
         existingItem.idCultura = item.idCultura;
         existingItem.nome = item.nome;
-        existingItem.dapMedio = parseFloat(item.dapMedio.toString());
+        existingItem.dapMedio = dapMedio;
       } else {
         // Criar novo objeto
         realm.create('Fase', {
           objID: item.objID,
           idCultura: item.idCultura,
           nome: item.nome,
-          dapMedio: parseFloat(item.dapMedio.toString()),
+          dapMedio: dapMedio,
         });
       }
     });
