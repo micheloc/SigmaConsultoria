@@ -127,8 +127,6 @@ const Avaliacao = () => {
   useEffect(() => {
     const loading = async () => {
       if (oCliente.objID) {
-        console.log('olá');
-
         setIsLoading(true);
         try {
           const resp: any = await _findFazendaByCliente(oCliente.objID);

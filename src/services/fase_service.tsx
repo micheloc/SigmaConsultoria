@@ -158,8 +158,6 @@ export const _removeFase = async (objID: string) => {
     realm.write(() => {
       const variedade = realm.objectForPrimaryKey('Fase', objID);
 
-      console.log(variedade);
-
       if (variedade) {
         realm.delete(variedade);
       }
@@ -182,7 +180,10 @@ export const _removeFase = async (objID: string) => {
           });
         }, 2000);
       } else {
-        Alert.alert('Alerta', 'Não foi possível remover a fase informada do banco de dados!');
+        Alert.alert(
+          'Alerta',
+          'Não foi possivel remover a fase do banco, pois ela contém vinculo com alguma avaliação!'
+        );
       }
     }
   }, 2500);

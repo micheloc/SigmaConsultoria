@@ -90,7 +90,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   const [rowAdversidade, setRowAdversidade] = useState<iAdversidades | null>();
   const [rowEspecificacao, setRowEspecificacao] = useState<iEspecificacoes | null>();
-  const [rowVariedade, setRowVariedade] = useState<iVariedade | null>();
 
   const [cultura, setCultura] = useState<iCultura[]>([]);
   const [variedade, setVariedade] = useState<iVariedade[]>([]);
@@ -155,7 +154,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   useEffect(() => {
     loading_fase();
-    loading_avaliacao();
+    loading_variedade();
   }, [avaliacao.idCultura]);
 
   /**
@@ -170,7 +169,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         for (const item of result) {
           dt.push(item);
         }
-
         setFase(dt);
       }
     } catch (error) {
@@ -178,12 +176,20 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     }
   };
 
-  const loading_avaliacao = async () => {
-    const response: any = await _findAllVariedadesByCultura(avaliacao.idCultura);
-    // const dt = _.cloneDeep(response);
-    // if (dt) {
-    //   setVariedade(dt);
-    // }
+  const loading_variedade = async () => {
+    try {
+      const response: any = await _findAllVariedadesByCultura(avaliacao.idCultura);
+      if (response) {
+        const dt: iVariedade[] = [];
+
+        for (const item of response) {
+          dt.push(item);
+        }
+        setVariedade(dt);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
   /**
@@ -276,12 +282,11 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
       };
 
       await _createVariedade(obj);
-
       vre.push(obj);
 
       Toast.show({
         type: 'success',
-        text1: `Variedade salva!`,
+        text1: `Fase salva!`,
         text1Style: { fontSize: 14 },
       });
 
@@ -300,26 +305,25 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         }
       }
     } else {
-      setTimeout(async () => {
-        vre = vre.filter((obj: iVariedade) => obj.objID !== props.objID);
-        vre.push(props);
+      vre = vre.filter((obj: iVariedade) => obj.objID !== avaliacao.idVariedade);
+      props.objID = avaliacao.idVariedade;
 
-        try {
-          const net = await NetInfo.fetch();
-          if (net.isConnected) {
-            const resp = await api.put(`/Variedade?objID=${props.objID}`, props);
-            if (resp.data.isValid) {
-              Toast.show({
-                type: 'success',
-                text1: `Valor salvo no banco!`,
-                text1Style: { fontSize: 14 },
-              });
-            }
+      vre.push(props);
+      try {
+        const net = await NetInfo.fetch();
+        if (net.isConnected) {
+          const resp = await api.put(`/Variedade?objID=${props.objID}`, props);
+          if (resp.data.isValid) {
+            Toast.show({
+              type: 'success',
+              text1: `Valor salvo no banco!`,
+              text1Style: { fontSize: 14 },
+            });
           }
-        } catch (error: any) {
-          console.log(error);
         }
-      }, 500);
+      } catch (error: any) {
+        console.log(error);
+      }
 
       setTimeout(async () => {
         await _updateVariedade(props);
@@ -335,7 +339,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     }
 
     setVariedade(vre);
-    setRowVariedade(null);
     setShowVariedade(false);
     setIsEditedVariedade(false);
     setAvaliacao((prev) => ({ ...prev, idVariedade: '' }));
@@ -356,7 +359,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
       };
 
       await _createFase(obj);
-
       fse.push(obj);
 
       Toast.show({
@@ -380,54 +382,54 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         }
       }
     } else {
-      setTimeout(async () => {
-        fse = fse.filter((obj: iFase) => obj.objID !== props.objID);
-        fse.push(props);
+      fse = fse.filter((obj: iFase) => obj.objID !== avaliacao.idFase);
+      props.objID = avaliacao.idFase;
 
-        try {
-          const net = await NetInfo.fetch();
-          if (net.isConnected) {
-            // Tratamento de parseFloat com validação
-            let dapMedio: number;
-            try {
-              dapMedio = parseFloat(props.dapMedio.toString());
-              if (isNaN(dapMedio)) {
-                throw new Error('Valor inválido para dapMedio');
-              }
-            } catch (error) {
-              console.error('Erro ao converter dapMedio para float:', error);
-              dapMedio = 0; // Valor padrão caso a conversão falhe
+      fse.push(props);
+
+      try {
+        const net = await NetInfo.fetch();
+        if (net.isConnected) {
+          // Tratamento de parseFloat com validação
+          let dapMedio: number;
+          try {
+            dapMedio = parseFloat(props.dapMedio.toString());
+            if (isNaN(dapMedio)) {
+              throw new Error('Valor inválido para dapMedio');
             }
-
-            const fa: iFase = {
-              objID: props.objID,
-              idCultura: props.idCultura,
-              nome: props.nome,
-              dapMedio: dapMedio,
-            };
-
-            const resp = await api.put(
-              `/Fase?objID=${props.objID}`, // objID como parâmetro na URL
-              fa, // Corpo da requisição com os dados a serem atualizados
-              {
-                headers: {
-                  accept: 'text/plain',
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
-            if (resp.data.isValid) {
-              Toast.show({
-                type: 'success',
-                text1: `Valor salvo no banco!`,
-                text1Style: { fontSize: 14 },
-              });
-            }
+          } catch (error) {
+            console.error('Erro ao converter dapMedio para float:', error);
+            dapMedio = 0; // Valor padrão caso a conversão falhe
           }
-        } catch (error: any) {
-          console.log(error);
+
+          const fa: iFase = {
+            objID: props.objID,
+            idCultura: props.idCultura,
+            nome: props.nome,
+            dapMedio: dapMedio,
+          };
+
+          const resp = await api.put(
+            `/Fase?objID=${props.objID}`, // objID como parâmetro na URL
+            fa, // Corpo da requisição com os dados a serem atualizados
+            {
+              headers: {
+                accept: 'text/plain',
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          if (resp.data.isValid) {
+            Toast.show({
+              type: 'success',
+              text1: `Valor salvo no banco!`,
+              text1Style: { fontSize: 14 },
+            });
+          }
         }
-      }, 500);
+      } catch (error: any) {
+        console.log(error);
+      }
 
       await _updateFase(props);
 
@@ -512,8 +514,8 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   /** * Este método será utilizado para remover a variedade selecionada do banco de dados e do banco interno. */
   const onRemoveVariedae = async () => {
-    const item: any = { ...rowVariedade };
     let vre: iVariedade[] = [...variedade];
+    const item: iVariedade = variedade.filter((obj: iVariedade) => obj.objID === avaliacao.idVariedade)[0];
 
     try {
       Alert.alert('Alerta!', `Deseja remover a fase: ${item.nome} `, [
@@ -525,10 +527,9 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           text: 'Sim',
           onPress: async () => {
             try {
-              const up_vre: iVariedade[] = vre.filter((obj: iVariedade) => obj.objID !== item.objID);
-              setVariedade(up_vre);
-              setRowVariedade(null);
-              setVariedade((prev) => ({ ...prev, idFase: '' }));
+              const up_variedade: iVariedade[] = vre.filter((obj: iVariedade) => obj.objID !== item.objID);
+              setVariedade(up_variedade);
+              setAvaliacao((prev) => ({ ...prev, idVariedade: '' }));
 
               setTimeout(async () => {
                 await _removeVariedade(item.objID); // Remove do banco interno
@@ -707,7 +708,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
               <LabelForm>Fase : </LabelForm>
               <InputGroup>
                 <Dropdown
-                  search
+                  search={fase.length > 0}
                   data={fase}
                   labelField="nome"
                   valueField="objID"
@@ -751,11 +752,10 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
               <LabelForm>Variedade : </LabelForm>
               <InputGroup>
                 <Dropdown
-                  search
+                  search={variedade.length > 0}
                   data={variedade}
                   labelField="nome"
                   valueField="objID"
-                  value={rowVariedade?.objID}
                   placeholder={
                     variedade.length > 0 ? 'Selecione a variedade...' : 'Registre uma variedade...'
                   }
@@ -925,6 +925,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
       <CadFase
         visible={showFase}
+        isEdited={isEditedFase}
         fs={fase.filter((item: iFase) => item.objID === avaliacao.idFase)[0]}
         onClose={() => {
           setShowFase(false);
@@ -935,9 +936,9 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
       <CadVariedadeCultura
         visible={showVarieade}
-        vari={rowVariedade}
+        isEdited={isEditedVariedade}
+        vari={variedade.filter((item: iVariedade) => item.objID === avaliacao.idVariedade)[0]}
         onClose={() => {
-          setRowVariedade(null);
           setShowVariedade(false);
           setIsEditedVariedade(false);
         }}

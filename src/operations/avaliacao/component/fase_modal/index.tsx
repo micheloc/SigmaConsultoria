@@ -9,11 +9,12 @@ import { useEffect, useState } from 'react';
 
 interface iProps {
   fs: iFase;
+  isEdited: boolean;
   checkRelease: (isValid: boolean) => void;
   setFormData: (state: any) => void;
 }
 
-const CadFase: any = WithModal(({ setFormData, checkRelease, fs }: iProps) => {
+const CadFase: any = WithModal(({ setFormData, checkRelease, fs, isEdited }: iProps) => {
   const [fase, setFase] = useState<iFase>({
     objID: uuid.v4().toString(),
     idCultura: '',
@@ -27,9 +28,7 @@ const CadFase: any = WithModal(({ setFormData, checkRelease, fs }: iProps) => {
   }, [fase]);
 
   useEffect(() => {
-    console.log(fs);
-
-    if (fs) {
+    if (fs && isEdited) {
       setFase((prev) => ({
         ...prev,
         objID: fs.objID,
@@ -70,8 +69,6 @@ const CadFase: any = WithModal(({ setFormData, checkRelease, fs }: iProps) => {
    * @param text refere-se ao campo digitado.
    */
   const handleNumberChange = (text: string): void => {
-    console.log(text);
-
     // Permite apenas números, pontos e o sinal de menos (-) no início.
     let value = text.replace(/[^0-9.-]/g, '');
 
