@@ -1,5 +1,9 @@
+import api from 'config/api';
 import context_realm from 'context_realm/index';
 import iFase from 'types/interfaces/iFase';
+import NetInfo from '@react-native-community/netinfo';
+import Toast from 'react-native-toast-message';
+import { Alert } from 'react-native';
 
 export const _createFase = async (item: iFase) => {
   try {
@@ -153,6 +157,9 @@ export const _removeFase = async (objID: string) => {
     const realm = await context_realm();
     realm.write(() => {
       const variedade = realm.objectForPrimaryKey('Fase', objID);
+
+      console.log(variedade);
+
       if (variedade) {
         realm.delete(variedade);
       }
@@ -160,6 +167,25 @@ export const _removeFase = async (objID: string) => {
   } catch (error) {
     console.error(error);
   }
+
+  setTimeout(async () => {
+    const net = await NetInfo.fetch();
+    if (net.isConnected) {
+      const resp = await api.delete(`/Fase?objID=${objID}`);
+
+      if (resp.data.isValid) {
+        setTimeout(() => {
+          Toast.show({
+            type: 'success',
+            text1: `Fase removida do banco!`,
+            text1Style: { fontSize: 14 },
+          });
+        }, 2000);
+      } else {
+        Alert.alert('Alerta', 'Não foi possível remover a fase informada do banco de dados!');
+      }
+    }
+  }, 2500);
 };
 
 export const _removeFaseByCultura = async (objID: string) => {

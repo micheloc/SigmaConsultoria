@@ -6,7 +6,6 @@ import WithModal from 'component/modal';
 import { LabelForm } from 'styles/boody.containers';
 import { View } from 'react-native';
 import { useEffect, useState } from 'react';
-import { InputGroup } from 'native-base';
 
 interface iProps {
   fs: iFase;
@@ -28,9 +27,9 @@ const CadFase: any = WithModal(({ setFormData, checkRelease, fs }: iProps) => {
   }, [fase]);
 
   useEffect(() => {
-    if (fs) {
-      console.log(fs);
+    console.log(fs);
 
+    if (fs) {
       setFase((prev) => ({
         ...prev,
         objID: fs.objID,

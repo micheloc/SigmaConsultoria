@@ -1,14 +1,13 @@
+import AuthContext from 'context_provider/index';
+import context_realm from 'context_realm/index';
+import Cliente from 'navigations/cliente';
 import Home from 'navigations/home';
-import Icon from 'react-native-vector-icons/FontAwesome6';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Image, TouchableOpacity } from 'react-native';
+import { Alert, Image, TouchableOpacity } from 'react-native';
 import { View, Text } from 'react-native';
 import { useContext, useEffect, useState } from 'react';
 import { _user } from 'services/login_service';
-import Cliente from 'navigations/cliente';
-import context_realm from 'context_realm/index';
-import AuthContext from 'context_provider/index';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,16 +26,31 @@ const TabRoutes = () => {
     setUsuario();
   }, []);
 
-  const logout = async () => {
-    let realm = await context_realm();
+  const exit = () => {
+    Alert.alert(
+      'Alerta!',
+      `Você deseja realmente encerrar sua sessão?\nobs: Ao encerrar, todas as informações do banco interno será removidas.`,
+      [
+        {
+          text: 'Não',
+          style: 'cancel',
+        },
+        {
+          text: 'Sim',
+          onPress: async () => {
+            let realm = await context_realm();
 
-    realm.write(() => {
-      realm.deleteAll(); // Remove todos os objetos do banco de dados
-    });
+            realm.write(() => {
+              realm.deleteAll(); // Remove todos os objetos do banco de dados
+            });
 
-    realm.close();
+            realm.close();
 
-    await check();
+            await check();
+          },
+        },
+      ]
+    );
   };
 
   return (
@@ -65,7 +79,7 @@ const TabRoutes = () => {
               </View>
             ),
             headerRight: () => (
-              <TouchableOpacity onPress={() => logout()}>
+              <TouchableOpacity onPress={() => exit()}>
                 <Image
                   source={require('assets/img/Icons/sair.png')}
                   style={{ margin: 8, width: 40, height: 40 }}

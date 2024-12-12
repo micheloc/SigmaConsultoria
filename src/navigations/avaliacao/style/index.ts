@@ -41,5 +41,5 @@ export const Divider = styled.View`
 `;
 
 export const List = styled.FlatList`
-  max-height: 70%;
+  max-height: 100%;
 `;
