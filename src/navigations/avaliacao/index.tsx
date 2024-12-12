@@ -236,8 +236,8 @@ const Avaliacao = () => {
           <View>
             <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
             <Dropdown
+              search={clientes.length > 0}
               data={clientes}
-              search
               labelField="nome"
               valueField="objID"
               placeholder="Selecione o Cliente"
@@ -252,8 +252,8 @@ const Avaliacao = () => {
           <View>
             <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
             <Dropdown
+              search={fazendas.length > 0}
               data={fazendas}
-              search
               labelField="nome"
               valueField="objID"
               placeholder="Selecione a fazenda"

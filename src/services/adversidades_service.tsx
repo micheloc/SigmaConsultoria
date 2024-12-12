@@ -24,6 +24,8 @@ export const _createAdversidades = async (items: iAdversidades[]): Promise<boole
     const realm = await context_realm();
     realm.write(() => {
       items.forEach((item) => {
+        console.log(item);
+
         realm.create('Adversidades', {
           objID: item.objID,
           idAvaliacao: item.idAvaliacao,
