@@ -1,8 +1,89 @@
-import { useEffect } from 'react';
-import { Alert } from 'react-native';
+import Dropdown from 'component/DropDown';
+import Share from 'react-native-share';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import iCliente from 'types/interfaces/iCliente';
+import uuid from 'react-native-uuid';
+
+import { ActivityIndicator, Alert, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { _getAllCliente } from 'services/cliente_service';
+import { Container, LabelForm } from 'styles/boody.containers';
+import { KeyboardAvoidingView } from 'react-native';
+import iFazenda from 'types/interfaces/iFazenda';
+import { _findFazendaByCliente } from 'services/fazenda_service';
 
 const Relatorio = () => {
+  const nav: any = useNavigation();
+
+  const [oCliente, setCliente] = useState<iCliente>({
+    objID: uuid.v4().toString(),
+    idUser: '',
+    nome: '',
+    email: '',
+    status: true,
+    registro: '',
+    created: new Date(Date.now.toString()),
+    updated: new Date(Date.now.toString()),
+  });
+
+  const [oFazenda, setFazenda] = useState<iFazenda>({
+    objID: '',
+    idCliente: '',
+    nome: '',
+    created: new Date(Date.now.toString()),
+    updated: new Date(Date.now.toString()),
+  });
+
+  const [clientes, setClientes] = useState<iCliente[]>([]);
+  const [fazendas, setFazendas] = useState<iFazenda[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useFocusEffect(
+    useCallback(() => {
+      const loading = async () => {
+        setIsLoading(true);
+
+        try {
+          const resp: any = await _getAllCliente();
+          if (resp.length > 0) {
+            setClientes(resp);
+          } else {
+            check_cliente();
+          }
+        } catch (error) {
+          console.log('Não foi possível carregar a lista de clientes: ', error);
+          check_cliente();
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      loading();
+    }, [])
+  );
+
+  useEffect(() => {
+    const loading = async () => {
+      if (oCliente.objID) {
+        setIsLoading(true);
+        try {
+          const resp: any = await _findFazendaByCliente(oCliente.objID);
+          if (resp.length > 0) {
+            setFazendas(resp);
+          } else {
+            console.warn('Nenhum cliente foi localizado!');
+          }
+        } catch (error) {
+          console.log('Não foi possivel carregar a lista de fazendas : ', error);
+        }
+        setIsLoading(false);
+      }
+    };
+
+    loading();
+  }, [oCliente]);
+
   const generate = async () => {
     const html = `
       <!DOCTYPE html>
@@ -20,7 +101,7 @@ const Relatorio = () => {
             }
             .header-title {
               text-align: center;
-              width: 80%;
+              width: 68%;
             }
 
             .logo-container img {
@@ -373,25 +454,101 @@ const Relatorio = () => {
 
     `;
 
-    // console.log(html);
+    const options = {
+      html,
+      fileName: 'documento',
+      directory: 'Documents',
+      height: 842, // Altura em pontos (portrait)
+      width: 595, // Largura em pontos (A4)
+      orientation: 'portrait', // Retrato (ou landscape para paisagem)
+    };
 
-    // const options = {
-    //   html,
-    //   fileName: 'documento',
-    //   directory: 'Documents',
-    //   // Definir tamanho A4 e orientação
-    //   height: 842, // Altura em pontos (portrait)
-    //   width: 595, // Largura em pontos (A4)
-    //   orientation: 'portrait', // Retrato (ou landscape para paisagem)
-    // };
+    const file = await RNHTMLtoPDF.convert(options);
 
-    // const file = await RNHTMLtoPDF.convert(options);
-    // Alert.alert('PDF criado!', `Local: ${file.filePath}`);
+    try {
+      const options = {
+        url: `file://${file.filePath}`,
+        type: 'application/pdf',
+        title: 'Compartilhar PDF',
+      };
+
+      try {
+        await Share.open(options);
+      } catch (error) {
+        console.error('Erro ao compartilhar o arquivo:', error);
+      }
+    } catch (error) {
+      console.error('Erro ao criar PDF:', error);
+    }
   };
 
-  useEffect(() => {
-    generate();
-  }, []);
+  const check_cliente = async () => {
+    Alert.alert(
+      'Alerta!',
+      'Nenhum cliente foi baixado para o banco interno!\nDeseja efetuar o download antes de começar este processo?',
+      [
+        {
+          text: 'Não',
+          style: 'cancel',
+          onPress: () => {
+            nav.navigate('navHome');
+          },
+        },
+        {
+          text: 'Sim',
+          onPress: async () => {
+            nav.navigate('navDownloadCliente');
+          },
+        },
+      ]
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" animating={true} />
+      </View>
+    );
+  }
+
+  return (
+    <Container style={{ backgroundColor: '#ccc' }}>
+      <KeyboardAvoidingView>
+        <View>
+          <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
+          <Dropdown
+            search={clientes.length > 0}
+            data={clientes}
+            labelField="nome"
+            valueField="objID"
+            placeholder="Selecione o Cliente"
+            searchPlaceholder="Pesquisar por cliente"
+            value={oCliente}
+            onChange={(item: iCliente) => {
+              setCliente(item);
+            }}
+          />
+        </View>
+
+        <View>
+          <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
+          <Dropdown
+            search={fazendas.length > 0}
+            data={fazendas}
+            labelField="nome"
+            valueField="objID"
+            placeholder="Selecione a fazenda"
+            searchPlaceholder="Pesquisar por fazenda"
+            value={oFazenda}
+            onChange={(item: iFazenda) => {
+              setFazenda(item);
+            }}
+          />
+        </View>
+      </KeyboardAvoidingView>
+    </Container>
+  );
 };
 
 export default Relatorio;

@@ -8,6 +8,7 @@ import { Alert, Image, TouchableOpacity } from 'react-native';
 import { View, Text } from 'react-native';
 import { useContext, useEffect, useState } from 'react';
 import { _user } from 'services/login_service';
+import Relatorio from 'operations/relatorio';
 
 const Tab = createBottomTabNavigator();
 
@@ -110,20 +111,38 @@ const TabRoutes = () => {
 
         <Tab.Screen
           name="relatorio"
-          component={Home}
+          component={Relatorio}
           options={{
-            headerShown: false,
+            headerShown: true,
+            headerTitle: 'Relatório',
+            headerTitleAlign: 'center',
+            headerLeft: () => (
+              <View>
+                <Image
+                  source={require('assets/img/logo_sigma.png')}
+                  style={{ margin: 8, width: 60, height: 60 }}
+                />
+              </View>
+            ),
+
             tabBarLabel: () => (
               <View>
                 <Text style={{ padding: 8, fontSize: 18, color: 'whitesmoke' }}>Relatório</Text>
               </View>
             ),
             tabBarIcon: () => (
-              <Image
-                source={require('assets/img/Icons/relatorio.png')}
-                style={{ margin: 8, width: 35, height: 35 }}
-              />
+              <View>
+                <Image
+                  source={require('assets/img/Icons/relatorio.png')}
+                  style={{ margin: 8, width: 35, height: 35 }}
+                />
+              </View>
             ),
+            tabBarLabelStyle: {
+              padding: 8,
+              fontSize: 18,
+              color: 'whitesmoke',
+            },
             tabBarActiveBackgroundColor: '#010371',
           }}
         />
