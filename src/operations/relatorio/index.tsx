@@ -2,20 +2,23 @@ import Dropdown from 'component/DropDown';
 import Share from 'react-native-share';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import iCliente from 'types/interfaces/iCliente';
+import iCultura from 'types/interfaces/iCultura';
+import iFase from 'types/interfaces/iFase';
+import iFazenda from 'types/interfaces/iFazenda';
 import uuid from 'react-native-uuid';
 
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { ActivityIndicator, Alert, Dimensions, StyleSheet, View, TextInput } from 'react-native';
+import { ButtonConf, ButtonUpdate, Container, Divider, Label, LabelForm } from 'styles/boody.containers';
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
-import { _getAllCliente } from 'services/cliente_service';
-import { Container, LabelForm } from 'styles/boody.containers';
-import { KeyboardAvoidingView } from 'react-native';
-import iFazenda from 'types/interfaces/iFazenda';
+
 import { _findFazendaByCliente } from 'services/fazenda_service';
+import { _getAllCliente } from 'services/cliente_service';
 
 const Relatorio = () => {
   const nav: any = useNavigation();
+  const widthScreen = Dimensions.get('screen').width;
 
   const [oCliente, setCliente] = useState<iCliente>({
     objID: uuid.v4().toString(),
@@ -36,8 +39,23 @@ const Relatorio = () => {
     updated: new Date(Date.now.toString()),
   });
 
+  const [oCultura, setCultura] = useState<iCultura>({
+    objID: '',
+    nome: '',
+  });
+
+  const [oFase, setFase] = useState<iFase>({
+    objID: '',
+    idCultura: '',
+    nome: '',
+    dapMedio: 0,
+  });
+
   const [clientes, setClientes] = useState<iCliente[]>([]);
   const [fazendas, setFazendas] = useState<iFazenda[]>([]);
+  const [culturas, setCulturas] = useState<iCultura[]>([]);
+  const [fases, setFases] = useState<iFase[]>([]);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useFocusEffect(
@@ -514,41 +532,120 @@ const Relatorio = () => {
 
   return (
     <Container style={{ backgroundColor: '#ccc' }}>
-      <KeyboardAvoidingView>
-        <View>
-          <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
-          <Dropdown
-            search={clientes.length > 0}
-            data={clientes}
-            labelField="nome"
-            valueField="objID"
-            placeholder="Selecione o Cliente"
-            searchPlaceholder="Pesquisar por cliente"
-            value={oCliente}
-            onChange={(item: iCliente) => {
-              setCliente(item);
-            }}
-          />
-        </View>
+      <View>
+        <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
+        <Dropdown
+          search={clientes.length > 0}
+          data={clientes}
+          labelField="nome"
+          valueField="objID"
+          placeholder="Selecione o Cliente"
+          searchPlaceholder="Pesquisar por cliente"
+          value={oCliente}
+          onChange={(item: iCliente) => {
+            setCliente(item);
+          }}
+        />
+      </View>
 
-        <View>
-          <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
-          <Dropdown
-            search={fazendas.length > 0}
-            data={fazendas}
-            labelField="nome"
-            valueField="objID"
-            placeholder="Selecione a fazenda"
-            searchPlaceholder="Pesquisar por fazenda"
-            value={oFazenda}
-            onChange={(item: iFazenda) => {
-              setFazenda(item);
-            }}
-          />
-        </View>
-      </KeyboardAvoidingView>
+      <View>
+        <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
+        <Dropdown
+          search={fazendas.length > 0}
+          data={fazendas}
+          labelField="nome"
+          valueField="objID"
+          placeholder="Selecione a fazenda"
+          searchPlaceholder="Pesquisar por fazenda"
+          value={oFazenda}
+          onChange={(item: iFazenda) => {
+            setFazenda(item);
+          }}
+        />
+      </View>
+
+      {oFazenda.objID && (
+        <>
+          <View>
+            <LabelForm style={{ marginBottom: -5 }}>Cultura : </LabelForm>
+            <Dropdown
+              search={culturas.length > 0}
+              data={culturas}
+              labelField="nome"
+              valueField="objID"
+              placeholder={
+                culturas.length > 0 ? 'Selecione a cultura...' : 'Nenhuma cultura foi encontrada... '
+              }
+              searchPlaceholder="Pesquisar por cultura"
+              value={oCultura}
+              onChange={(item: iCultura) => {
+                setCultura(item);
+              }}
+            />
+          </View>
+
+          <View>
+            <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
+            <Dropdown
+              search={fases.length > 0}
+              data={fases}
+              labelField="nome"
+              valueField="objID"
+              placeholder={fases.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '}
+              searchPlaceholder="Pesquisar por fazenda"
+              value={oFase}
+              onChange={(item: iFase) => {
+                setFase(item);
+              }}
+            />
+          </View>
+
+          <View style={styles.container}>
+            <LabelForm>Descrição da recomendação : </LabelForm>
+            <TextInput
+              style={styles.textArea}
+              multiline={true}
+              onChangeText={(text) => console.log(text)}
+              value={''}
+              placeholder="Informe os dados da recomendação..."
+              placeholderTextColor="#ababab"
+              textAlignVertical="top"
+            />
+          </View>
+          <Divider style={{ height: 1 }} />
+          <View style={{ width: '100%', alignItems: 'center' }}>
+            <View>
+              <ButtonUpdate style={{ width: widthScreen / 2 }}>
+                <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
+              </ButtonUpdate>
+            </View>
+          </View>
+        </>
+      )}
+
+      <Divider style={{ height: 1 }} />
+      <View style={{ width: '100%', alignItems: 'center' }}>
+        <ButtonConf style={{ width: widthScreen / 2 - 45 }}>
+          <Label style={{ fontSize: 12 }}>Exportar</Label>
+        </ButtonConf>
+      </View>
     </Container>
   );
 };
+
+const styles = StyleSheet.create({
+  container: { flex: 1, maxHeight: 230 },
+  textArea: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#999',
+    backgroundColor: '#fff',
+    color: 'black',
+    borderRadius: 5,
+    fontSize: 14,
+    marginLeft: 8,
+    marginRight: 15,
+  },
+});
 
 export default Relatorio;
