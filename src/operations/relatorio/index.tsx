@@ -542,6 +542,8 @@ const Relatorio = () => {
             searchPlaceholder="Pesquisar por fazenda"
             value={oFazenda}
             onChange={(item: iFazenda) => {
+              console.log(item);
+
               setFazenda(item);
             }}
           />
