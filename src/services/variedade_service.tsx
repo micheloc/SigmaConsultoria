@@ -1,5 +1,9 @@
 import context_realm from 'context_realm/index';
 import iVariedade from 'types/interfaces/iVariedade';
+import NetInfo from '@react-native-community/netinfo';
+import Toast from 'react-native-toast-message';
+import api from 'config/api';
+import { Alert } from 'react-native';
 
 export const _createVariedade = async (item: iVariedade) => {
   try {
@@ -106,6 +110,30 @@ export const _removeVariedade = async (objID: string) => {
   } catch (error) {
     console.error(error);
   }
+
+  setTimeout(async () => {
+    const net = await NetInfo.fetch();
+    if (net.isConnected) {
+      const resp = await api.delete(`/Variedade?objID=${objID}`);
+
+      console.log(resp.data);
+
+      if (resp.data.isValid) {
+        setTimeout(() => {
+          Toast.show({
+            type: 'success',
+            text1: `Variedade removida do banco!`,
+            text1Style: { fontSize: 14 },
+          });
+        }, 2000);
+      } else {
+        Alert.alert(
+          'Alerta',
+          'Não foi possivel remover a variedade do banco, pois ela contém vinculo com alguma avaliação!'
+        );
+      }
+    }
+  }, 2500);
 };
 
 export const _removeAllVariedade = async () => {

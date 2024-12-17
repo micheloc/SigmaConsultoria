@@ -6,27 +6,31 @@ import Input from 'component/Input';
 
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   View,
   StyleSheet,
   Text,
   TouchableOpacity,
   KeyboardAvoidingView,
+  Alert,
 } from 'react-native';
+
 import { ContainerLstArea, ContainerTitleArea, Divider, List, TextTitleArea } from './style';
 import { Container, LabelForm } from 'styles/boody.containers';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { _findCliente, _getAllCliente } from 'services/cliente_service';
 import { _findFazenda, _findFazendaByCliente, _getAllFazenda } from 'services/fazenda_service';
 import { _findAreaByFazenda, _getAllArea } from 'services/area_service';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { _findAvaliacaoByArea } from 'services/avaliacao_service';
-import { ScrollView } from 'native-base';
+import moment from 'moment';
 
 const Avaliacao = () => {
   const route = useRoute();
+  const now = moment(); // Data atual
+
   const [fArea, setFArea] = useState<string>('');
 
   const [areas, setAreas] = useState<iArea[]>([]);
@@ -78,21 +82,50 @@ const Avaliacao = () => {
     },
   });
 
-  useEffect(() => {
-    setIsLoading(true);
-    const loading = async () => {
-      try {
-        const resp: any = await _getAllCliente();
-        if (resp.length > 0) {
-          setClientes(resp);
+  const check_cliente = async () => {
+    Alert.alert(
+      'Alerta!',
+      'Nenhum cliente foi baixado para o banco interno!\nDeseja efetuar o download antes de começar este processo?',
+      [
+        {
+          text: 'Não',
+          style: 'cancel',
+          onPress: () => {
+            nav.navigate('navHome');
+          },
+        },
+        {
+          text: 'Sim',
+          onPress: async () => {
+            nav.navigate('navDownloadCliente');
+          },
+        },
+      ]
+    );
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true);
+
+      const loading = async () => {
+        try {
+          const resp: any = await _getAllCliente();
+          if (resp.length > 0) {
+            setClientes(resp);
+          } else {
+            check_cliente();
+          }
+        } catch (error) {
+          console.log('Não foi possível carregar a lista de clientes: ', error);
+          check_cliente();
+        } finally {
           setIsLoading(false);
         }
-      } catch (error) {
-        console.log('Não foi possivel carregar a lista de clientes : ', error);
-      }
-    };
-    loading();
-  }, []);
+      };
+      loading();
+    }, [])
+  );
 
   useEffect(() => {
     const loading = async () => {
@@ -206,8 +239,8 @@ const Avaliacao = () => {
           <View>
             <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
             <Dropdown
+              search={clientes.length > 0}
               data={clientes}
-              search
               labelField="nome"
               valueField="objID"
               placeholder="Selecione o Cliente"
@@ -222,8 +255,8 @@ const Avaliacao = () => {
           <View>
             <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
             <Dropdown
+              search={fazendas.length > 0}
               data={fazendas}
-              search
               labelField="nome"
               valueField="objID"
               placeholder="Selecione a fazenda"

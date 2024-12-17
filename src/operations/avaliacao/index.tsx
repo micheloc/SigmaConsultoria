@@ -1,5 +1,6 @@
 import CadAdversidades from './component/adversidades_modal';
 import CadEspecificos from './component/especificos_modal';
+import _ from 'lodash';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Dropdown from 'component/DropDown';
 import Input from 'component/Input';
@@ -29,7 +30,8 @@ import { ButtonConf, Container, Divider, Label, LabelForm } from 'styles/boody.c
 import { DrawerScreenProps } from '@react-navigation/drawer';
 import { ParamListBase } from '@react-navigation/routers';
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { Text, View, Platform, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
 
 import {
@@ -88,8 +90,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   const [rowAdversidade, setRowAdversidade] = useState<iAdversidades | null>();
   const [rowEspecificacao, setRowEspecificacao] = useState<iEspecificacoes | null>();
-  const [rowVariedade, setRowVariedade] = useState<iVariedade | null>();
-  const [rowFase, setRowFase] = useState<iFase | null>();
 
   const [cultura, setCultura] = useState<iCultura[]>([]);
   const [variedade, setVariedade] = useState<iVariedade[]>([]);
@@ -115,36 +115,82 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     setAvaliacao((prevState) => ({ ...prevState, data: new Date(currentDate) }));
   };
 
+  const check_cultura = async () => {
+    Alert.alert(
+      'Alerta!',
+      'Nenhuma cultura foi baixado para o banco interno!\nDeseja efetuar o download antes de começar este processo?',
+      [
+        {
+          text: 'Não',
+          style: 'cancel',
+          onPress: () => {
+            nav.navigate('navHome');
+          },
+        },
+        {
+          text: 'Sim',
+          onPress: async () => {
+            nav.navigate('navListCultura');
+          },
+        },
+      ]
+    );
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      const loadingCultura = async () => {
+        const resp: any = await _getAllCultura();
+        if (resp.length > 0) {
+          setCultura(resp);
+        } else {
+          check_cultura();
+        }
+      };
+
+      loadingCultura();
+    }, [])
+  );
+
   useEffect(() => {
-    const loadingCultura = async () => {
-      const resp: any = await _getAllCultura();
-      setCultura(resp);
-    };
-
-    loadingCultura();
-  }, []);
-
-  useEffect(() => {
-    /**
-     * Este método será utilizado para carregar a fase.
-     */
-    const loading_fase = async () => {
-      const resp: any = await _findAllFaseByCultura(avaliacao.idCultura);
-      if (resp) {
-        setFase(resp);
-      }
-    };
-
-    const loading_avaliacao = async () => {
-      const resp: any = await _findAllVariedadesByCultura(avaliacao.idCultura);
-      if (resp) {
-        setVariedade(resp);
-      }
-    };
-
     loading_fase();
-    loading_avaliacao();
+    loading_variedade();
   }, [avaliacao.idCultura]);
+
+  /**
+   * Este método será utilizado para carregar a fase.
+   */
+  const loading_fase = async () => {
+    try {
+      const result: any = await _findAllFaseByCultura(avaliacao.idCultura);
+      if (result) {
+        const dt: iFase[] = [];
+
+        for (const item of result) {
+          dt.push(item);
+        }
+        setFase(dt);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const loading_variedade = async () => {
+    try {
+      const response: any = await _findAllVariedadesByCultura(avaliacao.idCultura);
+      if (response) {
+        const dt: iVariedade[] = [];
+
+        for (const item of response) {
+          dt.push(item);
+        }
+        setVariedade(dt);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   /**
    * Este método será utilizado para capturar os valores informados na modal de cadastro de adversidades.
@@ -236,12 +282,11 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
       };
 
       await _createVariedade(obj);
-
       vre.push(obj);
 
       Toast.show({
         type: 'success',
-        text1: `Variedade salva!`,
+        text1: `Fase salva!`,
         text1Style: { fontSize: 14 },
       });
 
@@ -260,26 +305,25 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         }
       }
     } else {
-      setTimeout(async () => {
-        vre = vre.filter((obj: iVariedade) => obj.objID !== props.objID);
-        vre.push(props);
+      vre = vre.filter((obj: iVariedade) => obj.objID !== avaliacao.idVariedade);
+      props.objID = avaliacao.idVariedade;
 
-        try {
-          const net = await NetInfo.fetch();
-          if (net.isConnected) {
-            const resp = await api.put(`/Variedade?objID=${props.objID}`, props);
-            if (resp.data.isValid) {
-              Toast.show({
-                type: 'success',
-                text1: `Valor salvo no banco!`,
-                text1Style: { fontSize: 14 },
-              });
-            }
+      vre.push(props);
+      try {
+        const net = await NetInfo.fetch();
+        if (net.isConnected) {
+          const resp = await api.put(`/Variedade?objID=${props.objID}`, props);
+          if (resp.data.isValid) {
+            Toast.show({
+              type: 'success',
+              text1: `Valor salvo no banco!`,
+              text1Style: { fontSize: 14 },
+            });
           }
-        } catch (error: any) {
-          console.log(error);
         }
-      }, 500);
+      } catch (error: any) {
+        console.log(error);
+      }
 
       setTimeout(async () => {
         await _updateVariedade(props);
@@ -295,7 +339,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     }
 
     setVariedade(vre);
-    setRowVariedade(null);
     setShowVariedade(false);
     setIsEditedVariedade(false);
     setAvaliacao((prev) => ({ ...prev, idVariedade: '' }));
@@ -316,7 +359,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
       };
 
       await _createFase(obj);
-
       fse.push(obj);
 
       Toast.show({
@@ -340,54 +382,54 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
         }
       }
     } else {
-      setTimeout(async () => {
-        fse = fse.filter((obj: iFase) => obj.objID !== props.objID);
-        fse.push(props);
+      fse = fse.filter((obj: iFase) => obj.objID !== avaliacao.idFase);
+      props.objID = avaliacao.idFase;
 
-        try {
-          const net = await NetInfo.fetch();
-          if (net.isConnected) {
-            // Tratamento de parseFloat com validação
-            let dapMedio: number;
-            try {
-              dapMedio = parseFloat(props.dapMedio.toString());
-              if (isNaN(dapMedio)) {
-                throw new Error('Valor inválido para dapMedio');
-              }
-            } catch (error) {
-              console.error('Erro ao converter dapMedio para float:', error);
-              dapMedio = 0; // Valor padrão caso a conversão falhe
+      fse.push(props);
+
+      try {
+        const net = await NetInfo.fetch();
+        if (net.isConnected) {
+          // Tratamento de parseFloat com validação
+          let dapMedio: number;
+          try {
+            dapMedio = parseFloat(props.dapMedio.toString());
+            if (isNaN(dapMedio)) {
+              throw new Error('Valor inválido para dapMedio');
             }
-
-            const fa: iFase = {
-              objID: props.objID,
-              idCultura: props.idCultura,
-              nome: props.nome,
-              dapMedio: dapMedio,
-            };
-
-            const resp = await api.put(
-              `/Fase?objID=${props.objID}`, // objID como parâmetro na URL
-              fa, // Corpo da requisição com os dados a serem atualizados
-              {
-                headers: {
-                  accept: 'text/plain',
-                  'Content-Type': 'application/json',
-                },
-              }
-            );
-            if (resp.data.isValid) {
-              Toast.show({
-                type: 'success',
-                text1: `Valor salvo no banco!`,
-                text1Style: { fontSize: 14 },
-              });
-            }
+          } catch (error) {
+            console.error('Erro ao converter dapMedio para float:', error);
+            dapMedio = 0; // Valor padrão caso a conversão falhe
           }
-        } catch (error: any) {
-          console.log(error);
+
+          const fa: iFase = {
+            objID: props.objID,
+            idCultura: props.idCultura,
+            nome: props.nome,
+            dapMedio: dapMedio,
+          };
+
+          const resp = await api.put(
+            `/Fase?objID=${props.objID}`, // objID como parâmetro na URL
+            fa, // Corpo da requisição com os dados a serem atualizados
+            {
+              headers: {
+                accept: 'text/plain',
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+          if (resp.data.isValid) {
+            Toast.show({
+              type: 'success',
+              text1: `Valor salvo no banco!`,
+              text1Style: { fontSize: 14 },
+            });
+          }
         }
-      }, 500);
+      } catch (error: any) {
+        console.log(error);
+      }
 
       await _updateFase(props);
 
@@ -401,7 +443,6 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
     }
 
     setFase(fse);
-    setRowFase(null);
     setShowFase(false);
     setIsEditedFase(false);
     setAvaliacao((prev) => ({ ...prev, idFase: '' }));
@@ -473,10 +514,11 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   /** * Este método será utilizado para remover a variedade selecionada do banco de dados e do banco interno. */
   const onRemoveVariedae = async () => {
-    const objID: any = rowVariedade?.objID;
+    let vre: iVariedade[] = [...variedade];
+    const item: iVariedade = variedade.filter((obj: iVariedade) => obj.objID === avaliacao.idVariedade)[0];
 
     try {
-      Alert.alert('Alerta!', `Deseja remover a fase : ${rowVariedade?.nome} `, [
+      Alert.alert('Alerta!', `Deseja remover a fase: ${item.nome} `, [
         {
           text: 'Não',
           style: 'cancel',
@@ -485,26 +527,14 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           text: 'Sim',
           onPress: async () => {
             try {
-              const net = await NetInfo.fetch();
-              if (net.isConnected) {
-                const resp = await api.delete(`/Variedade?objID=${objID}`);
+              const up_variedade: iVariedade[] = vre.filter((obj: iVariedade) => obj.objID !== item.objID);
+              setVariedade(up_variedade);
+              setAvaliacao((prev) => ({ ...prev, idVariedade: '' }));
 
-                if (resp.data.isValid) {
-                  setTimeout(() => {
-                    Toast.show({
-                      type: 'success',
-                      text1: `Variedade removida do banco!`,
-                      text1Style: { fontSize: 14 },
-                    });
-                  }, 2000);
-                }
-              }
-            } catch (error) {
-              console.log('Não foi possivel remover a fase: ', error);
-            }
+              setTimeout(async () => {
+                await _removeVariedade(item.objID); // Remove do banco interno
+              }, 2000);
 
-            try {
-              await _removeFase(objID);
               setTimeout(() => {
                 Toast.show({
                   type: 'success',
@@ -513,30 +543,23 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                 });
               }, 600);
             } catch (error) {
-              console.log('Não foi possivel remover: ', error);
+              console.log('Erro ao remover a variedade:', error);
             }
-
-            setTimeout(() => {
-              const vre: iVariedade[] = [...variedade];
-              const vari: iVariedade[] = vre.filter((obj: iVariedade) => obj.objID !== objID);
-              setVariedade(vari);
-              // setRowVariedade(null);
-              setAvaliacao((prev) => ({ ...prev, idVariedade: '' }));
-            }, 500);
           },
         },
       ]);
     } catch (error) {
-      console.log('erro ao apresenta mensagem de alerta, ao excluir a fase : ', error);
+      console.log('Erro ao apresentar mensagem de alerta:', error);
     }
   };
 
   /** * Este método será utilizado para remover a variedade selecionada do banco de dados e do banco interno. */
   const onRemoveFase = async () => {
-    const objID: any = rowFase?.objID;
+    let fse: iFase[] = [...fase];
+    const item: iFase = fase.filter((obj: iFase) => obj.objID === avaliacao.idFase)[0];
 
     try {
-      Alert.alert('Alerta!', `Deseja remover a fase : ${rowFase?.nome} `, [
+      Alert.alert('Alerta!', `Deseja remover a fase: ${item.nome} `, [
         {
           text: 'Não',
           style: 'cancel',
@@ -545,26 +568,14 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
           text: 'Sim',
           onPress: async () => {
             try {
-              const net = await NetInfo.fetch();
-              if (net.isConnected) {
-                const resp = await api.delete(`/Fase?objID=${objID}`);
+              const up_fase: iFase[] = fse.filter((obj: iFase) => obj.objID !== item.objID);
+              setFase(up_fase);
+              setAvaliacao((prev) => ({ ...prev, idFase: '' }));
 
-                if (resp.data.isValid) {
-                  setTimeout(() => {
-                    Toast.show({
-                      type: 'success',
-                      text1: `Fase removida do banco!`,
-                      text1Style: { fontSize: 14 },
-                    });
-                  }, 2000);
-                }
-              }
-            } catch (error) {
-              console.log('Não foi possivel remover a fase: ', error);
-            }
+              setTimeout(async () => {
+                await _removeFase(item.objID); // Remove do banco interno
+              }, 2000);
 
-            try {
-              await _removeFase(objID);
               setTimeout(() => {
                 Toast.show({
                   type: 'success',
@@ -573,21 +584,13 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                 });
               }, 600);
             } catch (error) {
-              console.log('Não foi possivel remover: ', error);
+              console.log('Erro ao remover a fase:', error);
             }
-
-            setTimeout(() => {
-              const fse: iFase[] = [...fase];
-              const vr: iFase[] = fse.filter((obj: iFase) => obj.objID !== objID);
-              setFase(vr);
-              setRowFase(null);
-              setAvaliacao((prev) => ({ ...prev, idFase: '' }));
-            }, 500);
           },
         },
       ]);
     } catch (error) {
-      console.log('erro ao apresenta mensagem de alerta, ao excluir a fase : ', error);
+      console.log('Erro ao apresentar mensagem de alerta:', error);
     }
   };
 
@@ -705,7 +708,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
               <LabelForm>Fase : </LabelForm>
               <InputGroup>
                 <Dropdown
-                  search
+                  search={fase.length > 0}
                   data={fase}
                   labelField="nome"
                   valueField="objID"
@@ -713,8 +716,9 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                   searchPlaceholder="Pesquisar por fase"
                   style={{ width: sizeFase() }}
                   onChange={(item: any) => {
-                    setAvaliacao((prevState) => ({ ...prevState, idFase: item.objID }));
-                    setRowFase(item);
+                    if (item) {
+                      setAvaliacao((prevState) => ({ ...prevState, idFase: item.objID }));
+                    }
                   }}
                 />
                 <TouchableOpacity onPress={() => setShowFase(true)}>
@@ -748,17 +752,19 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
               <LabelForm>Variedade : </LabelForm>
               <InputGroup>
                 <Dropdown
-                  search
+                  search={variedade.length > 0}
                   data={variedade}
                   labelField="nome"
                   valueField="objID"
-                  value={rowVariedade?.objID}
-                  placeholder="Selecione a variedade..."
+                  placeholder={
+                    variedade.length > 0 ? 'Selecione a variedade...' : 'Registre uma variedade...'
+                  }
                   searchPlaceholder="Pesquisar por variedade"
                   style={{ width: sizeVariedade() }}
                   onChange={(item: any) => {
-                    setAvaliacao((prevState) => ({ ...prevState, idVariedade: item.objID }));
-                    setRowVariedade(item);
+                    if (item) {
+                      setAvaliacao((prevState) => ({ ...prevState, idVariedade: item.objID }));
+                    }
                   }}
                 />
                 <TouchableOpacity onPress={() => setShowVariedade(true)}>
@@ -789,6 +795,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             </View>
 
             <Divider style={{ backgroundColor: '#848484', marginTop: 20 }} />
+
             <View>
               <ButtonConf onPress={() => setShowEspecificos(true)}>
                 <Label>Adicionar especificos</Label>
@@ -838,6 +845,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
             </View>
 
             <Divider style={{ backgroundColor: '#848484', marginTop: 20 }} />
+
             <View>
               <ButtonConf onPress={() => setShowAdversidades(true)}>
                 <Label>Adicionar adversidades</Label>
@@ -917,9 +925,9 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
       <CadFase
         visible={showFase}
-        fs={rowFase}
+        isEdited={isEditedFase}
+        fs={fase.filter((item: iFase) => item.objID === avaliacao.idFase)[0]}
         onClose={() => {
-          setRowFase(null);
           setShowFase(false);
           setIsEditedFase(false);
         }}
@@ -928,9 +936,9 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
       <CadVariedadeCultura
         visible={showVarieade}
-        vari={rowVariedade}
+        isEdited={isEditedVariedade}
+        vari={variedade.filter((item: iVariedade) => item.objID === avaliacao.idVariedade)[0]}
         onClose={() => {
-          setRowVariedade(null);
           setShowVariedade(false);
           setIsEditedVariedade(false);
         }}

@@ -81,8 +81,8 @@ const Home = () => {
 const styles = StyleSheet.create({
   btnAvaliacao: {
     backgroundColor: '#16b95a',
-    width: 240,
-    height: 130,
+    width: '50%',
+    height: '20%',
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',

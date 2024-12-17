@@ -15,3 +15,5 @@ declare module '*.svg' {
 }
 
 declare module 'react-native-vector-icons';
+declare module 'react-native-html-to-pdf';
+declare module 'react-native-open-file';

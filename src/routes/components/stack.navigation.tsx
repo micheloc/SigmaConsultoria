@@ -11,6 +11,7 @@ import LstDownloadClientes from 'navigations/cliente/lista_clientes';
 import LstUsingClientes from 'navigations/cliente/clientes_baixados';
 import ListCulturas from 'navigations/Cultura/lista_culturas';
 import LstUsingCultura from 'navigations/Cultura/cultura_baixadas';
+import Relatorio from 'operations/avaliacao/component/relatorio';
 
 type RootStackParamList = {
   TabNavigator: any;
@@ -111,6 +112,47 @@ const StackNavigation = () => {
               headerTitle: () => (
                 <View>
                   <Text style={{ fontSize: 18, color: 'whitesmoke', textAlign: 'center' }}>Avaliação</Text>
+                </View>
+              ),
+              headerLeft: () => (
+                <TouchableOpacity
+                  onPress={() => {
+                    /// Essa condição tem como objetivo retornar para home caso a avaliação tenha sido finalizada.
+                    /// Evitando que volte para as telas anteriores.
+                    if (params === undefined) {
+                      navigation.goBack();
+                    } else {
+                      navigation.navigate('navHome'); // Substitua 'Home' pelo nome da tela inicial.
+                    }
+                  }}
+                  style={{ paddingLeft: 15 }}>
+                  <View>
+                    <Image
+                      source={require('assets/img/Icons/back.png')}
+                      style={{ margin: 8, width: 25, height: 25 }}
+                    />
+                  </View>
+                </TouchableOpacity>
+              ),
+              headerStyle: {
+                backgroundColor: '#12994a', // Cor de fundo do header
+              },
+              headerTintColor: 'whitesmoke', // Cor do texto do título
+            };
+          }}
+        />
+
+        <Stack.Screen
+          name="navRelatorio"
+          component={Relatorio}
+          options={({ navigation, route }: any) => {
+            const params = route?.params;
+            return {
+              headerShown: true,
+              headerTitleAlign: 'center',
+              headerTitle: () => (
+                <View>
+                  <Text style={{ fontSize: 18, color: 'whitesmoke', textAlign: 'center' }}>Relatórios</Text>
                 </View>
               ),
               headerLeft: () => (

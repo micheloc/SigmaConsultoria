@@ -91,43 +91,54 @@ const ListCulturas = () => {
   };
 
   /**
-   * Este método será utilizado para carregar os dados da cultura ao banco de dados realm.db
+   * Este método será responsavel por salvar os dados da cultura no banco de dados interno ("Realm DB").
+   * Também vai puxar as informações do banco de dados na nuvem para o banco interno.
    * @param obj refere-se ao objeto selecionado de cultura.
    */
   const createdCultura = async (obj: iCultura) => {
-    try {
-      setLoading(true);
-      await _createCultura(obj);
-      const cult: iCultura[] = [...culturaSelected];
-      cult.push(obj);
+    setLoading(true);
+    await _createCultura(obj);
+    const cult: iCultura[] = [...culturaSelected];
+    cult.push(obj);
 
-      // Aqui será carregado as fases relacionada a cultura.
+    try {
       const fases: any = await api.get(`/Fase/FindByCultura?idCultura=${obj.objID}`);
       if (fases.data.length > 0) {
         await _createFases(fases.data);
       }
+    } catch (error) {
+      console.log('Não foi possivel baixar as fases : ', error);
+      Toast.show({
+        type: 'error',
+        text2: 'Não existe fase para cultura selecionada!',
+        text2Style: { fontSize: 14 },
+      });
+    }
 
+    try {
       const variedades: any = await api.get(`/Variedade/FindByCultura?idCultura=${obj.objID}`);
       if (variedades.data.length > 0) {
         await _createVariedades(variedades.data);
       }
-      setNameCultura('');
-      setLoading(false);
-
-      Toast.show({
-        type: 'success',
-        text2: `Cultura : ${obj.nome}, foi baixado com sucesso!`,
-        text2Style: { fontSize: 14 },
-      });
     } catch (error) {
-      // Caso algo falhe, exibe o erro
+      console.log('Não foi possivel baixar as variedades : ', error);
       Toast.show({
         type: 'error',
-        text2: 'Ocorreu algum erro ao baixar as informações da cultura.',
+        text2: 'Não existe variedade para cultura selecionada!',
         text2Style: { fontSize: 14 },
       });
-      console.log(error);
     }
+
+    setTimeout(() => {
+      Toast.show({
+        type: 'success',
+        text2: `Item baixado com sucesso!`,
+        text2Style: { fontSize: 14 },
+      });
+    }, 1000);
+
+    setNameCultura('');
+    setLoading(false);
   };
 
   /** * Este component será utilizado para renderizar a lista de cultura a partir de uma filtragem pela variável nameCultura.  */

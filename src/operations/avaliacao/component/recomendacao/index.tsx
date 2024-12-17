@@ -5,7 +5,7 @@ import NetInfo from '@react-native-community/netinfo';
 
 import { ButtonConf, Container, Label, LabelForm } from 'styles/boody.containers';
 import { ContainerFooter } from 'component/modal/style';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 
@@ -45,6 +45,8 @@ const CadRecomendacao = ({ route }: any) => {
   const avaliacao: iProps = route.params;
   const nav: any = useNavigation();
 
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const [registro, setRegistro] = useState<iAvaliacao>({
     objID: avaliacao.objID,
     idArea: avaliacao.idArea,
@@ -60,10 +62,6 @@ const CadRecomendacao = ({ route }: any) => {
   });
 
   const handlePress = async () => {
-    await _removeAllAvaliacao();
-    await _removeAllAdversidades();
-    await _removeAllEspecificacoes();
-
     const realm_avaliacao: iAvaliacaoRealm = {
       objID: registro.objID,
       idArea: registro.idArea,
@@ -75,7 +73,7 @@ const CadRecomendacao = ({ route }: any) => {
       pdf: registro.pdf,
       recomendacao: registro.recomendacao,
     };
-
+    setIsLoading(true);
     const resp_avaliacao = await _createAvaliacao(realm_avaliacao);
     if (resp_avaliacao) {
       setTimeout(async () => {
@@ -144,10 +142,19 @@ const CadRecomendacao = ({ route }: any) => {
           ...sanitizedAvaliacao,
         });
       }, 1500);
+      setIsLoading(false);
     } catch (error) {
       console.log('errro ao redirecionar', error);
     }
   };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" animating={true} />
+      </View>
+    );
+  }
 
   return (
     <Container>

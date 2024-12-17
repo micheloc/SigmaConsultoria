@@ -9,13 +9,12 @@ import { useEffect, useState } from 'react';
 
 interface iProps {
   vari: iVariedade;
+  isEdited: boolean;
   checkRelease: (isValid: boolean) => void;
   setFormData: (state: any) => void;
 }
 
-// export default variedade_schema;
-
-const CadVariedadeCultura: any = WithModal(({ setFormData, checkRelease, vari }: iProps) => {
+const CadVariedadeCultura: any = WithModal(({ setFormData, checkRelease, vari, isEdited }: iProps) => {
   const [variedade, setVariedade] = useState<iVariedade>({
     objID: uuid.v4().toString(),
     idCultura: '',
@@ -28,7 +27,7 @@ const CadVariedadeCultura: any = WithModal(({ setFormData, checkRelease, vari }:
   }, [variedade]);
 
   useEffect(() => {
-    if (vari) {
+    if (vari && isEdited) {
       setVariedade((prev) => ({
         ...prev,
         objID: vari.objID,

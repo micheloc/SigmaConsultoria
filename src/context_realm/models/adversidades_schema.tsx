@@ -6,7 +6,7 @@ const adversidades_schema: ObjectSchema = {
   properties: {
     objID: 'string',
     idAvaliacao: 'string',
-    image: 'data?[]',
+    image: 'string?',
     descricao: 'string',
     nivel: 'float',
     tipo: 'string',

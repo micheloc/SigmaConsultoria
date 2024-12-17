@@ -15,17 +15,23 @@ import sContainerTable from 'component/style_component/container_table';
 import Toast from 'react-native-toast-message';
 
 import { ButtonConf, Container, Footer, Label, LabelForm } from 'styles/boody.containers';
-import { Dropdown } from 'react-native-element-dropdown';
-import { FlatList, View, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { ContainerHeaderLst, Divider, InputGroup } from './styles';
+import { FlatList, View, StyleSheet, Image, TouchableOpacity, Alert } from 'react-native';
+import { ContainerHeaderLst, Divider } from './styles';
+import { InputGroup, ScrollView } from 'native-base';
 import { TableArea } from './component/area_table';
 import { useEffect, useState } from 'react';
 import { formatCPForCNPJString } from 'util/adjust_mask';
 import { _createCliente, _getAllCliente, _removeAllClientes } from 'services/cliente_service';
-import { _createFazendas, _getAllFazenda, _removeAllFazendas } from 'services/fazenda_service';
+import {
+  _createFazendas,
+  _getAllFazenda,
+  _removeAllFazendas,
+  _removeFazenda,
+} from 'services/fazenda_service';
 import { _createAreas, _getAllArea, _removeAllArea } from 'services/area_service';
 import { useNavigation } from '@react-navigation/native';
 import Input from 'component/Input';
+import Dropdown from 'component/DropDown';
 
 const CadCliente = () => {
   const timestamp: number = moment.now();
@@ -50,6 +56,8 @@ const CadCliente = () => {
 
   const [showAreaModal, setShowAreaModal] = useState<boolean>(false);
   const [showFazendaModal, setShowFazendaModal] = useState<boolean>(false);
+
+  const [isEditedFazenda, setIsEditedFazenda] = useState<boolean>(false);
 
   useEffect(() => {
     loadingAreas();
@@ -82,45 +90,6 @@ const CadCliente = () => {
     Toast.show({
       type: 'success',
       text1: `Área: ${obj.nome} adicionada!`,
-      text1Style: { fontSize: 14 },
-    });
-  };
-
-  const onSubmitFazenda = (obj: iFazenda) => {
-    const fazenda: iFazenda = {
-      objID: obj.objID,
-      idCliente: cliente.objID,
-      nome: obj.nome,
-      created: obj.created,
-      updated: obj.updated,
-    };
-
-    const up_lst: iFazenda[] = [...lstFazenda];
-    up_lst.push(fazenda);
-
-    setLstFazenda(up_lst);
-
-    setShowFazendaModal(false);
-
-    Toast.show({
-      type: 'success',
-      text1: `Fazenda: ${obj.nome} adicionada com sucesso!`,
-      text1Style: { fontSize: 14 },
-    });
-  };
-
-  const onRemoveSelectedFazenda = () => {
-    const up_fazenda: iFazenda[] = lstFazenda.filter((obj: iFazenda) => obj.objID !== idFazenda);
-    setLstFazenda(up_fazenda);
-
-    const up_areas: iArea[] = lstAllAreas.filter((obj: iArea) => obj.idFazenda !== idFazenda);
-    setLstAllAreas(up_areas);
-
-    setIdFazenda('');
-
-    Toast.show({
-      type: 'success',
-      text1: `Fazenda removida com sucesso!`,
       text1Style: { fontSize: 14 },
     });
   };
@@ -181,6 +150,103 @@ const CadCliente = () => {
     }, 1500);
   };
 
+  /** * Este método será utilizado para validar o campo de registro  */
+  const disabled_register = (): boolean => {
+    /// Essa condição séra utilizada para validar o cadastro do cliente.
+    if (lstAllAreas.length === 0 || cliente.nome === '') {
+      return false;
+    }
+
+    return true;
+  };
+
+  const onSubmitFazenda = (obj: iFazenda) => {
+    const fazenda: iFazenda = {
+      objID: obj.objID,
+      idCliente: cliente.objID,
+      nome: obj.nome,
+      created: obj.created,
+      updated: obj.updated,
+    };
+
+    let up_lst: iFazenda[] = [...lstFazenda];
+    if (!isEditedFazenda) {
+      up_lst.push(fazenda);
+    } else {
+      up_lst = up_lst.filter((item: iFazenda) => item.objID !== idFazenda);
+      fazenda.objID = idFazenda;
+      up_lst.push(fazenda);
+    }
+
+    setIdFazenda('');
+    setLstFazenda(up_lst);
+    setShowFazendaModal(false);
+
+    Toast.show({
+      type: 'success',
+      text1: `Fazenda: ${obj.nome} adicionada com sucesso!`,
+      text1Style: { fontSize: 14 },
+    });
+  };
+
+  const edited_fazenda = () => {
+    setIsEditedFazenda(true);
+    setTimeout(() => {
+      setShowFazendaModal(true);
+    }, 500);
+  };
+
+  const onRemoveSelectedFazenda = () => {
+    const item: iFazenda = lstFazenda.filter((item: iFazenda) => item.objID === idFazenda)[0];
+
+    try {
+      Alert.alert(
+        'Alerta!',
+        `Deseja realmente excluir a Fazenda: ${item.nome}.\nAo apagar este registro, todas as áreas vinculada será apagada.`,
+        [
+          {
+            text: 'Não',
+            style: 'cancel',
+          },
+          {
+            text: 'Sim',
+            onPress: async () => {
+              try {
+                const up_fazenda: iFazenda[] = lstFazenda.filter(
+                  (obj: iFazenda) => obj.objID !== idFazenda
+                );
+                setLstFazenda(up_fazenda);
+
+                const up_areas: iArea[] = lstAllAreas.filter((obj: iArea) => obj.idFazenda !== idFazenda);
+                setLstAllAreas(up_areas);
+
+                setIdFazenda('');
+
+                Toast.show({
+                  type: 'success',
+                  text1: `Fazenda removida com sucesso!`,
+                  text1Style: { fontSize: 14 },
+                });
+              } catch (error) {
+                console.log('Erro ao remover a fase:', error);
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.log('Erro ao apresentar mensagem de alerta:', error);
+    }
+  };
+
+  const resize_fazenda = (): any => {
+    if (idFazenda && idFazenda !== '') {
+      return '72%';
+    }
+
+    return '91%';
+  };
+
   const styles = StyleSheet.create({
     dropdownSelect: {
       marginTop: -2,
@@ -195,16 +261,6 @@ const CadCliente = () => {
       elevation: 4,
     },
   });
-
-  /** * Este método será utilizado para validar o campo de registro  */
-  const disabled_register = (): boolean => {
-    /// Essa condição séra utilizada para validar o cadastro do cliente.
-    if (lstAllAreas.length === 0 || cliente.nome === '') {
-      return false;
-    }
-
-    return true;
-  };
 
   return (
     <Container style={sForm.body}>
@@ -247,47 +303,49 @@ const CadCliente = () => {
         <LabelForm>Fazendas : </LabelForm>
         <InputGroup>
           <Dropdown
-            search
+            search={lstFazenda.length > 0}
             data={lstFazenda}
-            style={styles.dropdownSelect}
-            maxHeight={450}
-            value={idFazenda}
             labelField="nome"
             valueField="objID"
-            placeholder="Informe a fazenda"
-            searchPlaceholder="Pesquisar por fazenda"
+            placeholder={lstFazenda.length > 0 ? 'Selecione a fase...' : 'Registre uma fazenda'}
+            searchPlaceholder="Pesquisar por fase"
+            style={{ width: resize_fazenda() }}
             onChange={(item: iFazenda) => {
-              setIdFazenda(item.objID);
+              if (item) {
+                setIdFazenda(item.objID);
+              }
             }}
           />
           <TouchableOpacity
             style={{ width: 50, height: 50, padding: 10 }}
             onPress={() => setShowFazendaModal(true)}>
             <Image
-              source={require('assets/img/Icons/adicionar.png')}
-              style={{ width: 30, height: 30, padding: 0 }}
+              source={require('assets/img/Icons/Add.png')}
+              style={{ width: 35, height: 35, padding: 0 }}
             />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            disabled={idFazenda === ''}
-            style={{
-              marginBottom: 5,
-              width: 50,
-              height: 50,
-              paddingTop: 10,
-              paddingBottom: 10,
-            }}
-            onPress={() => onRemoveSelectedFazenda()}>
-            <Image
-              source={require('assets/img/Icons/remover.png')}
-              style={{ width: 30, height: 30, padding: 0 }}
-            />
-          </TouchableOpacity>
+          {idFazenda !== '' && (
+            <>
+              <TouchableOpacity onPress={() => edited_fazenda()}>
+                <Image
+                  source={require('assets/img/Icons/editar.png')}
+                  style={{ width: 35, height: 35, margin: 8 }}
+                />
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => onRemoveSelectedFazenda()}>
+                <Image
+                  source={require('assets/img/Icons/remover.png')}
+                  style={{ width: 35, height: 35, margin: 8 }}
+                />
+              </TouchableOpacity>
+            </>
+          )}
         </InputGroup>
       </View>
 
-      <Divider />
+      <Divider style={{ paddingTop: 5 }} />
 
       <ButtonConf
         disabled={idFazenda === ''}
@@ -332,18 +390,21 @@ const CadCliente = () => {
         </ButtonConf>
       </Footer>
 
+      <FazendaModal
+        visible={showFazendaModal}
+        fz={lstFazenda.filter((item: iFazenda) => item.objID === idFazenda)[0]}
+        isEdited={isEditedFazenda}
+        onClose={() => {
+          setIsEditedFazenda(false);
+          setShowFazendaModal(false);
+        }}
+        onSubmitForm={onSubmitFazenda}
+      />
+
       <AreaModal
         visible={showAreaModal}
         onClose={() => setShowAreaModal(false)}
         onSubmitForm={onSubmitArea}
-        height={dimensions.isTablet ? '26%' : '32%'}
-      />
-
-      <FazendaModal
-        visible={showFazendaModal}
-        onClose={() => setShowFazendaModal(false)}
-        onSubmitForm={onSubmitFazenda}
-        height={dimensions.isTablet ? '26%' : '32%'}
       />
     </Container>
   );
