@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import Dropdown from 'component/DropDown';
 import Share from 'react-native-share';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
@@ -7,18 +8,49 @@ import iFase from 'types/interfaces/iFase';
 import iFazenda from 'types/interfaces/iFazenda';
 import uuid from 'react-native-uuid';
 
-import { ActivityIndicator, Alert, Dimensions, StyleSheet, View, TextInput } from 'react-native';
-import { ButtonConf, ButtonUpdate, Container, Divider, Label, LabelForm } from 'styles/boody.containers';
-import { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  StyleSheet,
+  View,
+  TextInput,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import {
+  ButtonConf,
+  ButtonEnd,
+  ButtonUpdate,
+  Container,
+  Divider,
+  Footer,
+  Label,
+  LabelForm,
+} from 'styles/boody.containers';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 
 import { _findFazendaByCliente } from 'services/fazenda_service';
 import { _getAllCliente } from 'services/cliente_service';
+import { _findRelatorioByFazenda, _findRelatorioByFazendaAndFase } from 'services/relatorio_service';
+import AvaliacaoModal from './avaliacao_modal';
+import iAvaliacao from 'types/interfaces/iAvaliacao';
+import Input from 'component/Input';
+import { background } from 'native-base/lib/typescript/theme/styled-system';
+import { iRelatorio, iRelatorioExport } from 'types/interfaces/iRelatorio';
+import { ContainerTitleArea, TextTitleArea } from 'navigations/avaliacao/style';
+import RecomendacaoModal from './recomendacao_modal';
+import { InputGroup } from 'native-base';
+import { ButtonCancel } from 'component/modal/style';
 
 const Relatorio = () => {
   const nav: any = useNavigation();
   const widthScreen = Dimensions.get('screen').width;
+  const heightScreen = Dimensions.get('screen').height;
 
   const [oCliente, setCliente] = useState<iCliente>({
     objID: uuid.v4().toString(),
@@ -51,12 +83,20 @@ const Relatorio = () => {
     dapMedio: 0,
   });
 
+  const [oRelatorio, setRelatorio] = useState<iRelatorioExport | null>();
+
   const [clientes, setClientes] = useState<iCliente[]>([]);
   const [fazendas, setFazendas] = useState<iFazenda[]>([]);
   const [culturas, setCulturas] = useState<iCultura[]>([]);
+  const [relatorioExport, setRelatorioExport] = useState<iRelatorioExport[]>([]);
   const [fases, setFases] = useState<iFase[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [showAvaliacao, setShowAvaliacao] = useState<boolean>(false);
+  const [showRecomendacao, setShowRecomendacao] = useState<boolean>(false);
+  const [numberFases, setNumberFases] = useState<number>(1);
+
+  const [txtTalhoes, setTxtTalhoes] = useState<string>('');
 
   useFocusEffect(
     useCallback(() => {
@@ -101,6 +141,59 @@ const Relatorio = () => {
 
     loading();
   }, [oCliente]);
+
+  useEffect(() => {
+    const loading = async () => {
+      const lst_cultura = [...culturas];
+      const lst_fases = [...fases];
+
+      setCulturas([]);
+      setFases([]);
+
+      const resp: any = await _findRelatorioByFazenda(oFazenda.objID);
+      if (resp) {
+        for (const item of resp) {
+          const c: iCultura = { objID: item.idCultura, nome: item.cultura };
+          lst_cultura.push(c);
+
+          const f: iFase = { objID: item.idFase, idCultura: item.idCultura, nome: item.fase, dapMedio: 0 };
+          lst_fases.push(f);
+        }
+      }
+
+      const unique_cultura = _.uniqBy(lst_cultura, 'objID');
+      setCulturas(unique_cultura);
+
+      const unique_fase = _.uniqBy(lst_fases, 'objID');
+      setFases(unique_fase);
+    };
+
+    loading();
+  }, [oFazenda]);
+
+  useEffect(() => {
+    if (oFase.objID) {
+      loadingRecomendacao();
+    }
+  }, [oFase]);
+
+  const loadingRecomendacao = async () => {
+    const resp: any = await _findRelatorioByFazendaAndFase(oFazenda.objID, oFase.objID);
+
+    if (resp.length > 0) {
+      const unique_area: any = _.uniqBy(resp, 'idArea');
+      const result = unique_area.map((item: iRelatorio) => item.area).join(', ');
+      setTxtTalhoes(result);
+
+      setShowAvaliacao(true);
+    }
+  };
+
+  useEffect(() => {
+    if (oRelatorio) {
+      setShowRecomendacao(true);
+    }
+  }, [oRelatorio]);
 
   const generate = async () => {
     const html = `
@@ -522,6 +615,66 @@ const Relatorio = () => {
     );
   };
 
+  const onSubmitAvaliacao = (row: iRelatorio[]) => {
+    const lst = [...relatorioExport];
+
+    for (const x of row) {
+      const obj: iRelatorioExport = {
+        id: numberFases,
+        objID: x.objID,
+        idCultura: x.idCultura,
+        idFase: x.idFase,
+        area: x.area,
+        fase: x.fase,
+        cultura: x.cultura,
+        recomendacao: x.recomendacao,
+      };
+
+      lst.push(obj);
+    }
+
+    setRelatorioExport(lst);
+    setShowAvaliacao(false);
+  };
+
+  const onSubmitRecomendacao = (row: iRelatorioExport) => {
+    const lst = [...relatorioExport];
+    const update_lst: iRelatorioExport[] = lst.filter((item: iRelatorioExport) => item.objID !== row.objID);
+    update_lst.push(row);
+
+    setRelatorioExport(update_lst);
+    setShowRecomendacao(false);
+  };
+
+  const onRemoveRecomendacao = (row: iRelatorioExport) => {
+    const lst = [...relatorioExport];
+
+    try {
+      Alert.alert('Alerta!', `Deseja realmente remover a recomendação da lista: ${row.recomendacao} `, [
+        {
+          text: 'Não',
+          style: 'cancel',
+        },
+        {
+          text: 'Sim',
+          onPress: async () => {
+            try {
+              const update_lst: iRelatorioExport[] = lst.filter(
+                (item: iRelatorioExport) => item.objID !== row.objID
+              );
+
+              setRelatorioExport(update_lst);
+            } catch (error) {
+              console.log('Erro ao remover a variedade:', error);
+            }
+          },
+        },
+      ]);
+    } catch (error) {
+      console.log('Erro ao apresentar mensagem de alerta:', error);
+    }
+  };
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -530,63 +683,18 @@ const Relatorio = () => {
     );
   }
 
-  return (
-    <Container style={{ backgroundColor: '#ccc' }}>
+  const nFases = Array.from({ length: numberFases }, (_, index) => index + 1);
+
+  const FaseComponent = ({ index }: any) => {
+    return (
       <View>
-        <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
-        <Dropdown
-          search={clientes.length > 0}
-          data={clientes}
-          labelField="nome"
-          valueField="objID"
-          placeholder="Selecione o Cliente"
-          searchPlaceholder="Pesquisar por cliente"
-          value={oCliente}
-          onChange={(item: iCliente) => {
-            setCliente(item);
-          }}
-        />
-      </View>
-
-      <View>
-        <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
-        <Dropdown
-          search={fazendas.length > 0}
-          data={fazendas}
-          labelField="nome"
-          valueField="objID"
-          placeholder="Selecione a fazenda"
-          searchPlaceholder="Pesquisar por fazenda"
-          value={oFazenda}
-          onChange={(item: iFazenda) => {
-            setFazenda(item);
-          }}
-        />
-      </View>
-
-      {oFazenda.objID && (
-        <>
+        {index > 1 && (
           <View>
-            <LabelForm style={{ marginBottom: -5 }}>Cultura : </LabelForm>
-            <Dropdown
-              search={culturas.length > 0}
-              data={culturas}
-              labelField="nome"
-              valueField="objID"
-              placeholder={
-                culturas.length > 0 ? 'Selecione a cultura...' : 'Nenhuma cultura foi encontrada... '
-              }
-              searchPlaceholder="Pesquisar por cultura"
-              value={oCultura}
-              onChange={(item: iCultura) => {
-                setCultura(item);
-              }}
-            />
-          </View>
+            <Divider style={{ backgroundColor: '#ababab' }} />
 
-          <View>
             <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
             <Dropdown
+              key={`dropdown-${index}`}
               search={fases.length > 0}
               data={fases}
               labelField="nome"
@@ -599,36 +707,227 @@ const Relatorio = () => {
               }}
             />
           </View>
+        )}
 
-          <View style={styles.container}>
-            <LabelForm>Descrição da recomendação : </LabelForm>
-            <TextInput
-              style={styles.textArea}
-              multiline={true}
-              onChangeText={(text) => console.log(text)}
-              value={''}
-              placeholder="Informe os dados da recomendação..."
-              placeholderTextColor="#ababab"
-              textAlignVertical="top"
-            />
-          </View>
-          <Divider style={{ height: 1 }} />
-          <View style={{ width: '100%', alignItems: 'center' }}>
+        {index === numberFases && (
+          <InputGroup>
             <View>
-              <ButtonUpdate style={{ width: widthScreen / 2 }}>
-                <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
+              <ButtonUpdate
+                style={{ width: widthScreen / 2, marginLeft: -1 }}
+                onPress={() => loadingRecomendacao()}>
+                <Label style={{ fontSize: 12 }}>Carregar Recomendacões</Label>
               </ButtonUpdate>
             </View>
-          </View>
-        </>
-      )}
+            <View>
+              <ButtonConf style={{ width: widthScreen / 2 - 30 }}>
+                <Label style={{ fontSize: 12 }}>Nova recomendação</Label>
+              </ButtonConf>
+            </View>
+          </InputGroup>
+        )}
 
-      <Divider style={{ height: 1 }} />
-      <View style={{ width: '100%', alignItems: 'center' }}>
-        <ButtonConf style={{ width: widthScreen / 2 - 45 }}>
-          <Label style={{ fontSize: 12 }}>Exportar</Label>
-        </ButtonConf>
+        <ScrollView nestedScrollEnabled={true}>
+          {relatorioExport.map((row: iRelatorioExport) => {
+            return (
+              <Fragment key={row.objID}>
+                <TouchableOpacity onPress={() => setRelatorio(row)}>
+                  <View style={styles.row}>
+                    <Text style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>
+                      {row.objID}
+                    </Text>
+                    <Text style={[styles.cell, styles.cellSeparator]}>{row.area}</Text>
+                    <Text style={[styles.cell, styles.cellSeparator]}>{row.recomendacao}</Text>
+                    <TouchableOpacity
+                      style={{ justifyContent: 'center', alignContent: 'center' }}
+                      onPress={() => onRemoveRecomendacao(row)}>
+                      <Image
+                        source={require('assets/img/Icons/remover.png')}
+                        style={{ width: 30, height: 30, margin: 10 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </TouchableOpacity>
+                <Divider style={{ height: 2 }} />
+              </Fragment>
+            );
+          })}
+        </ScrollView>
       </View>
+    );
+  };
+
+  const FaseList = (): any => {
+    return (
+      <View>
+        {nFases.map((number) => {
+          return <FaseComponent index={number} />;
+        })}
+      </View>
+    );
+  };
+
+  return (
+    <Container style={{ height: heightScreen, backgroundColor: '#ccc' }}>
+      <ScrollView nestedScrollEnabled={true}>
+        <View>
+          <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
+          <Dropdown
+            search={clientes.length > 0}
+            data={clientes}
+            labelField="nome"
+            valueField="objID"
+            placeholder="Selecione o Cliente"
+            searchPlaceholder="Pesquisar por cliente"
+            value={oCliente}
+            onChange={(item: iCliente) => {
+              setCliente(item);
+            }}
+          />
+        </View>
+
+        <View>
+          <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
+          <Dropdown
+            search={fazendas.length > 0}
+            data={fazendas}
+            labelField="nome"
+            valueField="objID"
+            placeholder="Selecione a fazenda"
+            searchPlaceholder="Pesquisar por fazenda"
+            value={oFazenda}
+            onChange={(item: iFazenda) => {
+              setFazenda(item);
+            }}
+          />
+        </View>
+
+        {oFazenda.objID && (
+          <>
+            <View>
+              <LabelForm style={{ marginBottom: -5 }}>Cultura : </LabelForm>
+              <Dropdown
+                search={culturas.length > 0}
+                data={culturas}
+                labelField="nome"
+                valueField="objID"
+                placeholder={
+                  culturas.length > 0 ? 'Selecione a cultura...' : 'Nenhuma cultura foi encontrada... '
+                }
+                searchPlaceholder="Pesquisar por cultura"
+                value={oCultura}
+                onChange={(item: iCultura) => {
+                  setCultura(item);
+                }}
+              />
+            </View>
+
+            <View>
+              <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
+              <Dropdown
+                search={fases.length > 0}
+                data={fases}
+                labelField="nome"
+                valueField="objID"
+                placeholder={fases.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '}
+                searchPlaceholder="Pesquisar por fazenda"
+                value={oFase}
+                onChange={(item: iFase) => {
+                  setFase(item);
+                }}
+              />
+            </View>
+
+            {oFase.objID && (
+              <View>
+                <LabelForm>Talhões : </LabelForm>
+                <Input
+                  style={{
+                    backgroundColor: '#ccc',
+                    borderColor: '#ababab',
+                    borderWidth: 1, // Adiciona largura para a borda
+                  }}
+                  maxLength={30}
+                  placeholder="Talhões"
+                  value={txtTalhoes}
+                />
+              </View>
+            )}
+
+            <View style={styles.containerList}>
+              {oFase.objID && (
+                <>
+                  <View>
+                    <ContainerTitleArea style={{ width: '100%', marginLeft: -1 }}>
+                      <TextTitleArea style={{ fontSize: 14 }}>Recomendações</TextTitleArea>
+                    </ContainerTitleArea>
+                  </View>
+                  <FaseList />
+                </>
+              )}
+
+              {relatorioExport.length > 0 && (
+                <>
+                  <Divider style={{ height: 1 }} />
+
+                  <View style={{ width: '100%', alignItems: 'center' }}>
+                    <InputGroup>
+                      <ButtonUpdate
+                        style={{ width: widthScreen / 2 }}
+                        onPress={() => {
+                          let x: number = numberFases + 1;
+
+                          setNumberFases(x);
+                        }}>
+                        <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
+                      </ButtonUpdate>
+
+                      {numberFases > 1 && (
+                        <ButtonEnd
+                          style={{ width: widthScreen / 2 }}
+                          onPress={() => {
+                            let x: number = numberFases - 1;
+
+                            setNumberFases(x);
+                          }}>
+                          <Label style={{ fontSize: 12 }}>Remover fase</Label>
+                        </ButtonEnd>
+                      )}
+                    </InputGroup>
+                  </View>
+                </>
+              )}
+
+              <Divider style={{ height: 1 }} />
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <ButtonConf style={{ width: widthScreen / 2 - 45 }}>
+                  <Label style={{ fontSize: 12 }}>Exportar</Label>
+                </ButtonConf>
+              </View>
+            </View>
+          </>
+        )}
+
+        <AvaliacaoModal
+          visible={showAvaliacao}
+          idFazenda={oFazenda.objID}
+          idFase={oFase.objID}
+          rel={relatorioExport}
+          onClose={() => {
+            setShowAvaliacao(false);
+          }}
+          onSubmitForm={onSubmitAvaliacao}
+        />
+
+        <RecomendacaoModal
+          visible={showRecomendacao}
+          rel={relatorioExport.filter((item: iRelatorioExport) => item.objID === oRelatorio?.objID)[0]}
+          onClose={() => {
+            setRelatorio(null);
+            setShowRecomendacao(false);
+          }}
+          onSubmitForm={onSubmitRecomendacao}
+        />
+      </ScrollView>
     </Container>
   );
 };
@@ -645,6 +944,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
     marginRight: 15,
+  },
+  headerCell: {
+    color: 'white',
+    fontWeight: 'bold',
+    backgroundColor: '#1b437e',
+    minWidth: 100,
+    padding: 10,
+  },
+  cellSeparator: {
+    minWidth: 80,
+    borderColor: '#ccc',
+  },
+  containerList: {
+    padding: 6,
+    paddingTop: 5,
+    marginRight: 8,
+    marginBottom: 5,
+    maxHeight: '28%',
+  },
+  row: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+  },
+  cell: {
+    padding: 5,
+    fontSize: 12,
+    borderWidth: 0.5,
+    flex: 1,
+    fontFamily: 'roboto',
   },
 });
 

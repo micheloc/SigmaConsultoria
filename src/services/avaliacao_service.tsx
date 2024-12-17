@@ -17,7 +17,6 @@ export const _createAvaliacao = async (item: iAvaliacaoRealm): Promise<boolean> 
         idVariedade: item.idVariedade,
         avaliadores: item.avaliadores,
         data: item.data,
-        image: item.image,
         pdf: item.pdf,
         recomendacao: item.recomendacao,
       });

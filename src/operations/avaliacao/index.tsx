@@ -884,7 +884,7 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
                           <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
                             {row.descricao.toUpperCase()}
                           </Text>
-                          <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>
+                          <Text key={toString()} style={[styles.cell, styles.cellSeparator]}>
                             {row.nivel}
                           </Text>
                           <Text key={uuid.v4().toString()} style={[styles.cell, styles.cellSeparator]}>

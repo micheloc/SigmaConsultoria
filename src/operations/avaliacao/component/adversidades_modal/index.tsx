@@ -91,12 +91,17 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
       } catch (err) {
         console.warn(err);
       }
-    } else {
+    } else if (Platform.OS === 'ios') {
       const result = await request(PERMISSIONS.IOS.CAMERA);
+      console.log(result);
       if (result === RESULTS.GRANTED) {
         handleCameraLaunch();
-      } else {
+      } else if (result === RESULTS.DENIED) {
         console.log('Permissão de câmera negada');
+      } else if (result === RESULTS.UNAVAILABLE) {
+        console.log('Permissão de câmera indisponível');
+      } else if (result === RESULTS.BLOCKED) {
+        console.log('Permissão de câmera bloqueada');
       }
     }
   };

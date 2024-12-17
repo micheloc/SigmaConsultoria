@@ -121,7 +121,7 @@ export const ButtonUpdate = styled.TouchableOpacity`
 `;
 
 export const ButtonEnd = styled.TouchableOpacity`
-  background-color: #3aa637;
+  background-color: rgb(146, 19, 19);
   padding: 10px;
   border-radius: 5px;
   margin: 5px;

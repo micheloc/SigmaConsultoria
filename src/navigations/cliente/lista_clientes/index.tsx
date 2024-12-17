@@ -22,6 +22,7 @@ import { _createFazendas } from 'services/fazenda_service';
 import { _createAreas } from 'services/area_service';
 import context_realm from 'context_realm/index';
 import Input from 'component/Input';
+import { _createRelatorio, _createRelatorios } from 'services/relatorio_service';
 
 const LstDownloadClientes = () => {
   const navigation: any = useNavigation();
@@ -111,6 +112,21 @@ const LstDownloadClientes = () => {
           for (const item of fazendas.data) {
             const areas = await api.get(`/Area/FindAllByfazenda?objID=${item.objID}`);
             await _createAreas(areas.data);
+          }
+        } catch (error) {
+          setTimeout(() => {
+            Toast.show({
+              type: 'error',
+              text2: `Não foi possivel baixar os dados da área!`,
+              text2Style: { fontSize: 12 },
+            });
+          }, 500);
+        }
+
+        try {
+          for (const item of fazendas.data) {
+            const resp = await api.get(`/Avaliacao/FindByFazenda?idFazenda=${item.objID}`);
+            await _createRelatorios(resp.data);
           }
         } catch (error) {
           setTimeout(() => {

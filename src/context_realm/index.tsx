@@ -9,6 +9,7 @@ import fase_schema from './models/fase_schema';
 import fazenda_schema from './models/fazenda_schema';
 import login_schema from './models/login_schema';
 import variedade_schema from './models/variedade_schema';
+import relatorio_schema from './models/relatorio_schema';
 
 const context_realm = async (): Promise<Realm> => {
   const config = {
@@ -24,8 +25,9 @@ const context_realm = async (): Promise<Realm> => {
       fazenda_schema,
       login_schema,
       variedade_schema,
+      relatorio_schema,
     ],
-    schemaVersion: 3,
+    schemaVersion: 6,
   };
 
   return await Realm.open(config);
