@@ -163,14 +163,22 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
       } catch (err) {
         console.warn(err);
       }
-    } else {
-      // Para iOS, solicitamos a permissão para acessar a galeria
-      const result = await request(PERMISSIONS.IOS.PHOTO_LIBRARY); // Permissão para acessar a galeria de fotos
-      if (result === RESULTS.GRANTED) {
-        console.log(result);
-        handleGaleriaLaunch(); // Função para abrir a galeria
+    } else if (Platform.OS === 'ios') {
+      if (requestPermission && hasPermission) {
+        try {
+          const result = await requestPermission();
+          console.log(result);
+
+          if (hasPermission) {
+            handleGaleriaLaunch(); // Função para lançar a câmera
+          } else {
+            console.log('Permissão da galeria não concedida no iOS');
+          }
+        } catch (err) {
+          console.error('Erro ao solicitar permissão da galeria no iOS:', err);
+        }
       } else {
-        console.log('Permissão de galeria negada');
+        console.log('Hook `useCameraPermission` não disponível para iOS');
       }
     }
   };
