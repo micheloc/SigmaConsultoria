@@ -20,6 +20,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Keyboard,
 } from 'react-native';
 
 import {
@@ -42,6 +43,7 @@ import { _findRelatorioByFazenda, _findRelatorioByFazendaAndFase } from 'service
 import { iRelatorio, iRelatorioExport, iRelatorioFases } from 'types/interfaces/iRelatorio';
 import { ContainerTitleArea, TextTitleArea } from 'navigations/avaliacao/style';
 import { InputGroup } from 'native-base';
+import RecomendacaoGeralModal from './component/recomendacao_geral_modal';
 
 const Relatorio = () => {
   const nav: any = useNavigation();
@@ -73,6 +75,7 @@ const Relatorio = () => {
   });
 
   const [oRelatorio, setRelatorio] = useState<iRelatorioExport | null>();
+  const [oRecomendacaoGeral, setRecomendacaoGeral] = useState<iRelatorioExport | null>();
 
   const [clientes, setClientes] = useState<iCliente[]>([]);
   const [fazendas, setFazendas] = useState<iFazenda[]>([]);
@@ -82,6 +85,7 @@ const Relatorio = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAvaliacao, setShowAvaliacao] = useState<boolean>(false);
   const [showRecomendacao, setShowRecomendacao] = useState<boolean>(false);
+  const [showRecomendacaoGeral, setShowRecomendacaoGeral] = useState<boolean>(false);
 
   const [txtTalhoes, setTxtTalhoes] = useState<string>('');
 
@@ -97,6 +101,7 @@ const Relatorio = () => {
       },
       lst_fase: [...fases],
       relatorio: [],
+      idRecomendacao: '',
       recomendacao: '',
     },
   ]);
@@ -189,6 +194,12 @@ const Relatorio = () => {
     }
   }, [oRelatorio]);
 
+  useEffect(() => {
+    if (oRecomendacaoGeral) {
+      setShowRecomendacaoGeral(true);
+    }
+  }, [oRecomendacaoGeral]);
+
   /** Este component será utilizado para filtrar a lista de index da lista de fases.  */
   const fLstFases = lstFases.filter((obj) => obj.index === indexFase)[0];
 
@@ -274,6 +285,20 @@ const Relatorio = () => {
     setShowRecomendacao(false);
   };
 
+  const onSubmitRecomendacaoGeral = (reco: string) => {
+    setLstFases((prev) =>
+      prev.map((item) =>
+        item.index === indexFase
+          ? {
+              ...item,
+              recomendacao: reco,
+            }
+          : item
+      )
+    );
+    setShowRecomendacaoGeral(false);
+  };
+
   const onRemoveRecomendacao = (row: iRelatorioExport) => {
     try {
       Alert.alert('Alerta!', `Deseja realmente remover a recomendação da lista: ${row.recomendacao} `, [
@@ -315,25 +340,6 @@ const Relatorio = () => {
   }
 
   const FaseComponent = ({ ...props }: iRelatorioFases) => {
-    console.log('olá');
-
-    // Dentro do componente FaseComponent
-    const handleChangeText = useCallback(
-      (txt: string) => {
-        setLstFases((prev) =>
-          prev.map((item) =>
-            item.index === indexFase
-              ? {
-                  ...item,
-                  recomendacao: txt,
-                }
-              : item
-          )
-        );
-      },
-      [indexFase]
-    );
-
     return (
       <View>
         {props.index > 1 && (
@@ -435,16 +441,34 @@ const Relatorio = () => {
         {props.relatorio.length === 0 && (
           <Text style={{ color: 'red' }}>Nenhuma recomendação carregada... </Text>
         )}
-
         <View style={styles.containerTextArea}>
-          <Input
-            style={styles.textArea}
-            value={fLstFases.recomendacao} // Use o valor local para o campo de texto
-            onChangeText={handleChangeText}
-            placeholder="Informe os dados da recomendação... "
-            multiline={true}
-            numberOfLines={4}
-          />
+          <TouchableOpacity
+            onPress={() => {
+              //// Essa condição limita a edição somente ao index atual.
+              if (props.index === indexFase) {
+                const item: iRelatorioExport = {
+                  objID: uuid.v4().toString(),
+                  idCultura: props.oFase.idCultura,
+                  idFase: props.oFase.objID,
+                  area: '',
+                  fase: '',
+                  cultura: '',
+                  recomendacao: props.recomendacao,
+                };
+
+                setRecomendacaoGeral(item);
+              }
+            }}>
+            <View style={styles.row}>
+              {props.recomendacao !== '' ? (
+                <Text style={[styles.cell, styles.cellSeparator]}>{props.recomendacao}</Text>
+              ) : (
+                <Text style={[styles.cell, styles.cellSeparator, { color: '#ababab', padding: '2%' }]}>
+                  {'Informe a recomendação geral... '}
+                </Text>
+              )}
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -599,6 +623,7 @@ const Relatorio = () => {
                           oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
                           lst_fase: [...fases],
                           relatorio: [],
+                          idRecomendacao: '',
                           recomendacao: '',
                         },
                       ]);
@@ -663,6 +688,16 @@ const Relatorio = () => {
           }}
           onSubmitForm={onSubmitRecomendacao}
         />
+
+        <RecomendacaoGeralModal
+          visible={showRecomendacaoGeral}
+          reco={lstFases.filter((item) => item.index === indexFase).map((item) => item.recomendacao)[0]}
+          onClose={() => {
+            setRecomendacaoGeral(null);
+            setShowRecomendacaoGeral(false);
+          }}
+          onSubmitForm={onSubmitRecomendacaoGeral}
+        />
       </ScrollView>
     </Container>
   );
@@ -672,17 +707,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, maxHeight: 230 },
   containerTextArea: {
     flex: 1,
-  },
-  textArea: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#999',
-    backgroundColor: '#fff',
-    color: 'black',
-    borderRadius: 5,
-    fontSize: 14,
-    width: '100%',
-    marginLeft: '-0.06%',
+    marginTop: '1%',
   },
   headerCell: {
     color: 'white',

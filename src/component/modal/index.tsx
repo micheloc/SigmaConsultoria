@@ -49,7 +49,7 @@ const WithModal = (WrappedComponent: React.ComponentType<any>) => {
                   borderWidth: 1,
                 }}
                 onPress={handleSubmit}>
-                <Text style={{ color: 'white', fontWeight: 'bold' }}>Adicionar</Text>
+                <Text style={{ color: 'white', fontWeight: 'bold' }}>Salvar</Text>
               </ButtonConfirm>
 
               <ButtonCancel onPress={onClose}>
