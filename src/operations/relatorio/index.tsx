@@ -195,8 +195,11 @@ const Relatorio = () => {
     }
   }, [oRelatorio]);
 
+  /** Este component será utilizado para filtrar a lista de index da lista de fases.  */
+  const fLstFases = lstFases.filter((obj) => obj.index === indexFase)[0];
+
   const loadingRecomendacao = async () => {
-    const resp: any = await _findRelatorioByFazendaAndFase(oFazenda.objID, oFase.objID);
+    const resp: any = await _findRelatorioByFazendaAndFase(oFazenda.objID, fLstFases.oFase.objID);
 
     if (resp.length > 0) {
       const unique_area: any = _.uniqBy(resp, 'idArea');
@@ -413,9 +416,6 @@ const Relatorio = () => {
     );
   };
 
-  /** Este component será utilizado para filtrar a lista de index da lista de fases.  */
-  const fLstFases = lstFases.filter((obj) => obj.index === indexFase)[0];
-
   return (
     <Container style={{ height: heightScreen, backgroundColor: '#ccc' }}>
       <ScrollView nestedScrollEnabled={true}>
@@ -479,10 +479,11 @@ const Relatorio = () => {
                   data={lstFases[0].lst_fase}
                   labelField="nome"
                   valueField="objID"
+                  searchPlaceholder="Pesquisar por fase"
                   placeholder={
                     lstFases[0].lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase encontrada... '
                   }
-                  searchPlaceholder="Pesquisar por fase"
+                  value={lstFases[0].oFase}
                   onChange={(item: iFase) => {
                     setLstFases((prev) =>
                       prev.map((fase) =>
@@ -591,7 +592,7 @@ const Relatorio = () => {
         <AvaliacaoModal
           visible={showAvaliacao}
           idFazenda={oFazenda.objID}
-          idFase={oFase.objID}
+          idFase={fLstFases.oFase.objID}
           rel={lstFases
             .filter((item) => item.index === indexFase)
             .map((item) => item.relatorio)
