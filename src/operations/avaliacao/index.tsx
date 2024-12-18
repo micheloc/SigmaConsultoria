@@ -32,7 +32,7 @@ import { ParamListBase } from '@react-navigation/routers';
 import { useNavigation } from '@react-navigation/native';
 import { useCallback, useEffect, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { Text, View, Platform, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native';
+import { Text, View, Platform, StyleSheet, TouchableOpacity, Image, Alert, Dimensions } from 'react-native';
 
 import {
   _createVariedade,
@@ -68,6 +68,7 @@ interface iParams {
 }
 
 const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) => {
+  const screenWidth = Dimensions.get('window').width;
   const params: iParams = route.params;
 
   const nav: any = useNavigation();
@@ -494,22 +495,22 @@ const CadAvaliacao: React.FC<CadAvaliacaoProps> = ({ route, navigation }: any) =
 
   const sizeFase = (): any => {
     if (avaliacao.idCultura && avaliacao.idFase === '') {
-      return '89%';
+      return screenWidth - 70;
     } else if (avaliacao.idCultura && avaliacao.idFase !== '') {
-      return '73%';
+      return screenWidth - 160;
     }
 
-    return '97%';
+    return screenWidth;
   };
 
   const sizeVariedade = (): any => {
     if (avaliacao.idCultura && avaliacao.idVariedade === '') {
-      return '89%';
+      return screenWidth - 70;
     } else if (avaliacao.idCultura && avaliacao.idVariedade !== '') {
-      return '73%';
+      return screenWidth - 160;
     }
 
-    return '97%';
+    return screenWidth;
   };
 
   /** * Este método será utilizado para remover a variedade selecionada do banco de dados e do banco interno. */
