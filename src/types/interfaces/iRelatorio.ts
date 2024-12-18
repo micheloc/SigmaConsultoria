@@ -31,4 +31,5 @@ export interface iRelatorioFases {
   oFase: iFase;
   lst_fase: iFase[];
   relatorio: iRelatorioExport[];
+  recomendacao: string;
 }

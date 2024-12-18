@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { uniq } from 'lodash';
 import AvaliacaoModal from './component/avaliacao_modal';
 import Dropdown from 'component/DropDown';
 
@@ -72,13 +72,6 @@ const Relatorio = () => {
     nome: '',
   });
 
-  const [oFase, setFase] = useState<iFase>({
-    objID: '',
-    idCultura: '',
-    nome: '',
-    dapMedio: 0,
-  });
-
   const [oRelatorio, setRelatorio] = useState<iRelatorioExport | null>();
 
   const [clientes, setClientes] = useState<iCliente[]>([]);
@@ -96,9 +89,15 @@ const Relatorio = () => {
   const [lstFases, setLstFases] = useState<iRelatorioFases[]>([
     {
       index: indexFase,
-      oFase: { ...oFase },
+      oFase: {
+        objID: '',
+        idCultura: '',
+        nome: '',
+        dapMedio: 0,
+      },
       lst_fase: [...fases],
       relatorio: [],
+      recomendacao: '',
     },
   ]);
 
@@ -168,6 +167,7 @@ const Relatorio = () => {
       setCulturas(unique_cultura);
 
       const unique_fase = _.uniqBy(lst_fases, 'objID'); // Garante que não existam duplicatas com o mesmo objID
+      setFases(unique_fase);
       setLstFases((prev) =>
         prev.map((item) =>
           item.index === indexFase
@@ -182,12 +182,6 @@ const Relatorio = () => {
 
     loading();
   }, [oFazenda]);
-
-  useEffect(() => {
-    if (oFase.objID) {
-      loadingRecomendacao();
-    }
-  }, [oFase]);
 
   useEffect(() => {
     if (oRelatorio) {
@@ -328,7 +322,11 @@ const Relatorio = () => {
             <Divider style={{ backgroundColor: '#ababab', height: '0.5%' }} />
 
             <InputGroup>
-              <View style={{ width: '50%' }}>
+              <View
+                style={{
+                  width: lstFases[0].oFase.objID !== '' && props.index === indexFase ? '50%' : '100%',
+                  marginBottom: '2%',
+                }}>
                 <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
                 <Dropdown
                   key={`dropdown-${props.index}`}
@@ -339,9 +337,21 @@ const Relatorio = () => {
                   placeholder={
                     props.lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '
                   }
+                  value={
+                    lstFases[props.index - 1].oFase.objID !== '' ? lstFases[props.index - 1].oFase : null
+                  }
                   searchPlaceholder="Pesquisar por fazenda"
                   onChange={(item: iFase) => {
-                    console.log(item);
+                    setLstFases((prev) =>
+                      prev.map((fase) =>
+                        fase.index === indexFase
+                          ? {
+                              ...fase,
+                              oFase: { ...fase.oFase, ...item }, // Substitui as propriedades de 'oFase' com as de 'row.oFase'
+                            }
+                          : fase
+                      )
+                    );
                   }}
                 />
               </View>
@@ -361,7 +371,13 @@ const Relatorio = () => {
 
         <View style={styles.row}>
           <>
-            <Text style={[styles.cell, styles.headerCell, styles.cellSeparator, { maxWidth: '46%' }]}>
+            <Text
+              style={[
+                styles.cell,
+                styles.headerCell,
+                styles.cellSeparator,
+                { maxWidth: props.index === indexFase ? '46%' : '50%' },
+              ]}>
               Lavoura
             </Text>
             <Text style={[styles.cell, styles.headerCell, styles.cellSeparator]}>Recomendação</Text>
@@ -371,19 +387,27 @@ const Relatorio = () => {
           return (
             <Fragment key={row.objID}>
               <Divider style={{ height: '-1%' }} />
-              <TouchableOpacity onPress={() => setRelatorio(row)}>
+              <TouchableOpacity
+                onPress={() => {
+                  //// Essa condição limita a edição somente ao index atual.
+                  if (props.index === indexFase) {
+                    setRelatorio(row);
+                  }
+                }}>
                 <View style={styles.row}>
                   <Text style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>{row.objID}</Text>
                   <Text style={[styles.cell, styles.cellSeparator]}>{row.area}</Text>
                   <Text style={[styles.cell, styles.cellSeparator]}>{row.recomendacao}</Text>
-                  <TouchableOpacity
-                    style={{ justifyContent: 'center', alignContent: 'center' }}
-                    onPress={() => onRemoveRecomendacao(row)}>
-                    <Image
-                      source={require('assets/img/Icons/remover.png')}
-                      style={{ width: 30, height: 30, margin: 10 }}
-                    />
-                  </TouchableOpacity>
+                  {props.index === indexFase && (
+                    <TouchableOpacity
+                      style={{ justifyContent: 'center', alignContent: 'center' }}
+                      onPress={() => onRemoveRecomendacao(row)}>
+                      <Image
+                        source={require('assets/img/Icons/remover.png')}
+                        style={{ width: 30, height: 30, margin: 10 }}
+                      />
+                    </TouchableOpacity>
+                  )}
                 </View>
               </TouchableOpacity>
             </Fragment>
@@ -395,8 +419,19 @@ const Relatorio = () => {
         <View style={styles.containerTextArea}>
           <Input
             style={styles.textArea}
-            value=""
-            onChangeText={(txt: string) => console.log(txt)}
+            value={props.recomendacao}
+            onChangeText={(txt: string) => {
+              setLstFases((prev) =>
+                prev.map((item) =>
+                  item.index === indexFase
+                    ? {
+                        ...item,
+                        recomendacao: txt,
+                      }
+                    : item
+                )
+              );
+            }}
             placeholder="Informe os dados da recomendação... "
             multiline={true}
             numberOfLines={4}
@@ -472,7 +507,7 @@ const Relatorio = () => {
             </View>
 
             <InputGroup>
-              <View style={{ width: lstFases[0].oFase.objID !== '' ? '50%' : '100%' }}>
+              <View style={{ width: lstFases[0].oFase.objID !== '' && indexFase === 1 ? '50%' : '100%' }}>
                 <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
                 <Dropdown
                   search={lstFases[0].lst_fase.length > 0}
@@ -555,6 +590,7 @@ const Relatorio = () => {
                           oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
                           lst_fase: [...fases],
                           relatorio: [],
+                          recomendacao: '',
                         },
                       ]);
 
