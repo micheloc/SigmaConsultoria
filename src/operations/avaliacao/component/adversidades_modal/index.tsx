@@ -74,7 +74,6 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
   }, []);
 
   /** * Este método será utilizado para autorizar que o usuário possa carregar as imagens retirada diretamente da câmera.. */
-  /** * Este método será utilizado para autorizar que o usuário possa carregar as imagens retirada diretamente da câmera.. */
   const requestPermissionCamera = async (): Promise<void> => {
     if (Platform.OS === 'android') {
       try {
