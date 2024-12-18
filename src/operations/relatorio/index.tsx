@@ -716,7 +716,7 @@ const Relatorio = () => {
       <View>
         {props.index > 1 && (
           <>
-            <Divider style={{ backgroundColor: '#ababab' }} />
+            <Divider style={{ backgroundColor: '#ababab', height: '0.5%' }} />
 
             <InputGroup>
               <View style={{ width: '50%' }}>
@@ -781,7 +781,7 @@ const Relatorio = () => {
           );
         })}
         {props.relatorio.length === 0 && (
-          <Text style={{ color: 'red' }}>Nenhuma recomendação adicionada... </Text>
+          <Text style={{ color: 'red' }}>Nenhuma recomendação carregada... </Text>
         )}
         <View style={styles.containerTextArea}>
           <Input
@@ -909,49 +909,45 @@ const Relatorio = () => {
                 </>
               )}
 
-              {fLstFases.relatorio.length > 0 && (
-                <>
-                  <Divider style={{ height: 1 }} />
+              <Divider style={{ height: '0.5%' }} />
 
-                  <View style={{ width: '100%', alignItems: 'center' }}>
-                    <InputGroup>
-                      <ButtonUpdate
-                        style={{ width: widthScreen / 2 }}
-                        onPress={() => {
-                          let x: number = indexFase + 1;
+              <View style={{ width: '100%', alignItems: 'center' }}>
+                <InputGroup>
+                  <ButtonUpdate
+                    style={{ width: widthScreen / 2 }}
+                    onPress={() => {
+                      let x: number = indexFase + 1;
 
-                          setLstFases((prev) => [
-                            ...prev,
-                            {
-                              index: x,
-                              oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
-                              lst_fase: [...fases],
-                              relatorio: [],
-                            },
-                          ]);
+                      setLstFases((prev) => [
+                        ...prev,
+                        {
+                          index: x,
+                          oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
+                          lst_fase: [...fases],
+                          relatorio: [],
+                        },
+                      ]);
 
-                          setIndexFases(x);
-                        }}>
-                        <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
-                      </ButtonUpdate>
+                      setIndexFases(x);
+                    }}>
+                    <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
+                  </ButtonUpdate>
 
-                      {indexFase > 1 && (
-                        <ButtonEnd
-                          style={{ width: widthScreen / 2 }}
-                          onPress={() => {
-                            setLstFases((prev) => prev.filter((obj) => obj.index !== indexFase));
+                  {indexFase > 1 && (
+                    <ButtonEnd
+                      style={{ width: widthScreen / 2 }}
+                      onPress={() => {
+                        setLstFases((prev) => prev.filter((obj) => obj.index !== indexFase));
 
-                            let x: number = indexFase - 1;
+                        let x: number = indexFase - 1;
 
-                            setIndexFases(x);
-                          }}>
-                          <Label style={{ fontSize: 12 }}>Remover fase</Label>
-                        </ButtonEnd>
-                      )}
-                    </InputGroup>
-                  </View>
-                </>
-              )}
+                        setIndexFases(x);
+                      }}>
+                      <Label style={{ fontSize: 12 }}>Remover fase</Label>
+                    </ButtonEnd>
+                  )}
+                </InputGroup>
+              </View>
 
               <Divider style={{ height: 1 }} />
               <View style={{ width: '100%', alignItems: 'center' }}>
