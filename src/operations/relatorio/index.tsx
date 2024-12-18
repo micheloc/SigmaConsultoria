@@ -87,8 +87,6 @@ const Relatorio = () => {
   const [showRecomendacao, setShowRecomendacao] = useState<boolean>(false);
   const [showRecomendacaoGeral, setShowRecomendacaoGeral] = useState<boolean>(false);
 
-  const [txtTalhoes, setTxtTalhoes] = useState<string>('');
-
   const [indexFase, setIndexFases] = useState<number>(1);
   const [lstFases, setLstFases] = useState<iRelatorioFases[]>([
     {
@@ -105,6 +103,8 @@ const Relatorio = () => {
       recomendacao: '',
     },
   ]);
+
+  const [recomendacoes, setRecomendacoes] = useState<any[]>([]);
 
   useFocusEffect(
     useCallback(() => {
@@ -203,6 +203,27 @@ const Relatorio = () => {
   /** Este component será utilizado para filtrar a lista de index da lista de fases.  */
   const fLstFases = lstFases.filter((obj) => obj.index === indexFase)[0];
 
+  useEffect(() => {
+    loading_recomendacoes();
+  }, [fLstFases]);
+
+  const loading_recomendacoes = async () => {
+    let resp: any = await _findRelatorioByFazendaAndFase(oFazenda.objID, fLstFases.oFase.objID);
+
+    if (fLstFases.relatorio.length > 0) {
+      resp = resp.filter(
+        (item: iRelatorioExport) =>
+          !fLstFases.relatorio.some((relatorio: iRelatorioExport) => relatorio.objID === item.objID)
+      );
+    }
+
+    if (resp.length > 0) {
+      setRecomendacoes(resp);
+    } else {
+      setRecomendacoes([]);
+    }
+  };
+
   const check_cliente = async () => {
     Alert.alert(
       'Alerta!',
@@ -253,22 +274,42 @@ const Relatorio = () => {
     );
 
     if (row.length > 0) {
-      const unique_area: any = _.uniqBy(row, 'idFase');
+      const unique_area: any = _.uniqBy(row, 'area');
       const result = unique_area.map((item: iRelatorio) => item.area).join(', ');
 
+      // Obtém os talhões do índice correspondente
+      let talhoes = lstFases.filter((obj) => obj.index === indexFase)[0].talhoes;
+
+      if (talhoes) {
+        // Se result for uma string com múltiplos itens (com vírgulas)
+        const split_result = result.split(', '); // Dividindo o result em partes
+
+        // Verificando se talhoes não contém os elementos de result
+        for (const area of split_result) {
+          // Se talhoes não contém o area individual, adiciona
+          if (!talhoes.includes(area)) {
+            talhoes = talhoes ? talhoes + ', ' + area : area; // Concatena com vírgula
+          }
+        }
+      } else {
+        // Se talhoes estiver vazio, simplesmente define o result
+        talhoes = result;
+      }
+
+      // Atualiza o estado
       setLstFases((prev) =>
         prev.map((item) =>
           item.index === indexFase
             ? {
                 ...item,
-                talhoes: result,
+                talhoes: talhoes,
               }
             : item
         )
       );
-
-      setTxtTalhoes(result);
     }
+
+    loading_recomendacoes();
 
     setShowAvaliacao(false);
   };
@@ -355,38 +396,57 @@ const Relatorio = () => {
             <InputGroup>
               <View
                 style={{
-                  width: lstFases[0].oFase.objID !== '' && props.index === indexFase ? '50%' : '100%',
+                  width:
+                    props.oFase.objID !== '' && props.index === indexFase && recomendacoes.length > 0
+                      ? '50%'
+                      : '100%',
                   marginBottom: '2%',
                 }}>
                 <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
-                <Dropdown
-                  key={`dropdown-${props.index}`}
-                  search={props.lst_fase.length > 0}
-                  data={props.lst_fase}
-                  labelField="nome"
-                  valueField="objID"
-                  placeholder={
-                    props.lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '
-                  }
-                  value={
-                    lstFases[props.index - 1].oFase.objID !== '' ? lstFases[props.index - 1].oFase : null
-                  }
-                  searchPlaceholder="Pesquisar por fazenda"
-                  onChange={(item: iFase) => {
-                    setLstFases((prev) =>
-                      prev.map((fase) =>
-                        fase.index === indexFase
-                          ? {
-                              ...fase,
-                              oFase: { ...fase.oFase, ...item }, // Substitui as propriedades de 'oFase' com as de 'row.oFase'
-                            }
-                          : fase
-                      )
-                    );
-                  }}
-                />
+                {props.relatorio.length > 0 ? (
+                  <View>
+                    <Text
+                      style={{
+                        backgroundColor: 'whitesmoke',
+                        borderColor: '#ababab',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        padding: '2%',
+                        marginRight: '1%',
+                        marginLeft: '0.2%',
+                      }}>
+                      {props.oFase.nome}
+                    </Text>
+                  </View>
+                ) : (
+                  <Dropdown
+                    key={`dropdown-${props.index}`}
+                    search={props.lst_fase.length > 0}
+                    data={props.lst_fase}
+                    labelField="nome"
+                    valueField="objID"
+                    placeholder={
+                      props.lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '
+                    }
+                    value={props.oFase}
+                    searchPlaceholder="Pesquisar por fazenda"
+                    onChange={(item: iFase) => {
+                      setLstFases((prev) =>
+                        prev.map((fase) =>
+                          fase.index === indexFase
+                            ? {
+                                ...fase,
+                                oFase: { ...fase.oFase, ...item }, // Substitui as propriedades de 'oFase' com as de 'row.oFase'
+                              }
+                            : fase
+                        )
+                      );
+                    }}
+                  />
+                )}
               </View>
-              {props.index === indexFase && (
+
+              {props.oFase.objID !== '' && props.index === indexFase && recomendacoes.length > 0 && (
                 <View style={{ alignItems: 'center' }}>
                   <LabelForm style={{ marginBottom: -11 }}></LabelForm>
                   <ButtonUpdate
@@ -403,16 +463,26 @@ const Relatorio = () => {
         {props.talhoes !== '' && (
           <View>
             <LabelForm>Talhões : </LabelForm>
-            <Input
+            <Text
               style={{
-                backgroundColor: '#ccc',
+                backgroundColor: 'whitesmoke',
                 borderColor: '#ababab',
-                borderWidth: 1, // Adiciona largura para a borda
-              }}
-              maxLength={30}
-              placeholder="Talhões"
-              value={props.talhoes}
-            />
+                borderWidth: 1,
+                borderRadius: 5,
+                width: widthScreen - 20,
+                marginBottom: '1%',
+                padding: '2%',
+              }}>
+              {props.talhoes}
+            </Text>
+          </View>
+        )}
+
+        {props.index === 1 && (
+          <View>
+            <ContainerTitleArea style={{ width: '100%', marginLeft: -1 }}>
+              <TextTitleArea style={{ fontSize: 12 }}>Recomendações</TextTitleArea>
+            </ContainerTitleArea>
           </View>
         )}
 
@@ -511,34 +581,68 @@ const Relatorio = () => {
       <ScrollView nestedScrollEnabled={true}>
         <View>
           <LabelForm style={{ marginBottom: -5 }}>Cliente : </LabelForm>
-          <Dropdown
-            search={clientes.length > 0}
-            data={clientes}
-            labelField="nome"
-            valueField="objID"
-            placeholder="Selecione o Cliente"
-            searchPlaceholder="Pesquisar por cliente"
-            value={oCliente}
-            onChange={(item: iCliente) => {
-              setCliente(item);
-            }}
-          />
+          {lstFases[0].relatorio.length > 0 ? (
+            <View>
+              <Text
+                style={{
+                  backgroundColor: 'whitesmoke',
+                  borderColor: '#ababab',
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  padding: '2%',
+                  marginRight: '2%',
+                  marginLeft: '0.8%',
+                }}>
+                {oCliente.nome}
+              </Text>
+            </View>
+          ) : (
+            <Dropdown
+              search={clientes.length > 0}
+              data={clientes}
+              labelField="nome"
+              valueField="objID"
+              placeholder="Selecione o Cliente"
+              searchPlaceholder="Pesquisar por cliente"
+              value={oCliente}
+              onChange={(item: iCliente) => {
+                setCliente(item);
+              }}
+            />
+          )}
         </View>
 
         <View>
           <LabelForm style={{ marginBottom: -5 }}>Fazenda : </LabelForm>
-          <Dropdown
-            search={fazendas.length > 0}
-            data={fazendas}
-            labelField="nome"
-            valueField="objID"
-            placeholder="Selecione a fazenda"
-            searchPlaceholder="Pesquisar por fazenda"
-            value={oFazenda}
-            onChange={(item: iFazenda) => {
-              setFazenda(item);
-            }}
-          />
+          {lstFases[0].relatorio.length > 0 ? (
+            <View>
+              <Text
+                style={{
+                  backgroundColor: 'whitesmoke',
+                  borderColor: '#ababab',
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  padding: '2%',
+                  marginRight: '2%',
+                  marginLeft: '0.8%',
+                }}>
+                {oFazenda.nome}
+              </Text>
+            </View>
+          ) : (
+            <Dropdown
+              search={fazendas.length > 0}
+              data={fazendas}
+              labelField="nome"
+              valueField="objID"
+              placeholder="Selecione a fazenda"
+              searchPlaceholder="Pesquisar por fazenda"
+              value={oFazenda}
+              onChange={(item: iFazenda) => {
+                setFazenda(item);
+              }}
+            />
+          )}
         </View>
 
         {oFazenda.objID && (
@@ -562,34 +666,59 @@ const Relatorio = () => {
             </View>
 
             <InputGroup>
-              <View style={{ width: lstFases[0].oFase.objID !== '' && indexFase === 1 ? '50%' : '100%' }}>
+              <View
+                style={{
+                  width:
+                    lstFases[0].oFase.objID !== '' && indexFase === 1 && recomendacoes.length > 0
+                      ? '50%'
+                      : '100%',
+                }}>
                 <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
-                <Dropdown
-                  search={lstFases[0].lst_fase.length > 0}
-                  data={lstFases[0].lst_fase}
-                  labelField="nome"
-                  valueField="objID"
-                  searchPlaceholder="Pesquisar por fase"
-                  placeholder={
-                    lstFases[0].lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase encontrada... '
-                  }
-                  value={lstFases[0].oFase}
-                  onChange={(item: iFase) => {
-                    setLstFases((prev) =>
-                      prev.map((fase) =>
-                        fase.index === indexFase
-                          ? {
-                              ...fase,
-                              oFase: { ...fase.oFase, ...item }, // Substitui as propriedades de 'oFase' com as de 'row.oFase'
-                            }
-                          : fase
-                      )
-                    );
-                  }}
-                />
+                {lstFases[0].relatorio.length > 0 ? (
+                  <View>
+                    <Text
+                      style={{
+                        backgroundColor: 'whitesmoke',
+                        borderColor: '#ababab',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        padding: '2%',
+                        marginRight: '2%',
+                        marginLeft: '0.8%',
+                      }}>
+                      {lstFases[0].oFase.nome}
+                    </Text>
+                  </View>
+                ) : (
+                  <Dropdown
+                    search={lstFases[0].lst_fase.length > 0}
+                    data={lstFases[0].lst_fase}
+                    labelField="nome"
+                    valueField="objID"
+                    searchPlaceholder="Pesquisar por fase"
+                    placeholder={
+                      lstFases[0].lst_fase.length > 0
+                        ? 'Selecione a fase...'
+                        : 'Nenhuma fase encontrada... '
+                    }
+                    value={lstFases[0].oFase}
+                    onChange={(item: iFase) => {
+                      setLstFases((prev) =>
+                        prev.map((fase) =>
+                          fase.index === indexFase
+                            ? {
+                                ...fase,
+                                oFase: { ...fase.oFase, ...item }, // Substitui as propriedades de 'oFase' com as de 'row.oFase'
+                              }
+                            : fase
+                        )
+                      );
+                    }}
+                  />
+                )}
               </View>
 
-              {lstFases[0].oFase.objID !== '' && indexFase === 1 && (
+              {lstFases[0].oFase.objID !== '' && indexFase === 1 && recomendacoes.length > 0 && (
                 <View style={{ alignItems: 'center' }}>
                   <LabelForm style={{ marginBottom: -11 }}></LabelForm>
                   <ButtonUpdate
@@ -604,11 +733,6 @@ const Relatorio = () => {
             <View style={styles.containerList}>
               {lstFases[0].oFase.objID !== '' && (
                 <>
-                  <View>
-                    <ContainerTitleArea style={{ width: '100%', marginLeft: -1 }}>
-                      <TextTitleArea style={{ fontSize: 12 }}>Recomendações</TextTitleArea>
-                    </ContainerTitleArea>
-                  </View>
                   <FaseList />
                 </>
               )}
@@ -617,27 +741,35 @@ const Relatorio = () => {
 
               <View style={{ width: '100%', alignItems: 'center' }}>
                 <InputGroup>
-                  <ButtonUpdate
-                    style={{ width: widthScreen / 2 }}
-                    onPress={() => {
-                      let x: number = indexFase + 1;
+                  {fLstFases.lst_fase.length > 1 && fLstFases.relatorio.length > 0 && (
+                    <ButtonUpdate
+                      style={{ width: widthScreen / 2 }}
+                      onPress={() => {
+                        let x: number = indexFase + 1;
+                        const copy_fases = _.cloneDeep(fases);
 
-                      setLstFases((prev) => [
-                        ...prev,
-                        {
-                          index: x,
-                          oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
-                          lst_fase: [...fases],
-                          relatorio: [],
-                          talhoes: '',
-                          recomendacao: '',
-                        },
-                      ]);
+                        const up_fases: iFase[] = _.remove(
+                          copy_fases,
+                          (obj) => !_.isEqual(obj, fLstFases.oFase)
+                        );
 
-                      setIndexFases(x);
-                    }}>
-                    <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
-                  </ButtonUpdate>
+                        setLstFases((prev) => [
+                          ...prev,
+                          {
+                            index: x,
+                            oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
+                            lst_fase: [...up_fases],
+                            relatorio: [],
+                            talhoes: '',
+                            recomendacao: '',
+                          },
+                        ]);
+
+                        setIndexFases(x);
+                      }}>
+                      <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
+                    </ButtonUpdate>
+                  )}
 
                   {indexFase > 1 && (
                     <ButtonEnd
@@ -655,12 +787,19 @@ const Relatorio = () => {
                 </InputGroup>
               </View>
 
-              <Divider style={{ height: 1 }} />
-              <View style={{ width: '100%', alignItems: 'center' }}>
-                <ButtonConf style={{ width: widthScreen / 2 - 45 }}>
-                  <Label style={{ fontSize: 12 }}>Exportar</Label>
-                </ButtonConf>
-              </View>
+              {oCliente.objID !== '' &&
+                oFazenda.objID !== '' &&
+                oCultura.objID !== '' &&
+                fLstFases.relatorio.length > 0 && (
+                  <>
+                    <Divider style={{ height: 1 }} />
+                    <View style={{ width: '100%', alignItems: 'center' }}>
+                      <ButtonConf style={{ width: widthScreen / 2 - 45 }}>
+                        <Label style={{ fontSize: 12 }}>Exportar</Label>
+                      </ButtonConf>
+                    </View>
+                  </>
+                )}
             </View>
           </>
         )}
