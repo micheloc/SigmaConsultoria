@@ -36,7 +36,7 @@ const Dropdown = ({ data, onChange, ...props }: any) => {
 
 const styles = StyleSheet.create({
   dropdownSelect: {
-    height: 50,
+    height: 40,
     width: '97%',
     backgroundColor: 'whitesmoke',
     borderRadius: 5,
