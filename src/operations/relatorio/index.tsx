@@ -32,7 +32,7 @@ import {
   LabelForm,
 } from 'styles/boody.containers';
 
-import { Fragment, useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
 
@@ -315,6 +315,25 @@ const Relatorio = () => {
   }
 
   const FaseComponent = ({ ...props }: iRelatorioFases) => {
+    console.log('olá');
+
+    // Dentro do componente FaseComponent
+    const handleChangeText = useCallback(
+      (txt: string) => {
+        setLstFases((prev) =>
+          prev.map((item) =>
+            item.index === indexFase
+              ? {
+                  ...item,
+                  recomendacao: txt,
+                }
+              : item
+          )
+        );
+      },
+      [indexFase]
+    );
+
     return (
       <View>
         {props.index > 1 && (
@@ -416,22 +435,12 @@ const Relatorio = () => {
         {props.relatorio.length === 0 && (
           <Text style={{ color: 'red' }}>Nenhuma recomendação carregada... </Text>
         )}
+
         <View style={styles.containerTextArea}>
           <Input
             style={styles.textArea}
-            value={props.recomendacao}
-            onChangeText={(txt: string) => {
-              setLstFases((prev) =>
-                prev.map((item) =>
-                  item.index === indexFase
-                    ? {
-                        ...item,
-                        recomendacao: txt,
-                      }
-                    : item
-                )
-              );
-            }}
+            value={fLstFases.recomendacao} // Use o valor local para o campo de texto
+            onChangeText={handleChangeText}
             placeholder="Informe os dados da recomendação... "
             multiline={true}
             numberOfLines={4}
@@ -445,7 +454,7 @@ const Relatorio = () => {
     return (
       <View>
         {lstFases.map((obj) => {
-          return <FaseComponent {...obj} />;
+          return <FaseComponent key={uuid.v4().toString()} {...obj} />;
         })}
       </View>
     );
