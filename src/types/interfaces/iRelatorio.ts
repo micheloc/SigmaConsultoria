@@ -1,3 +1,5 @@
+import iFase from './iFase';
+
 export interface iRelatorio {
   objID: string;
   idFazenda: string;
@@ -15,7 +17,6 @@ export interface iRelatorio {
 }
 
 export interface iRelatorioExport {
-  id: number;
   objID: string;
   idCultura: string;
   idFase: string;
@@ -23,4 +24,11 @@ export interface iRelatorioExport {
   fase: string;
   cultura: string;
   recomendacao: string;
+}
+
+export interface iRelatorioFases {
+  index: number;
+  oFase: iFase;
+  lst_fase: iFase[];
+  relatorio: iRelatorioExport[];
 }

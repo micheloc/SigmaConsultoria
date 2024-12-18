@@ -15,6 +15,7 @@ interface iProps {
 
 const RecomendacaoModal: any = WithModal(({ setFormData, checkRelease, rel }: iProps) => {
   const [relatorio, setRelatorio] = useState<iRelatorioExport>({
+    id: 0,
     objID: uuid.v4().toString(),
     idCultura: '',
     idFase: '',

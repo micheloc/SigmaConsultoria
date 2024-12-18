@@ -41,7 +41,7 @@ import AvaliacaoModal from './avaliacao_modal';
 import iAvaliacao from 'types/interfaces/iAvaliacao';
 import Input from 'component/Input';
 import { background } from 'native-base/lib/typescript/theme/styled-system';
-import { iRelatorio, iRelatorioExport } from 'types/interfaces/iRelatorio';
+import { iRelatorio, iRelatorioExport, iRelatorioFases } from 'types/interfaces/iRelatorio';
 import { ContainerTitleArea, TextTitleArea } from 'navigations/avaliacao/style';
 import RecomendacaoModal from './recomendacao_modal';
 import { InputGroup } from 'native-base';
@@ -88,15 +88,23 @@ const Relatorio = () => {
   const [clientes, setClientes] = useState<iCliente[]>([]);
   const [fazendas, setFazendas] = useState<iFazenda[]>([]);
   const [culturas, setCulturas] = useState<iCultura[]>([]);
-  const [relatorioExport, setRelatorioExport] = useState<iRelatorioExport[]>([]);
   const [fases, setFases] = useState<iFase[]>([]);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAvaliacao, setShowAvaliacao] = useState<boolean>(false);
   const [showRecomendacao, setShowRecomendacao] = useState<boolean>(false);
-  const [numberFases, setNumberFases] = useState<number>(1);
 
   const [txtTalhoes, setTxtTalhoes] = useState<string>('');
+
+  const [indexFase, setIndexFases] = useState<number>(1);
+  const [lstFases, setLstFases] = useState<iRelatorioFases[]>([
+    {
+      index: indexFase,
+      oFase: { ...oFase },
+      lst_fase: [...fases],
+      relatorio: [],
+    },
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -177,6 +185,12 @@ const Relatorio = () => {
     }
   }, [oFase]);
 
+  useEffect(() => {
+    if (oRelatorio) {
+      setShowRecomendacao(true);
+    }
+  }, [oRelatorio]);
+
   const loadingRecomendacao = async () => {
     const resp: any = await _findRelatorioByFazendaAndFase(oFazenda.objID, oFase.objID);
 
@@ -188,12 +202,6 @@ const Relatorio = () => {
       setShowAvaliacao(true);
     }
   };
-
-  useEffect(() => {
-    if (oRelatorio) {
-      setShowRecomendacao(true);
-    }
-  }, [oRelatorio]);
 
   const generate = async () => {
     const html = `
@@ -616,11 +624,9 @@ const Relatorio = () => {
   };
 
   const onSubmitAvaliacao = (row: iRelatorio[]) => {
-    const lst = [...relatorioExport];
-
+    const lst: iRelatorioExport[] = [];
     for (const x of row) {
       const obj: iRelatorioExport = {
-        id: numberFases,
         objID: x.objID,
         idCultura: x.idCultura,
         idFase: x.idFase,
@@ -633,22 +639,39 @@ const Relatorio = () => {
       lst.push(obj);
     }
 
-    setRelatorioExport(lst);
+    setLstFases((prev) =>
+      prev.map((fase) =>
+        fase.index === indexFase
+          ? {
+              ...fase,
+              relatorio: [...fase.relatorio, ...lst], // Adiciona itens ao relatorio existente
+            }
+          : fase
+      )
+    );
+
     setShowAvaliacao(false);
   };
 
   const onSubmitRecomendacao = (row: iRelatorioExport) => {
-    const lst = [...relatorioExport];
-    const update_lst: iRelatorioExport[] = lst.filter((item: iRelatorioExport) => item.objID !== row.objID);
-    update_lst.push(row);
-
-    setRelatorioExport(update_lst);
+    setLstFases((prev) =>
+      prev.map((fase) =>
+        fase.index === indexFase
+          ? {
+              ...fase,
+              relatorio: fase.relatorio.map((obj) =>
+                obj.objID === row.objID
+                  ? { ...obj, ...row } // Substitui as propriedades do objeto com as de 'row'
+                  : obj
+              ),
+            }
+          : fase
+      )
+    );
     setShowRecomendacao(false);
   };
 
   const onRemoveRecomendacao = (row: iRelatorioExport) => {
-    const lst = [...relatorioExport];
-
     try {
       Alert.alert('Alerta!', `Deseja realmente remover a recomendação da lista: ${row.recomendacao} `, [
         {
@@ -659,11 +682,16 @@ const Relatorio = () => {
           text: 'Sim',
           onPress: async () => {
             try {
-              const update_lst: iRelatorioExport[] = lst.filter(
-                (item: iRelatorioExport) => item.objID !== row.objID
+              setLstFases((prev) =>
+                prev.map((fase) =>
+                  fase.index === indexFase
+                    ? {
+                        ...fase,
+                        relatorio: [...fase.relatorio.filter((obj) => obj.objID !== row.objID)], // Adiciona itens ao relatorio existente
+                      }
+                    : fase
+                )
               );
-
-              setRelatorioExport(update_lst);
             } catch (error) {
               console.log('Erro ao remover a variedade:', error);
             }
@@ -683,51 +711,43 @@ const Relatorio = () => {
     );
   }
 
-  const nFases = Array.from({ length: numberFases }, (_, index) => index + 1);
-
-  const FaseComponent = ({ index }: any) => {
+  const FaseComponent = ({ ...props }: iRelatorioFases) => {
     return (
       <View>
-        {index > 1 && (
+        {props.index > 1 && (
           <View>
             <Divider style={{ backgroundColor: '#ababab' }} />
 
             <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
             <Dropdown
-              key={`dropdown-${index}`}
-              search={fases.length > 0}
-              data={fases}
+              key={`dropdown-${props.index}`}
+              search={props.lst_fase.length > 0}
+              data={props.lst_fase}
               labelField="nome"
               valueField="objID"
-              placeholder={fases.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '}
+              placeholder={
+                props.lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '
+              }
               searchPlaceholder="Pesquisar por fazenda"
-              value={oFase}
               onChange={(item: iFase) => {
-                setFase(item);
+                console.log(item);
               }}
             />
           </View>
         )}
 
-        {index === numberFases && (
-          <InputGroup>
-            <View>
-              <ButtonUpdate
-                style={{ width: widthScreen / 2, marginLeft: -1 }}
-                onPress={() => loadingRecomendacao()}>
-                <Label style={{ fontSize: 12 }}>Carregar Recomendacões</Label>
-              </ButtonUpdate>
-            </View>
-            <View>
-              <ButtonConf style={{ width: widthScreen / 2 - 30 }}>
-                <Label style={{ fontSize: 12 }}>Nova recomendação</Label>
-              </ButtonConf>
-            </View>
-          </InputGroup>
+        {props.index === indexFase && (
+          <View style={{ width: '100%', alignItems: 'center', marginBottom: '1%' }}>
+            <ButtonUpdate
+              style={{ width: widthScreen / 2, marginLeft: -1 }}
+              onPress={() => loadingRecomendacao()}>
+              <Label style={{ fontSize: 12 }}>Carregar Recomendacões</Label>
+            </ButtonUpdate>
+          </View>
         )}
 
         <ScrollView nestedScrollEnabled={true}>
-          {relatorioExport.map((row: iRelatorioExport) => {
+          {props.relatorio.map((row: iRelatorioExport) => {
             return (
               <Fragment key={row.objID}>
                 <TouchableOpacity onPress={() => setRelatorio(row)}>
@@ -759,12 +779,15 @@ const Relatorio = () => {
   const FaseList = (): any => {
     return (
       <View>
-        {nFases.map((number) => {
-          return <FaseComponent index={number} />;
+        {lstFases.map((obj) => {
+          return <FaseComponent {...obj} />;
         })}
       </View>
     );
   };
+
+  /** Este component será utilizado para filtrar a lista de index da lista de fases.  */
+  const fLstFases = lstFases.filter((obj) => obj.index === indexFase)[0];
 
   return (
     <Container style={{ height: heightScreen, backgroundColor: '#ccc' }}>
@@ -865,7 +888,7 @@ const Relatorio = () => {
                 </>
               )}
 
-              {relatorioExport.length > 0 && (
+              {fLstFases.relatorio.length > 0 && (
                 <>
                   <Divider style={{ height: 1 }} />
 
@@ -874,20 +897,32 @@ const Relatorio = () => {
                       <ButtonUpdate
                         style={{ width: widthScreen / 2 }}
                         onPress={() => {
-                          let x: number = numberFases + 1;
+                          let x: number = indexFase + 1;
 
-                          setNumberFases(x);
+                          setLstFases((prev) => [
+                            ...prev,
+                            {
+                              index: x,
+                              oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
+                              lst_fase: [...fases],
+                              relatorio: [],
+                            },
+                          ]);
+
+                          setIndexFases(x);
                         }}>
                         <Label style={{ fontSize: 12 }}>Adicionar Fase</Label>
                       </ButtonUpdate>
 
-                      {numberFases > 1 && (
+                      {indexFase > 1 && (
                         <ButtonEnd
                           style={{ width: widthScreen / 2 }}
                           onPress={() => {
-                            let x: number = numberFases - 1;
+                            setLstFases((prev) => prev.filter((obj) => obj.index !== indexFase));
 
-                            setNumberFases(x);
+                            let x: number = indexFase - 1;
+
+                            setIndexFases(x);
                           }}>
                           <Label style={{ fontSize: 12 }}>Remover fase</Label>
                         </ButtonEnd>
@@ -911,7 +946,10 @@ const Relatorio = () => {
           visible={showAvaliacao}
           idFazenda={oFazenda.objID}
           idFase={oFase.objID}
-          rel={relatorioExport}
+          rel={lstFases
+            .filter((item) => item.index === indexFase)
+            .map((item) => item.relatorio)
+            .flat()}
           onClose={() => {
             setShowAvaliacao(false);
           }}
@@ -920,7 +958,13 @@ const Relatorio = () => {
 
         <RecomendacaoModal
           visible={showRecomendacao}
-          rel={relatorioExport.filter((item: iRelatorioExport) => item.objID === oRelatorio?.objID)[0]}
+          rel={
+            lstFases
+              .filter((item) => item.index === indexFase)
+              .map((item) => item.relatorio)
+              .flat()
+              .filter((rel) => rel.objID === oRelatorio?.objID)[0]
+          }
           onClose={() => {
             setRelatorio(null);
             setShowRecomendacao(false);
