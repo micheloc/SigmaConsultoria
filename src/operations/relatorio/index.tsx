@@ -715,37 +715,49 @@ const Relatorio = () => {
     return (
       <View>
         {props.index > 1 && (
-          <View>
+          <>
             <Divider style={{ backgroundColor: '#ababab' }} />
 
-            <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
-            <Dropdown
-              key={`dropdown-${props.index}`}
-              search={props.lst_fase.length > 0}
-              data={props.lst_fase}
-              labelField="nome"
-              valueField="objID"
-              placeholder={
-                props.lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '
-              }
-              searchPlaceholder="Pesquisar por fazenda"
-              onChange={(item: iFase) => {
-                console.log(item);
-              }}
-            />
-          </View>
+            <InputGroup>
+              <View style={{ width: '50%' }}>
+                <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
+                <Dropdown
+                  key={`dropdown-${props.index}`}
+                  search={props.lst_fase.length > 0}
+                  data={props.lst_fase}
+                  labelField="nome"
+                  valueField="objID"
+                  placeholder={
+                    props.lst_fase.length > 0 ? 'Selecione a fase...' : 'Nenhuma fase foi encontrada... '
+                  }
+                  searchPlaceholder="Pesquisar por fazenda"
+                  onChange={(item: iFase) => {
+                    console.log(item);
+                  }}
+                />
+              </View>
+              {props.index === indexFase && (
+                <View style={{ alignItems: 'center' }}>
+                  <LabelForm style={{ marginBottom: -11 }}></LabelForm>
+                  <ButtonUpdate
+                    style={{ width: widthScreen / 2 - 15 }}
+                    onPress={() => loadingRecomendacao()}>
+                    <Label style={{ fontSize: 12 }}>Carregar Recomendacões</Label>
+                  </ButtonUpdate>
+                </View>
+              )}
+            </InputGroup>
+          </>
         )}
 
-        {props.index === indexFase && (
-          <View style={{ width: '100%', alignItems: 'center', marginBottom: '1%' }}>
-            <ButtonUpdate
-              style={{ width: widthScreen / 2, marginLeft: -1 }}
-              onPress={() => loadingRecomendacao()}>
-              <Label style={{ fontSize: 12 }}>Carregar Recomendacões</Label>
-            </ButtonUpdate>
-          </View>
-        )}
-
+        <View style={styles.row}>
+          <>
+            <Text style={[styles.cell, styles.headerCell, styles.cellSeparator, { maxWidth: '46%' }]}>
+              Lavoura
+            </Text>
+            <Text style={[styles.cell, styles.headerCell, styles.cellSeparator]}>Recomendação</Text>
+          </>
+        </View>
         {props.relatorio.map((row: iRelatorioExport) => {
           return (
             <Fragment key={row.objID}>
@@ -768,6 +780,9 @@ const Relatorio = () => {
             </Fragment>
           );
         })}
+        {props.relatorio.length === 0 && (
+          <Text style={{ color: 'red' }}>Nenhuma recomendação adicionada... </Text>
+        )}
         <View style={styles.containerTextArea}>
           <Input
             style={styles.textArea}
@@ -887,7 +902,7 @@ const Relatorio = () => {
                 <>
                   <View>
                     <ContainerTitleArea style={{ width: '100%', marginLeft: -1 }}>
-                      <TextTitleArea style={{ fontSize: 14 }}>Recomendações</TextTitleArea>
+                      <TextTitleArea style={{ fontSize: 12 }}>Recomendações</TextTitleArea>
                     </ContainerTitleArea>
                   </View>
                   <FaseList />
@@ -995,8 +1010,7 @@ const styles = StyleSheet.create({
     color: 'black',
     borderRadius: 5,
     fontSize: 14,
-    marginLeft: '-0.1%',
-    width: '100%',
+    width: '99.5%',
   },
   headerCell: {
     color: 'white',
