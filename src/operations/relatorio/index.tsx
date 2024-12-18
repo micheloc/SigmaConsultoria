@@ -472,7 +472,7 @@ const Relatorio = () => {
             </View>
 
             <InputGroup>
-              <View style={{ width: lstFases[0].oFase.objID ? '50%' : '100%' }}>
+              <View style={{ width: lstFases[0].oFase.objID !== '' ? '50%' : '100%' }}>
                 <LabelForm style={{ marginBottom: -5 }}>Fase : </LabelForm>
                 <Dropdown
                   search={lstFases[0].lst_fase.length > 0}
@@ -498,7 +498,7 @@ const Relatorio = () => {
                 />
               </View>
 
-              {lstFases[0].oFase.objID && indexFase === 1 && (
+              {lstFases[0].oFase.objID !== '' && indexFase === 1 && (
                 <View style={{ alignItems: 'center' }}>
                   <LabelForm style={{ marginBottom: -11 }}></LabelForm>
                   <ButtonUpdate
