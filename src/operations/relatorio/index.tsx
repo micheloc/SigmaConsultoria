@@ -101,7 +101,7 @@ const Relatorio = () => {
       },
       lst_fase: [...fases],
       relatorio: [],
-      idRecomendacao: '',
+      talhoes: '',
       recomendacao: '',
     },
   ]);
@@ -203,18 +203,6 @@ const Relatorio = () => {
   /** Este component será utilizado para filtrar a lista de index da lista de fases.  */
   const fLstFases = lstFases.filter((obj) => obj.index === indexFase)[0];
 
-  const loadingRecomendacao = async () => {
-    const resp: any = await _findRelatorioByFazendaAndFase(oFazenda.objID, fLstFases.oFase.objID);
-
-    if (resp.length > 0) {
-      const unique_area: any = _.uniqBy(resp, 'idArea');
-      const result = unique_area.map((item: iRelatorio) => item.area).join(', ');
-      setTxtTalhoes(result);
-
-      setShowAvaliacao(true);
-    }
-  };
-
   const check_cliente = async () => {
     Alert.alert(
       'Alerta!',
@@ -237,7 +225,7 @@ const Relatorio = () => {
     );
   };
 
-  const onSubmitAvaliacao = (row: iRelatorio[]) => {
+  const onSubmitAvaliacao = async (row: iRelatorio[]) => {
     const lst: iRelatorioExport[] = [];
     for (const x of row) {
       const obj: iRelatorioExport = {
@@ -263,6 +251,24 @@ const Relatorio = () => {
           : fase
       )
     );
+
+    if (row.length > 0) {
+      const unique_area: any = _.uniqBy(row, 'idFase');
+      const result = unique_area.map((item: iRelatorio) => item.area).join(', ');
+
+      setLstFases((prev) =>
+        prev.map((item) =>
+          item.index === indexFase
+            ? {
+                ...item,
+                talhoes: result,
+              }
+            : item
+        )
+      );
+
+      setTxtTalhoes(result);
+    }
 
     setShowAvaliacao(false);
   };
@@ -385,13 +391,29 @@ const Relatorio = () => {
                   <LabelForm style={{ marginBottom: -11 }}></LabelForm>
                   <ButtonUpdate
                     style={{ width: widthScreen / 2 - 15 }}
-                    onPress={() => loadingRecomendacao()}>
+                    onPress={() => setShowAvaliacao(true)}>
                     <Label style={{ fontSize: 12 }}>Carregar Recomendacões</Label>
                   </ButtonUpdate>
                 </View>
               )}
             </InputGroup>
           </>
+        )}
+
+        {props.talhoes !== '' && (
+          <View>
+            <LabelForm>Talhões : </LabelForm>
+            <Input
+              style={{
+                backgroundColor: '#ccc',
+                borderColor: '#ababab',
+                borderWidth: 1, // Adiciona largura para a borda
+              }}
+              maxLength={30}
+              placeholder="Talhões"
+              value={props.talhoes}
+            />
+          </View>
         )}
 
         <View style={styles.row}>
@@ -572,28 +594,12 @@ const Relatorio = () => {
                   <LabelForm style={{ marginBottom: -11 }}></LabelForm>
                   <ButtonUpdate
                     style={{ width: widthScreen / 2 - 15 }}
-                    onPress={() => loadingRecomendacao()}>
+                    onPress={() => setShowAvaliacao(true)}>
                     <Label style={{ fontSize: 12 }}>Carregar Recomendacões</Label>
                   </ButtonUpdate>
                 </View>
               )}
             </InputGroup>
-
-            {lstFases[0].oFase.objID !== '' && (
-              <View>
-                <LabelForm>Talhões : </LabelForm>
-                <Input
-                  style={{
-                    backgroundColor: '#ccc',
-                    borderColor: '#ababab',
-                    borderWidth: 1, // Adiciona largura para a borda
-                  }}
-                  maxLength={30}
-                  placeholder="Talhões"
-                  value={txtTalhoes}
-                />
-              </View>
-            )}
 
             <View style={styles.containerList}>
               {lstFases[0].oFase.objID !== '' && (
@@ -623,7 +629,7 @@ const Relatorio = () => {
                           oFase: { objID: '', idCultura: '', nome: '', dapMedio: 0 },
                           lst_fase: [...fases],
                           relatorio: [],
-                          idRecomendacao: '',
+                          talhoes: '',
                           recomendacao: '',
                         },
                       ]);
