@@ -17,22 +17,15 @@
     "backgroundColor": "#ffffff"
   },
   "assetBundlePatterns": ["**/*"],
-  "ios": {
-  "supportsTablet": true,
-  "bundleIdentifier": "com.sigmaConsultoria.app",
-  "buildNumber": "1.0.0",
-  "infoPlist": {
-    "NSCameraUsageDescription": "Este aplicativo precisa de acesso à câmera",
-    "NSLocationWhenInUseUsageDescription": "Este aplicativo precisa de acesso à sua localização",
-    "NSPhotoLibraryUsageDescription": "Este aplicativo precisa de acesso à galeria de fotos",
-    "NSPhotoLibraryAddUsageDescription": "Este aplicativo precisa adicionar fotos à sua galeria"
-  },
+ "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sigmaConsultoria.app",
+      "buildNumber": "1.0.0",
   "adaptiveIcon": {
-      "foregroundImage": "./src/assets/icon-sigma.png",
-      "backgroundColor": "#ffffff"
-    }
-    
-  },
+    "foregroundImage": "./src/assets/icon-sigma.png",
+    "backgroundColor": "#ffffff"
+  }
+},
   "android": {
     "adaptiveIcon": {
       "foregroundImage": "./src/assets/icon-sigma.png",

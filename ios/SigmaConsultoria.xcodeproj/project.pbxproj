@@ -162,8 +162,8 @@
 				00E356EA1AD99517003FC87E /* Sources */,
 				00E356EB1AD99517003FC87E /* Frameworks */,
 				00E356EC1AD99517003FC87E /* Resources */,
-				CB5B1F96AFFC791EF4AB6CCD /* [CP] Embed Pods Frameworks */,
 				76B5CE2206A03F69FCC75B4C /* [CP] Copy Pods Resources */,
+				1B7DB6C8783AA2DF2B2FAB00 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -184,8 +184,8 @@
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				F0F21E70ACB21509B10ED8B1 /* [CP] Embed Pods Frameworks */,
 				02EE4E29CACC6609669CE80E /* [CP] Copy Pods Resources */,
+				C6F766DA55140A654411678B /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -286,6 +286,23 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SigmaConsultoria/Pods-SigmaConsultoria-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		1B7DB6C8783AA2DF2B2FAB00 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SigmaConsultoria-SigmaConsultoriaTests/Pods-SigmaConsultoria-SigmaConsultoriaTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SigmaConsultoria-SigmaConsultoriaTests/Pods-SigmaConsultoria-SigmaConsultoriaTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SigmaConsultoria-SigmaConsultoriaTests/Pods-SigmaConsultoria-SigmaConsultoriaTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		627DA8051F130DD47D633F17 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -347,24 +364,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		CB5B1F96AFFC791EF4AB6CCD /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SigmaConsultoria-SigmaConsultoriaTests/Pods-SigmaConsultoria-SigmaConsultoriaTests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-SigmaConsultoria-SigmaConsultoriaTests/Pods-SigmaConsultoria-SigmaConsultoriaTests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SigmaConsultoria-SigmaConsultoriaTests/Pods-SigmaConsultoria-SigmaConsultoriaTests-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F0F21E70ACB21509B10ED8B1 /* [CP] Embed Pods Frameworks */ = {
+		C6F766DA55140A654411678B /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (

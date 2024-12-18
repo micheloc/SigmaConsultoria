@@ -12,9 +12,9 @@ import { Box, Select, CheckIcon } from 'native-base';
 import { BoxView, ButtonUpdate, Container, Label, LabelForm } from 'styles/boody.containers';
 import { ButtonCancel, ContainerImagem, ContainerModalGalery, ContainerPhoto, Imagem } from './styles';
 import { ContainerFooter } from 'component/modal/style';
-import { Camera, useCameraDevices } from 'react-native-vision-camera';
+import { Camera, useCameraDevices, useCameraPermission } from 'react-native-vision-camera';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import { request, PERMISSIONS, RESULTS, check } from 'react-native-permissions';
 import { InputGroup } from 'operations/clientes/styles';
 import { Modal, StyleSheet, View, PermissionsAndroid, Platform, Image } from 'react-native';
 import { useEffect, useState } from 'react';
@@ -29,6 +29,7 @@ interface iProps {
 const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iProps) => {
   const devices: any = useCameraDevices();
   const device = devices;
+  const { hasPermission, requestPermission } = useCameraPermission();
 
   const [showGaleria, setShowGaleria] = useState<boolean>(false);
   const [cameraVisible, setCameraVisible] = useState(false);
@@ -73,6 +74,7 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
   }, []);
 
   /** * Este método será utilizado para autorizar que o usuário possa carregar as imagens retirada diretamente da câmera.. */
+  /** * Este método será utilizado para autorizar que o usuário possa carregar as imagens retirada diretamente da câmera.. */
   const requestPermissionCamera = async (): Promise<void> => {
     if (Platform.OS === 'android') {
       try {
@@ -83,20 +85,31 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
           buttonNegative: 'Cancelar',
           buttonPositive: 'OK',
         });
+
         if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          handleCameraLaunch();
+          handleCameraLaunch(); // Função para lançar a câmera
         } else {
-          console.log('Permissão de câmera negada');
+          console.log('Permissão de câmera negada no Android');
         }
       } catch (err) {
-        console.warn(err);
+        console.warn('Erro ao solicitar permissão de câmera no Android:', err);
       }
-    } else {
-      const result = await request(PERMISSIONS.IOS.CAMERA);
-      if (result === RESULTS.GRANTED) {
-        handleCameraLaunch();
+    } else if (Platform.OS === 'ios') {
+      if (requestPermission && hasPermission) {
+        try {
+          const result = await requestPermission();
+          console.log(result);
+
+          if (hasPermission) {
+            handleCameraLaunch(); // Função para lançar a câmera
+          } else {
+            console.log('Permissão de câmera não concedida no iOS');
+          }
+        } catch (err) {
+          console.error('Erro ao solicitar permissão de câmera no iOS:', err);
+        }
       } else {
-        console.log('Permissão de câmera negada');
+        console.log('Hook `useCameraPermission` não disponível para iOS');
       }
     }
   };
@@ -155,6 +168,7 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
       // Para iOS, solicitamos a permissão para acessar a galeria
       const result = await request(PERMISSIONS.IOS.PHOTO_LIBRARY); // Permissão para acessar a galeria de fotos
       if (result === RESULTS.GRANTED) {
+        console.log(result);
         handleGaleriaLaunch(); // Função para abrir a galeria
       } else {
         console.log('Permissão de galeria negada');
