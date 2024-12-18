@@ -746,32 +746,38 @@ const Relatorio = () => {
           </View>
         )}
 
-        <ScrollView nestedScrollEnabled={true}>
-          {props.relatorio.map((row: iRelatorioExport) => {
-            return (
-              <Fragment key={row.objID}>
-                <TouchableOpacity onPress={() => setRelatorio(row)}>
-                  <View style={styles.row}>
-                    <Text style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>
-                      {row.objID}
-                    </Text>
-                    <Text style={[styles.cell, styles.cellSeparator]}>{row.area}</Text>
-                    <Text style={[styles.cell, styles.cellSeparator]}>{row.recomendacao}</Text>
-                    <TouchableOpacity
-                      style={{ justifyContent: 'center', alignContent: 'center' }}
-                      onPress={() => onRemoveRecomendacao(row)}>
-                      <Image
-                        source={require('assets/img/Icons/remover.png')}
-                        style={{ width: 30, height: 30, margin: 10 }}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </TouchableOpacity>
-                <Divider style={{ height: 2 }} />
-              </Fragment>
-            );
-          })}
-        </ScrollView>
+        {props.relatorio.map((row: iRelatorioExport) => {
+          return (
+            <Fragment key={row.objID}>
+              <Divider style={{ height: '-1%' }} />
+              <TouchableOpacity onPress={() => setRelatorio(row)}>
+                <View style={styles.row}>
+                  <Text style={[styles.cell, styles.cellSeparator, { display: 'none' }]}>{row.objID}</Text>
+                  <Text style={[styles.cell, styles.cellSeparator]}>{row.area}</Text>
+                  <Text style={[styles.cell, styles.cellSeparator]}>{row.recomendacao}</Text>
+                  <TouchableOpacity
+                    style={{ justifyContent: 'center', alignContent: 'center' }}
+                    onPress={() => onRemoveRecomendacao(row)}>
+                    <Image
+                      source={require('assets/img/Icons/remover.png')}
+                      style={{ width: 30, height: 30, margin: 10 }}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            </Fragment>
+          );
+        })}
+        <View style={styles.containerTextArea}>
+          <Input
+            style={styles.textArea}
+            value=""
+            onChangeText={(txt: string) => console.log(txt)}
+            placeholder="Informe os dados da recomendação... "
+            multiline={true}
+            numberOfLines={4}
+          />
+        </View>
       </View>
     );
   };
@@ -978,6 +984,9 @@ const Relatorio = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, maxHeight: 230 },
+  containerTextArea: {
+    flex: 1,
+  },
   textArea: {
     flex: 1,
     borderWidth: 1,
@@ -986,8 +995,8 @@ const styles = StyleSheet.create({
     color: 'black',
     borderRadius: 5,
     fontSize: 14,
-    marginLeft: 8,
-    marginRight: 15,
+    marginLeft: '-0.1%',
+    width: '100%',
   },
   headerCell: {
     color: 'white',
