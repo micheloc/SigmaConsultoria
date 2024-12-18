@@ -511,7 +511,7 @@ const Relatorio = () => {
               )}
             </InputGroup>
 
-            {oFase.objID && (
+            {lstFases[0].oFase.objID !== '' && (
               <View>
                 <LabelForm>Talhões : </LabelForm>
                 <Input
@@ -528,7 +528,7 @@ const Relatorio = () => {
             )}
 
             <View style={styles.containerList}>
-              {oFase.objID && (
+              {lstFases[0].oFase.objID !== '' && (
                 <>
                   <View>
                     <ContainerTitleArea style={{ width: '100%', marginLeft: -1 }}>
