@@ -82,6 +82,8 @@ const Relatorio = () => {
   const [culturas, setCulturas] = useState<iCultura[]>([]);
   const [fases, setFases] = useState<iFase[]>([]);
 
+  const [lFase, setLFase] = useState<iFase[]>([]);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showAvaliacao, setShowAvaliacao] = useState<boolean>(false);
   const [showRecomendacao, setShowRecomendacao] = useState<boolean>(false);
@@ -748,10 +750,12 @@ const Relatorio = () => {
                         let x: number = indexFase + 1;
                         const copy_fases = _.cloneDeep(fases);
 
-                        const up_fases: iFase[] = _.remove(
-                          copy_fases,
-                          (obj) => !_.isEqual(obj, fLstFases.oFase)
-                        );
+                        const copy_lst_select_fase = _.cloneDeep(lFase);
+                        copy_lst_select_fase.push(fLstFases.oFase);
+
+                        setLFase(copy_lst_select_fase);
+
+                        const up_fases: iFase[] = _.differenceBy(copy_fases, copy_lst_select_fase, 'objID');
 
                         setLstFases((prev) => [
                           ...prev,
@@ -776,6 +780,12 @@ const Relatorio = () => {
                       style={{ width: widthScreen / 2 }}
                       onPress={() => {
                         setLstFases((prev) => prev.filter((obj) => obj.index !== indexFase));
+
+                        if (lFase.length <= 2) {
+                          setLFase([]);
+                        } else {
+                          setLFase((prev) => prev.filter((obj) => obj.objID !== fLstFases.oFase.objID));
+                        }
 
                         let x: number = indexFase - 1;
 

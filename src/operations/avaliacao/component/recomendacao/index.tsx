@@ -23,6 +23,12 @@ import {
 import Input from 'component/Input';
 import api from 'config/api';
 import base64ToBytes from 'util/base64ToBytes';
+import { _createRelatorio } from 'services/relatorio_service';
+import { iRelatorio } from 'types/interfaces/iRelatorio';
+import { _findArea } from 'services/area_service';
+import { _findCultura } from 'services/cultura_service';
+import { _findFase } from 'services/fase_service';
+import { _findVariedades } from 'services/variedade_service';
 
 interface iProps {
   objID: string;
@@ -88,6 +94,30 @@ const CadRecomendacao = ({ route }: any) => {
       }, 500);
     }
 
+    const area: any = await _findArea(avaliacao.idArea);
+    const cultura: any = await _findCultura(avaliacao.idCultura);
+    const fase: any = await _findFase(avaliacao.idFase);
+    const variedade: any = await _findVariedades(avaliacao.idVariedade);
+
+    const relatorio: iRelatorio = {
+      objID: registro.objID,
+      idFazenda: avaliacao.idFazenda,
+      idArea: registro.idArea,
+      idCultura: registro.idCultura,
+      idFase: registro.idFase,
+      idVariedade: registro.idVariedade,
+      avaliadores: registro.avaliadores,
+      data: registro.data,
+      area: area.nome,
+      recomendacao: registro.recomendacao,
+      cultura: cultura.nome,
+      fase: fase.nome,
+      variedade: variedade.nome,
+    };
+    const resp_relatorios = await _createRelatorio(relatorio);
+
+    console.log('relatorio', resp_relatorios);
+
     try {
       setTimeout(async () => {
         const net = await NetInfo.fetch();
@@ -113,18 +143,21 @@ const CadRecomendacao = ({ route }: any) => {
               headers: { 'Content-Type': 'application/json' },
             });
 
-            const adv = registro.adversidades.map((item: iAdversidades) => {
+            const adv: any = registro.adversidades.map((item: iAdversidades) => {
               return { objID: item.objID, img: item.image };
             });
-            setTimeout(async () => {
-              try {
-                const x = await api.put('/Adversidade/UpdateImgAdv', adv, {
-                  headers: { 'Content-Type': 'application/json' },
-                });
-              } catch (error) {
-                console.log('olá', error);
-              }
-            }, 1000);
+
+            if (adv.objID && adv.img) {
+              setTimeout(async () => {
+                try {
+                  const x = await api.put('/Adversidade/UpdateImgAdv', adv, {
+                    headers: { 'Content-Type': 'application/json' },
+                  });
+                } catch (error) {
+                  console.log('olá', error);
+                }
+              }, 1500);
+            }
           } catch (error) {
             console.log(error);
             return;
@@ -142,7 +175,10 @@ const CadRecomendacao = ({ route }: any) => {
           ...sanitizedAvaliacao,
         });
       }, 1500);
-      setIsLoading(false);
+
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 3000);
     } catch (error) {
       console.log('errro ao redirecionar', error);
     }

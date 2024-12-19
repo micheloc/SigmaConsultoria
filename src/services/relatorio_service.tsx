@@ -1,4 +1,5 @@
 import context_realm from 'context_realm/index';
+import { iRelatorio } from 'types/interfaces/iRelatorio';
 
 export const _createRelatorio = async (item: iRelatorio) => {
   const realm = await context_realm();
@@ -15,6 +16,7 @@ export const _createRelatorio = async (item: iRelatorio) => {
         idVariedade: item.idVariedade,
         avaliadores: item.avaliadores,
         data: item.data,
+        area: item.area,
         recomendacao: item.recomendacao,
         cultura: item.cultura,
         fase: item.fase,
