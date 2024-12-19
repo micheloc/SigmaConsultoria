@@ -116,8 +116,6 @@ export const _removeVariedade = async (objID: string) => {
     if (net.isConnected) {
       const resp = await api.delete(`/Variedade?objID=${objID}`);
 
-      console.log(resp.data);
-
       if (resp.data.isValid) {
         setTimeout(() => {
           Toast.show({

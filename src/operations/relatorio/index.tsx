@@ -47,6 +47,7 @@ import RecomendacaoGeralModal from './component/recomendacao_geral_modal';
 
 const Relatorio = () => {
   const nav: any = useNavigation();
+
   const widthScreen = Dimensions.get('screen').width;
   const heightScreen = Dimensions.get('screen').height;
 
@@ -233,15 +234,14 @@ const Relatorio = () => {
       [
         {
           text: 'Não',
-          style: 'cancel',
-          onPress: () => {
-            nav.navigate('navHome');
+          onPress: async () => {
+            nav.navigate('Home');
           },
         },
         {
           text: 'Sim',
           onPress: async () => {
-            nav.navigate('navDownloadCliente');
+            await nav.navigate('navDownloadCliente');
           },
         },
       ]
@@ -393,8 +393,6 @@ const Relatorio = () => {
       <View>
         {props.index > 1 && (
           <>
-            <Divider style={{ backgroundColor: '#ababab', height: '0.5%' }} />
-
             <InputGroup>
               <View
                 style={{
@@ -572,7 +570,16 @@ const Relatorio = () => {
     return (
       <View>
         {lstFases.map((obj) => {
-          return <FaseComponent key={uuid.v4().toString()} {...obj} />;
+          return (
+            <View>
+              <View>
+                <Divider style={{ backgroundColor: '#ababab', height: 1 }} />
+              </View>
+              <View style={{ marginBottom: 10 }}>
+                <FaseComponent key={uuid.v4().toString()} {...obj} />;
+              </View>
+            </View>
+          );
         })}
       </View>
     );

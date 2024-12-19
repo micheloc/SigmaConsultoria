@@ -4,8 +4,6 @@ import { iRelatorio } from 'types/interfaces/iRelatorio';
 export const _createRelatorio = async (item: iRelatorio) => {
   const realm = await context_realm();
   try {
-    console.log(item);
-
     realm.write(() => {
       realm.create('Relatorio', {
         objID: item.objID,

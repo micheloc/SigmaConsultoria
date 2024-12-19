@@ -114,9 +114,7 @@ const CadRecomendacao = ({ route }: any) => {
       fase: fase.nome,
       variedade: variedade.nome,
     };
-    const resp_relatorios = await _createRelatorio(relatorio);
-
-    console.log('relatorio', resp_relatorios);
+    await _createRelatorio(relatorio);
 
     try {
       setTimeout(async () => {
@@ -143,20 +141,22 @@ const CadRecomendacao = ({ route }: any) => {
               headers: { 'Content-Type': 'application/json' },
             });
 
-            const adv: any = registro.adversidades.map((item: iAdversidades) => {
-              return { objID: item.objID, img: item.image };
+            const adv: any = registro.adversidades.map((item) => {
+              return { objID: item.objID, img: item.image }; // img pode ser a string Base64
             });
 
-            if (adv.objID && adv.img) {
-              setTimeout(async () => {
-                try {
-                  const x = await api.put('/Adversidade/UpdateImgAdv', adv, {
-                    headers: { 'Content-Type': 'application/json' },
+            try {
+              for (const item of adv) {
+                if (item.img) {
+                  await api.put('/Adversidade/UpdateImgAdv', item, {
+                    headers: {
+                      'Content-Type': 'application/json', // Agora, como estamos enviando JSON, usamos esse cabeçalho
+                    },
                   });
-                } catch (error) {
-                  console.log('olá', error);
                 }
-              }, 1500);
+              }
+            } catch (error) {
+              console.log('Erro ao enviar imagem:', error);
             }
           } catch (error) {
             console.log(error);
@@ -178,7 +178,7 @@ const CadRecomendacao = ({ route }: any) => {
 
       setTimeout(() => {
         setIsLoading(false);
-      }, 3000);
+      }, 10000);
     } catch (error) {
       console.log('errro ao redirecionar', error);
     }

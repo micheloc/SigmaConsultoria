@@ -93,7 +93,6 @@ const CadAdversidades: any = WithModal(({ setFormData, checkRelease, adv }: iPro
       }
     } else if (Platform.OS === 'ios') {
       const result = await request(PERMISSIONS.IOS.CAMERA);
-      console.log(result);
       if (result === RESULTS.GRANTED) {
         handleCameraLaunch();
       } else if (result === RESULTS.DENIED) {
